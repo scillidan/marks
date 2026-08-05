@@ -1,0 +1,3 @@
+> Fancyhdr is a popular LaTeX package that provides extensive control over page headers and footers in LaTeX2ε documents. It enables customization of multi-line headers and footers, separate designs for even/odd pages, and special handling for chapter pages or pages with floats. The package also supports initialization commands like \fancyheadinit and controls for heading styles during automatic changes by LaTeX. [perplexity.ai]
+
+译：fancyhdr是LaTeX文档中一个流行的宏包，它提供了对页面页眉和页脚的广泛控制功能。它支持多行页眉和页脚的自定义设计、奇偶页的独立样式，以及章节页或浮动对象页面的特殊处理。该宏包还包括初始化命令如\fancyheadinit，并提供在LaTeX自动更改标题样式时的控制选项。
