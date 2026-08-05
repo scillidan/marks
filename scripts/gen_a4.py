@@ -161,6 +161,30 @@ def convert_avif_to_jpg(src, images_dir):
     return _ffmpeg_to_jpg(src, dest, frames=0)
 
 
+def wrap_image_figures(md_content):
+    parts = re.split(r"(\n[ \t]*\n)", md_content)
+    out = []
+    for part in parts:
+        if re.fullmatch(r"\n[ \t]*\n", part):
+            out.append(part)
+            continue
+        m = re.match(r"^(!\[[^\]]*\]\([^\s\)\\]+\))[ \t]*\n(.*)$", part, re.S)
+        if m:
+            image, caption = m.group(1), m.group(2)
+            caption = caption.rstrip()
+            if caption:
+                out.append(
+                    "<figure>\n\n"
+                    + image
+                    + "\n\n<figcaption>"
+                    + caption
+                    + "</figcaption>\n</figure>"
+                )
+                continue
+        out.append(part)
+    return "".join(out)
+
+
 def process_markdown(md_path, content_dir, output_dir, filename_suffix=""):
     if not md_path.exists():
         sys.exit(f"Error: Markdown file not found: {md_path}")
@@ -306,6 +330,8 @@ def process_markdown(md_path, content_dir, output_dir, filename_suffix=""):
 
     md_content_local = any_img_re.sub(rewrite_local, md_content_local)
 
+    md_content_local = wrap_image_figures(md_content_local)
+
     md_content_local = re.sub(r"\n{3,}", "\n\n", md_content_local)
 
     suffix = f"-{filename_suffix}" if filename_suffix else ""
@@ -430,6 +456,9 @@ def generate_typ_single(content_path, size_str, fonts, output_dir):
 #show image: set align(center)
 #set image(width: 100%)
 
+#set figure(numbering: none, supplement: none, gap: 0.25em)
+#show figure.caption: set text(style: "italic")
+
 #cmarker.render(read("../{md_processed_path.name}"))"""
 
     typ_path = output_dir / "typs" / f"{content_path.stem}.typ"
@@ -466,6 +495,9 @@ def generate_typ_dual_two_files(
 
 #show image: set align(center)
 #set image(width: 100%)
+
+#set figure(numbering: none, supplement: none, gap: 0.25em)
+#show figure.caption: set text(style: "italic")
 
 #grid(
   columns: (1fr, 1fr),
