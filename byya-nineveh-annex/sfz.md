@@ -1,0 +1,1 @@
+sfz ⚪software synthesizer ⚪软合成器 ⚫定义声音样本的行为,存储合成器的数据的纯文本(plain text)格式的文件 ⚫这类文本归为标记语言(markup language) 通常是可读的

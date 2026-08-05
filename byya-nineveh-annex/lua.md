@@ -1,0 +1,1 @@
+Lua ⚫1993年诞生在巴西 葡萄牙语中是月亮的意思 ⚫一种动态脚本语言 常用于配置(config),运行时(runtime) 适合嵌入更大的脚本,库 进行交互 ⚫除基础变量外 大部分都在引用表(table)上数据 ⚫表类似Python的字典(dictionary)或JavaScript中的实体(object) 

@@ -1,0 +1,1 @@
+abbreviation ⚪abbr. ⚪缩写 ⚫其中 acronym(首字母缩写词)按词发音 initialism(字母词)首字缩写但按逐字母发音 倾向不使用句号间隔字母 RAS Syndrome(Redundant Acronym Syndrome Syndrome, 冗余首字缩写综合征)多词首字组词 但某个或几个词被重复 Contraction(简写)部分属于中略 一般在尾部加一个点 不改变读法 Clipping(截音)截取词的部分
