@@ -1,0 +1,5 @@
+<!-- 非个人化 -->
+
+> The poet's mind is in fact a receptacle for seizing and storing up numberless feelings, phrases, images, which remain there until all the particles which can unite to form a new compound are present together [...] The mind of the mature poet differs from that of the immature one not precisely in any valuation of 'personality,' [...] but by being a more finely perfected medium in which special, or very varied, feelings are at liberty to enter into new combinations. [T.S. Eliot, 'Tradition and the Individual Talent', "The Sacred Wood: Essays on Poetry and Criticism"]
+
+译（GLM-5-Turbo）：诗人的头脑实际上是一个捕捉和储存无数情感、短语、意象的容器，它们停留在那里，直到所有能够结合形成新化合物的微粒同时出现。[……]成熟诗人的头脑与不成熟诗人的头脑的区别，并不精确地体现在对‘个性’的任何评价上，[……]而是体现在它是一个更加完美精细的媒介，在这个媒介中，特殊的或极其多样的情感可以自由地进入新的组合。 [T.S.艾略特, '传统与个人才能', "圣林：诗歌与批评文集"]

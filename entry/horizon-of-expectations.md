@@ -1,0 +1,5 @@
+<!-- 期待视野 -->
+
+> Ein literarisches Werk ist kein Objekt, das für sich steht und jedem Leser in jeder Periode dasselbe Gesicht bietet. Es ist nicht ein Monument, das metaphysisch seine überzeitliche Essenz verkündet, sondern vielmehr eine Partitur, die in ihren Lesern immer neue Resonanzen erweckt und so den Text aus seiner Materialität befreit zu einer gegenwärtigen Existenz. In diesem Sinn ist die Lektüre nicht ein autonomes, freies und individuelles Geschehen, sondern die Begegnung eines Lesers mit einem Text, die sich im Horizont seiner Erwartungen vollzieht. Dieser Erwartungshorizont ist das System von Erwartungen, mit dem der Leser an den Text herangeht, gebildet aus seiner Erfahrung mit anderen Texten, aus den Normen und Gattungen, die er kennt. [Hans Robert Jauss, "Literaturgeschichte als Provokation der Literaturwissenschaft"]
+
+译（GLM-5.1）：一部文学作品并非一个独立自足、对每个时期每个读者都呈现同一面貌的客体。它不是一尊形而上学地宣告其超时代本质的纪念碑，而更像一份乐谱，在其读者中不断唤起新的回响，从而将文本从其物质性中解放出来，成为一种当下的存在。在这个意义上，阅读并非一个自主、自由、个体的事件，而是读者与文本在期待视野中的相遇。这种期待视野是读者带着一系列期待接触文本时所构成的系统，这些期待源于他与其他文本的经验，源于他所熟悉的规范与体裁。 [汉斯·罗伯特·姚斯，《文学史作为向文学理论的挑战》]

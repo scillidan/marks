@@ -1,0 +1,3 @@
+> Workspaces in Mudirr act as a hub for your teams and projects. They are designed for long-term collaboration, where different projects can exist under one workspace. Think of workspaces as your company or department, while projects are the individual tasks or initiatives your team is working on. Projects typically have deadlines and specific outcomes, while workspaces are more ongoing and flexible. [mudirr.com, "What’s the difference between a workspace and a project?"]
+
+译：Mudirr中的工作区充当您的团队和项目的中心。它们旨在促进长期协作，不同的项目可以存在于同一个工作区下。可以把工作区看作是您的公司或部门，而项目则是您的团队正在进行的各个任务或计划。项目通常有截止日期和具体结果，而工作区则更具持续性和灵活性。

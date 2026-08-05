@@ -1,0 +1,3 @@
+> a word for a feeling of anticipation equal parts enthusiasm and anxiety ahead of the near certainty of an avalanche harvest, the moment we dreamt when planting an orchard so long ago and the energy required in attempt to respect that original vision and figure out what to do with it all [nnnnnnnn.co/log/240721-avalanche.html]
+
+译：一种期待的情感，既充满热情又带有焦虑，面对即将来临的雪崩般的收获时刻，那是我们在多年前种植果园时所梦想的时刻，以及为了尊重最初的愿景而投入的精力，努力想要处理这所有的一切。
