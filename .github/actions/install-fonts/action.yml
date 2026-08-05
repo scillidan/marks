@@ -1,0 +1,42 @@
+name: Install fonts from remote Scoop manifests
+description: Download, verify, extract and install TTF/OTF fonts described by remote Scoop manifests.
+
+inputs:
+  manifests:
+    description: 'Newline or space-separated URLs of Scoop manifest JSON files'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Install archive tools
+      shell: bash
+      run: sudo apt-get update && sudo apt-get install -y p7zip-full fontconfig
+
+    - name: Compute cache key
+      id: cache-key
+      shell: bash
+      env:
+        MANIFESTS: ${{ inputs.manifests }}
+      run: |
+        key="fonts-$(printf '%s' "$MANIFESTS" | sha256sum | cut -d' ' -f1)"
+        echo "key=$key" >> "$GITHUB_OUTPUT"
+
+    - name: Restore font cache
+      id: font-cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.local/share/fonts
+        key: ${{ steps.cache-key.outputs.key }}
+
+    - name: Download and install fonts
+      if: steps.font-cache.outputs.cache-hit != 'true'
+      shell: bash
+      env:
+        MANIFESTS: ${{ inputs.manifests }}
+      run: |
+        python3 "${{ github.action_path }}/install.py" $(printf '%s' "$MANIFESTS" | tr '\n' ' ')
+
+    - name: Refresh font cache
+      shell: bash
+      run: fc-cache -fv

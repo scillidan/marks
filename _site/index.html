@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>𝔪𝔞𝔯𝔨𝔰</title>
+  <link rel="icon" href="asset/favicon.ico" />
+  <link rel="shortcut icon" href="asset/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="16x16" href="asset/favicon-16x16.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="asset/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="96x96" href="asset/favicon-96x96.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="asset/apple-touch-icon.png" />
+  <link rel="manifest" href="asset/site.webmanifest" />
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-head">
+        <h1>𝔪𝔞𝔯𝔨𝔰</h1>
+      </div>
+      <div id="toc">Loading…</div>
+      <a class="source" href="https://github.com/scillidan/marks" target="_blank" rel="noopener">Source</a>
+      <button id="toggle-sidebar" type="button" aria-expanded="true" aria-controls="sidebar" title="Toggle sidebar"><span class="tri" aria-hidden="true"></span></button>
+      <div id="sidebar-resizer" role="separator" aria-orientation="vertical" title="Drag to resize"></div>
+    </aside>
+    <main class="viewer">
+      <pdfjs-viewer-element
+        id="viewer"
+        viewer-css-theme="LIGHT"
+        zoom="page-actual"
+        style="height: 100%; display: none;">
+      </pdfjs-viewer-element>
+      <div id="empty-state" class="empty-state">Select a PDF from the sidebar to preview.</div>
+    </main>
+  </div>
+
+  <script type="module" src="https://cdn.jsdelivr.net/npm/pdfjs-viewer-element@3.2.2/dist/pdfjs-viewer-element.js"></script>
+  <script>
+    const sidebar = document.getElementById('toc');
+    const viewer = document.getElementById('viewer');
+    const layout = document.querySelector('.layout');
+    const toggleBtn = document.getElementById('toggle-sidebar');
+    const sidebarEl = document.getElementById('sidebar');
+    const resizer = document.getElementById('sidebar-resizer');
+    let manifest = { groups: [] };
+
+    const SIDEBAR_W_KEY = 'marks.sidebarWidth';
+
+    function clampSidebarWidth(w) {
+      const max = Math.min(window.innerWidth * 0.4, 40 * window.innerWidth / 100);
+      return Math.max(240, Math.min(max, w));
+    }
+
+    function setSidebarWidth(w) {
+      sidebarEl.style.setProperty('--sidebar-width', clampSidebarWidth(w) + 'px');
+    }
+
+    function saveSidebarWidth() {
+      const w = sidebarEl.getBoundingClientRect().width;
+      if (w > 0) {
+        localStorage.setItem(SIDEBAR_W_KEY, String(Math.round(w)));
+      }
+    }
+
+    // Restore persisted width on load.
+    const savedWidth = parseFloat(localStorage.getItem(SIDEBAR_W_KEY));
+    if (savedWidth > 0) {
+      setSidebarWidth(savedWidth);
+    }
+
+    resizer.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      layout.classList.add('resizing');
+      const startX = e.clientX;
+      const startW = sidebarEl.getBoundingClientRect().width;
+
+      function onMove(ev) {
+        setSidebarWidth(startW + (ev.clientX - startX));
+      }
+      function onUp() {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        layout.classList.remove('resizing');
+        saveSidebarWidth();
+      }
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
+
+    toggleBtn.addEventListener('click', () => {
+      layout.classList.toggle('sidebar-collapsed');
+      toggleBtn.setAttribute('aria-expanded', String(!layout.classList.contains('sidebar-collapsed')));
+    });
+
+    function findItemByPath(groups, path) {
+      for (const group of groups) {
+        if (group.items) {
+          const item = group.items.find(i => i.path === path);
+          if (item) return item;
+        }
+        if (group.subgroups) {
+          const found = findItemByPath(group.subgroups, path);
+          if (found) return found;
+        }
+      }
+      return null;
+    }
+
+    function updateActive(path) {
+      document.querySelectorAll('.item-list a').forEach(a => a.classList.toggle('active', a.dataset.path === path));
+    }
+
+    function loadPdf(path, title) {
+      if (!path) return;
+      // pdfjs-viewer-element resolves src inside an iframe, so give it an
+      // absolute URL to make sure it points at this server. Encode the path
+      // so characters like [] or spaces in file names survive URL parsing.
+      const encodedPath = encodeURI(path);
+      const url = new URL(encodedPath, window.location.href).href;
+      viewer.style.display = 'block';
+      document.getElementById('empty-state').style.display = 'none';
+      viewer.setAttribute('src', url);
+      updateActive(path);
+      history.replaceState(null, '', '#' + encodeURIComponent(path));
+    }
+
+    function renderItem(item) {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.href = '#' + encodeURIComponent(item.path);
+      a.textContent = item.title;
+      a.title = item.title + (item.source ? ` (${item.source})` : '');
+      a.dataset.path = item.path;
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        loadPdf(item.path, item.title);
+      });
+      li.appendChild(a);
+      return li;
+    }
+
+    function renderGroup(group, container) {
+      const details = document.createElement('details');
+      const summary = document.createElement('summary');
+      summary.textContent = group.name;
+      details.appendChild(summary);
+
+      if (group.items && group.items.length > 0) {
+        const ul = document.createElement('ul');
+        ul.className = 'item-list';
+        for (const item of group.items) {
+          ul.appendChild(renderItem(item));
+        }
+        details.appendChild(ul);
+      }
+
+      if (group.subgroups && group.subgroups.length > 0) {
+        const subContainer = document.createElement('div');
+        subContainer.className = 'subgroups';
+        for (const sub of group.subgroups) {
+          renderGroup(sub, subContainer);
+        }
+        details.appendChild(subContainer);
+      }
+
+      container.appendChild(details);
+    }
+
+    function renderToc() {
+      if (!manifest.groups || manifest.groups.length === 0) {
+        sidebar.innerHTML = '<p>No PDFs found. Run <code>./scripts/build-preview.sh</code> first.</p>';
+        return;
+      }
+
+      const frag = document.createDocumentFragment();
+      for (const group of manifest.groups) {
+        renderGroup(group, frag);
+      }
+      sidebar.innerHTML = '';
+      sidebar.appendChild(frag);
+    }
+
+    async function init() {
+      try {
+        const res = await fetch('manifest.json');
+        if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+        manifest = await res.json();
+        renderToc();
+
+        const hash = decodeURIComponent(location.hash.slice(1));
+        if (hash) {
+          const item = findItemByPath(manifest.groups, hash);
+          if (item) {
+            loadPdf(item.path, item.title);
+          }
+        }
+      } catch (err) {
+        sidebar.innerHTML = `<div class="error-state">Failed to load manifest.json:<br>${err.message}</div>`;
+      }
+    }
+
+    // The Paper & Ink viewer theme switches to a dark palette via
+    // `@media (prefers-color-scheme: dark)`, which the component's
+    // `color-scheme: light` does not suppress on dark-mode systems. Re-declare
+    // the light palette with !important so the viewer stays light.
+    // The custom element is defined by a deferred module script, so wait for
+    // it to upgrade before calling its injectViewerStyles method.
+    customElements.whenDefined('pdfjs-viewer-element').then(async () => {
+      // Keep every newly-opened PDF at Actual Size. pdfjs-viewer-element only
+      // applies the zoom attribute hash at initial build; later `src` changes
+      // call PDFViewerApplication.open() which falls back to the
+      // `defaultZoomValue` viewer option (empty -> Automatic Zoom).
+      const { viewerOptions } = await viewer.setViewerOptions({ defaultZoomValue: 'page-actual' });
+      viewerOptions?.set('defaultZoomValue', 'page-actual');
+      viewer.injectViewerStyles(`
+      :root{--main-color:#1c1c1c !important;--toolbar-icon-bg-color:#2b2b2b !important;--toolbar-icon-hover-bg-color:#1c1c1c !important;--body-bg-color:#f1f3f5 !important;--toolbar-bg-color:#ffffff !important;--toolbar-border-color:#d0d7de !important;--toolbar-border-bottom:0 !important;--toolbar-box-shadow:0 1px 0 rgb(31 35 40 / 8%) !important;--toolbarSidebar-box-shadow:inset -1px 0 0 rgb(31 35 40 / 12%), 0 1px 0 rgb(31 35 40 / 6%) !important;--toolbarSidebar-border-bottom:1px solid #d0d7de !important;--separator-color:#c7cdd4 !important;--field-color:#1f2328 !important;--field-bg-color:#ffffff !important;--field-border-color:#c6ccd2 !important;--button-hover-color:rgb(74 144 217 / 14%) !important;--toggled-btn-color:#2b2b2b !important;--toggled-btn-bg-color:rgb(74 144 217 / 20%) !important;--toggled-hover-active-btn-color:rgb(74 144 217 / 28%) !important;--toggled-hover-btn-outline:1px solid rgb(74 144 217 / 40%) !important;--doorhanger-bg-color:#ffffff !important;--doorhanger-border-color:rgb(31 35 40 / 18%) !important;--doorhanger-hover-bg-color:rgb(74 144 217 / 12%) !important;--doorhanger-hover-color:#1c1c1c !important;--doorhanger-separator-color:#d0d7de !important;--dropdown-btn-bg-color:#f6f8fa !important;--dropdown-btn-border:1px solid #c6ccd2 !important;--focus-ring-color:#4a90d9 !important;--outline-color:#4a90d9 !important;--outline-around-color:#f4f2ef !important;--dialog-button-border:1px solid #c6ccd2 !important;--dialog-button-bg-color:#f6f8fa !important;--dialog-button-hover-bg-color:rgb(74 144 217 / 18%) !important;--progressBar-color:#4a90d9 !important;--progressBar-bg-color:#e7edf4 !important;--progressBar-blend-color:#7db0e4 !important;--thickness-bg:#ffffff !important;--find-not-found-bg-color:#f6ddd8 !important;}
+      #viewsManager{--sidebar-bg-color:rgb(241 243 245 / .96) !important;--header-bg:rgb(255 255 255 / .96) !important;--text-color:#1f2328 !important;--button-fg:#2f343b !important;--button-bg:rgb(31 35 40 / .08) !important;--button-hover-bg:rgb(74 144 217 / .16) !important;--button-hover-fg:#1c1c1c !important;--button-active-bg:rgb(74 144 217 / .24) !important;--button-active-fg:#1c1c1c !important;--button-focus-outline-color:#4a90d9 !important;--button-focus-border-color:#2b2b2b !important;--status-actions-bg:rgb(107 107 107 / .08) !important;--status-undo-bg:rgb(74 144 217 / .14) !important;--status-waiting-bg:rgb(74 144 217 / .14) !important;--status-warning-bg:#fff1e6 !important;--indicator-color:#4a90d9 !important;--indicator-warning-color:#cc6f28 !important;--header-shadow:0 1px 4px rgb(31 35 40 / 10%) !important;--image-border-color:#d0d7de !important;--image-hover-border-color:#4a90d9 !important;--image-current-border-color:#4a90d9 !important;--image-current-focused-outline-color:#4a90d9 !important;--image-page-number-bg:#f6f8fa !important;--image-page-number-fg:#2f343b !important;--image-current-page-number-bg:#4a90d9 !important;--image-current-page-number-fg:#ffffff !important;--image-shadow:0 1px 2px rgb(43 43 43 / .08), 0 0 0 1px var(--image-border-color) !important;}
+      .sidebar{--sidebar-bg-color:#f6f8fa !important;--sidebar-border-color:rgb(31 35 40 / 18%) !important;--sidebar-box-shadow:0 1px 3px rgb(31 35 40 / 8%), 0 6px 16px rgb(31 35 40 / 8%) !important;--resizer-hover-bg-color:#4a90d9 !important;}
+      .dialog{--dialog-bg-color:#ffffff !important;--dialog-border-color:#d0d7de !important;--dialog-shadow:0 8px 24px rgb(43 43 43 / .12) !important;--text-primary-color:#1f2328 !important;--text-secondary-color:#57606a !important;--separator-color:#d0d7de !important;--link-fg-color:#4a90d9 !important;--link-hover-fg-color:#2f73b8 !important;--textarea-border-color:#c6ccd2 !important;--textarea-bg-color:#ffffff !important;--textarea-fg-color:#1f2328 !important;--input-text-bg-color:#ffffff !important;--input-text-fg-color:#1f2328 !important;--button-secondary-bg-color:#f6f8fa !important;--button-secondary-hover-bg-color:#eff2f5 !important;--button-secondary-active-bg-color:#e6ebf1 !important;--button-secondary-border-color:#c6ccd2 !important;--button-primary-bg-color:#4a90d9 !important;--button-primary-hover-bg-color:#3f83cb !important;--button-primary-active-bg-color:#2f73b8 !important;--button-primary-fg-color:#ffffff !important;--button-primary-border-color:#4a90d9 !important;--radio-bg-color:#f6f8fa !important;--radio-checked-bg-color:#ffffff !important;--radio-border-color:#b8c1ca !important;--radio-checked-border-color:#4a90d9 !important;}
+      .colorPicker{--hover-outline-color:#3f83cb !important;--selected-outline-color:#4a90d9 !important;--swatch-border-color:#c6ccd2 !important;}
+      .toggle-button{--color-accent-primary:light-dark(#4a90d9, #7db0e4) !important;--color-accent-primary-hover:light-dark(#3f83cb, #9ac2ea) !important;--color-accent-primary-active:light-dark(#2f73b8, #b6d4f1) !important;--color-canvas:light-dark(#ffffff, #161b22) !important;--border-color-interactive:light-dark(#c6ccd2, #e6edf3) !important;}
+      .toggle-button[aria-pressed=true]{--toggle-dot-background-color-on-pressed:#ffffff !important;}
+      .messageBar{--message-bar-close-button-color:#2b2b2b !important;--message-bar-close-button-color-hover:#1c1c1c !important;--message-bar-close-button-hover-bg-color:rgb(74 144 217 / .14) !important;--message-bar-close-button-active-bg-color:rgb(74 144 217 / .24) !important;--message-bar-close-button-focus-bg-color:rgb(74 144 217 / .18) !important;}
+      #editorUndoBar{--text-primary-color:#1f2328 !important;--message-bar-icon-color:#4a90d9 !important;--message-bar-bg-color:#edf4fb !important;--message-bar-border-color:#c9dcee !important;--message-bar-fg-color:#1c1c1c !important;--undo-button-bg-color:#f6f8fa !important;--undo-button-bg-color-hover:#eff2f5 !important;--undo-button-bg-color-active:#e6ebf1 !important;--undo-button-border:1px solid #c6ccd2 !important;--undo-button-fg-color:#2f343b !important;--undo-button-fg-color-hover:#1c1c1c !important;--undo-button-fg-color-active:#1c1c1c !important;}
+      /* Thin scrollbars (1px) with arrow buttons removed. */
+      #viewerContainer::-webkit-scrollbar,
+      #viewsManager::-webkit-scrollbar,
+      #sidebarContainer::-webkit-scrollbar,
+      .sidebarContent::-webkit-scrollbar,
+      .thumbnailView::-webkit-scrollbar,
+      .treeItem::-webkit-scrollbar,
+      .thumbnailScroll::-webkit-scrollbar,
+      .treeItemScroll::-webkit-scrollbar {width:1px;height:1px;}
+      #viewerContainer::-webkit-scrollbar-track,
+      #viewsManager::-webkit-scrollbar-track,
+      #sidebarContainer::-webkit-scrollbar-track,
+      .sidebarContent::-webkit-scrollbar-track,
+      .thumbnailView::-webkit-scrollbar-track,
+      .treeItem::-webkit-scrollbar-track,
+      .thumbnailScroll::-webkit-scrollbar-track,
+      .treeItemScroll::-webkit-scrollbar-track {background:transparent;}
+      #viewerContainer::-webkit-scrollbar-thumb,
+      #viewsManager::-webkit-scrollbar-thumb,
+      #sidebarContainer::-webkit-scrollbar-thumb,
+      .sidebarContent::-webkit-scrollbar-thumb,
+      .thumbnailView::-webkit-scrollbar-thumb,
+      .treeItem::-webkit-scrollbar-thumb,
+      .thumbnailScroll::-webkit-scrollbar-thumb,
+      .treeItemScroll::-webkit-scrollbar-thumb {background:rgb(176 176 176);border-radius:0;}
+      #viewerContainer::-webkit-scrollbar-button,
+      #viewsManager::-webkit-scrollbar-button,
+      #sidebarContainer::-webkit-scrollbar-button,
+      .sidebarContent::-webkit-scrollbar-button,
+      .thumbnailView::-webkit-scrollbar-button,
+      .treeItem::-webkit-scrollbar-button,
+      .thumbnailScroll::-webkit-scrollbar-button,
+      .treeItemScroll::-webkit-scrollbar-button {display:none;}
+      #viewerContainer::-webkit-scrollbar-corner,
+      #viewsManager::-webkit-scrollbar-corner,
+      #sidebarContainer::-webkit-scrollbar-corner,
+      .sidebarContent::-webkit-scrollbar-corner,
+      .thumbnailView::-webkit-scrollbar-corner,
+      .treeItem::-webkit-scrollbar-corner,
+      .thumbnailScroll::-webkit-scrollbar-corner,
+      .treeItemScroll::-webkit-scrollbar-corner {background:transparent;}
+      /* Chromium respects -webkit-scrollbar (1px). Firefox ignores it, so fall
+         back to scrollbar-width: thin there. */
+      @supports not selector(::-webkit-scrollbar) {
+        #viewerContainer, #viewsManager, #sidebarContainer, .sidebarContent, .thumbnailView, .treeItem, .thumbnailScroll, .treeItemScroll {scrollbar-width:thin;scrollbar-color:rgb(176 176 176) transparent;}
+      }
+    `);
+    });
+
+    init();
+  </script>
+</body>
+</html>
