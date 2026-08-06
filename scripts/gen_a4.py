@@ -453,11 +453,19 @@ def generate_typ_single(content_path, size_str, fonts, output_dir):
 #show raw.where(block: false): set text(font: ({font_str}), size: {size_str})
 #show raw.where(block: true):  set text(font: ({font_str}), size: {size_str})
 
-#set image(width: 80%)
+#show image: set align(center)
+#set image(width: 90%)
 
-#set figure(numbering: none, supplement: none, gap: 0.25em)
-#show figure: set align(left)
-#show figure.caption: set par(justify: false)
+#show figure: it => {{
+  show image: set image(width: 100%)
+  align(center, block(width: 90%, stack(
+    spacing: 0.25em,
+    it.body,
+    if it.caption != none {{
+      align(left, par(justify: false, it.caption.body))
+    }}
+  )))
+}}
 
 #cmarker.render(read("../{md_processed_path.name}"))"""
 
@@ -493,11 +501,19 @@ def generate_typ_dual_two_files(
 #set text(font: ({font_str}), size: {size_str})
 #set par(justify: true)
 
-#set image(width: 80%)
+#show image: set align(center)
+#set image(width: 90%)
 
-#set figure(numbering: none, supplement: none, gap: 0.25em)
-#show figure: set align(left)
-#show figure.caption: set par(justify: false)
+#show figure: it => {{
+  show image: set image(width: 100%)
+  align(center, block(width: 90%, stack(
+    spacing: 0.25em,
+    it.body,
+    if it.caption != none {{
+      align(left, par(justify: false, it.caption.body))
+    }}
+  )))
+}}
 
 #grid(
   columns: (1fr, 1fr),
