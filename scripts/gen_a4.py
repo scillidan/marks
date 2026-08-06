@@ -453,11 +453,11 @@ def generate_typ_single(content_path, size_str, fonts, output_dir):
 #show raw.where(block: false): set text(font: ({font_str}), size: {size_str})
 #show raw.where(block: true):  set text(font: ({font_str}), size: {size_str})
 
-#show image: set align(center)
-#set image(width: 100%)
+#set image(width: 80%)
 
 #set figure(numbering: none, supplement: none, gap: 0.25em)
-#show figure.caption: set text(style: "italic")
+#show figure: set align(left)
+#show figure.caption: set par(justify: false)
 
 #cmarker.render(read("../{md_processed_path.name}"))"""
 
@@ -493,11 +493,11 @@ def generate_typ_dual_two_files(
 #set text(font: ({font_str}), size: {size_str})
 #set par(justify: true)
 
-#show image: set align(center)
-#set image(width: 100%)
+#set image(width: 80%)
 
 #set figure(numbering: none, supplement: none, gap: 0.25em)
-#show figure.caption: set text(style: "italic")
+#show figure: set align(left)
+#show figure.caption: set par(justify: false)
 
 #grid(
   columns: (1fr, 1fr),
