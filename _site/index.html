@@ -46,6 +46,7 @@
     let manifest = { groups: [] };
 
     const SIDEBAR_W_KEY = 'marks.sidebarWidth';
+    const pinyinCollator = new Intl.Collator('zh-Hans-u-co-pinyin');
 
     function clampSidebarWidth(w) {
       const max = Math.min(window.innerWidth * 0.4, 40 * window.innerWidth / 100);
@@ -149,7 +150,10 @@
       if (group.items && group.items.length > 0) {
         const ul = document.createElement('ul');
         ul.className = 'item-list';
-        for (const item of group.items) {
+        const items = group.dir === 'post_zh-cn'
+          ? [...group.items].sort((a, b) => pinyinCollator.compare(a.title, b.title))
+          : group.items;
+        for (const item of items) {
           ul.appendChild(renderItem(item));
         }
         details.appendChild(ul);
