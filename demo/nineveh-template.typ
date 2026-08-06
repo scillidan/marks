@@ -4,7 +4,7 @@
 #import "@preview/libra:0.1.0": balance
 
 #let nineveh-layout(doc) = {
-  set page(paper: "a6", flipped: true, margin: 2%)
+  set page(paper: "a6", flipped: true, margin: (top: 4%, bottom: 4%, left: 2%, right: 2%))
   set text(font: "Sarasa Mono SC", size: 8pt)
   set grid(column-gutter: 1em)
   set figure(numbering: none)
