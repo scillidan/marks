@@ -171,12 +171,12 @@ def wrap_image_figures(md_content):
         m = re.match(r"^(!\[[^\]]*\]\([^\s\)\\]+\))[ \t]*\n(.*)$", part, re.S)
         if m:
             image, caption = m.group(1), m.group(2)
-            caption = caption.rstrip()
+            caption = "  \n".join(ln.rstrip() for ln in caption.rstrip().split("\n"))
             if caption:
                 out.append(
                     "<figure>\n\n"
                     + image
-                    + "\n\n<figcaption>"
+                    + "\n\n<figcaption>\n\n"
                     + caption
                     + "</figcaption>\n</figure>"
                 )
