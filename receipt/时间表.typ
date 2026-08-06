@@ -1,6 +1,13 @@
 = 时间表
 // cheatsheet
 #divider()
+[焯]
+#table(stroke: none, inset: 2pt, align: left, columns: 2,
+	[30@s], [菠菜],
+	[40@s], [西兰花],
+	[1@m], [胡萝卜丁],
+)
+#v(.6em)
 [煮]
 #table(stroke: none, inset: 2pt, align: left, columns: 2,
 	[5@min], [白豆腐块],
@@ -12,8 +19,6 @@
 [火锅]
 #table(stroke: none, inset: 2pt, align: left, columns: 2,
 	[10-20@s], [响铃卷],
-	[30@s], [菠菜],
-	[40@s], [西兰花],
 	[0.5-1@min], [油豆皮],
 	[0.5-1@min], [豆芽],
 	[1-2@min], [金针菇],
