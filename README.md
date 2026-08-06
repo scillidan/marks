@@ -2,4 +2,4 @@
 
 ## Attribute
 
-Source code (only the code) is licensed under `MIT`.
+This repository uses a dual license: source code is licensed under `MIT` (embedded non-code content are not included), and non-code content (articles, text, images, videos, etc.) under `CC BY 4.0`.
