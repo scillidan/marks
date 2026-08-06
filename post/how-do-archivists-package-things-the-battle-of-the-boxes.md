@@ -63,9 +63,8 @@ In this common archival packaging method, records are placed in standard archiva
 
 One of the key advantages of standard packaging is that it universally accommodates a particular range of common document sizes. For convenience, we’ll call this range **_hand-scale documents_**: documents that can be held comfortably between our hands held not too far apart. This range of sizes arguably encompasses the majority of paper and photographic records produced in daily life over the centuries, both before and after paper sizes were standardized.
 
-![](assets/how-do-archivists-package-things-the-battle-of-the-boxes_05.jpg)
-
-*Files of hand-scale documents at the Region of Peel Archives.* From top left clockwise: *early 19th century, mid-late 19th century, late 20th twentieth century, early 20th century*.
+![](assets/how-do-archivists-package-things-the-battle-of-the-boxes_05.jpg)  
+Files of hand-scale documents at the Region of Peel Archives. From top left clockwise: early 19th century, mid-late 19th century, late 20th twentieth century, early 20th century.
 
 ## The benefits of uniformity
 
@@ -135,8 +134,7 @@ The typical North American archival file folder.
 **The Bankers Box**: A commonly used larger box is the classic “Bankers Box.” This size of box is typically used in records centres of large organizations. An acid-free version is used for modern administrative records in archives. This box can be, let’s say, taxing on staff in the large volumes in which it tends to accumulate.  
 
 ![](assets/how-do-archivists-package-things-the-battle-of-the-boxes_07.jpg)
-
-*Typical North American archival boxes including (from the left) a Bankers box, a Hollinger box, and a half-Bankers box, a new favourite of the Region of Peel Archives. Some brands have removable lids while others have hinged lids.*
+Typical North American archival boxes including (from the left) a Bankers box, a Hollinger box, and a half-Bankers box, a new favourite of the Region of Peel Archives. Some brands have removable lids while others have hinged lids.
 
 ```md
 **Like a glove**
@@ -174,17 +172,16 @@ To protect documents filed this way, we need to package them properly. Here are 
 
 **File folders should not be overfilled and should be adjusted appropriately**. File folders should be manually squared off at the bottom to accommodate the thickness of the records within them. North American file folders generally come with an array of pre-scored lines for this purpose.
 
-![](assets/how-do-archivists-package-things-the-battle-of-the-boxes_11.png)
-
-Left and centre: *Correctly foldering a thick file of modern office paper, and a slim file of 19th century documents.* Right: *Incorrectly foldering some 19th century deeds.*
+![](assets/how-do-archivists-package-things-the-battle-of-the-boxes_11.png)  
+Left and centre: Correctly foldering a thick file of modern office paper, and a slim file of 19th century documents.  
+Right: Incorrectly foldering some 19th century deeds.
 
 ## Packing files into boxes
 
 **Boxes should be filled snuggly with files, but not overfilled**. Both overfilling and underfilling a box could cause damage like folding or curvature. Archivists test the ideal fit by eye, as well as by ease of access to files, and ability to fit an average hand down the back of a filled box.
 
-![](assets/how-do-archivists-package-things-the-battle-of-the-boxes_12.jpg)
-
-_A vertically filled box seen from above. This box includes file folders containing documents of varying sizes, and also an unpublished bound volume (book). When bound volumes are stored in boxes, we make sure their spines are facing downwards so that the weight of the text block (the pages) does not pull away from the spine._
+![](assets/how-do-archivists-package-things-the-battle-of-the-boxes_12.jpg)  
+A vertically filled box seen from above. This box includes file folders containing documents of varying sizes, and also an unpublished bound volume (book). When bound volumes are stored in boxes, we make sure their spines are facing downwards so that the weight of the text block (the pages) does not pull away from the spine.
 
 **Any space left in a partially filled box needs to be braced** so that files don’t slump over. Slumping and curvature are the primary risks of this packaging style. Some archivists tip the box on its side while filling it, and ask archives researchers to do the same when removing files for use.
 
