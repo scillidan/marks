@@ -28,7 +28,10 @@ The eukaryotes invented organization, if we use the literal definition of “org
 Since that original act, the eukaryote has transformed again and again. It first evolved into a smattering of unique unicellular creatures, such as the ancestors of modern [diplomonads (opens a new tab)](https://microbewiki.kenyon.edu/index.php/Diplomonada), which swim with dual tail clusters, and the parasitic [microsporidians (opens a new tab)](https://microbewiki.kenyon.edu/index.php/Microsporidia), which shoot out coiled tubes to infect victim cells.
 
 ![](assets/meet-the-eukaryote-the-first-cell-to-get-organized_02.webp)  
-These are among the oldest known fossils of eukaryotic cells, estimated to be between 1.4 billion and 1.65 billion years old. Left: A variety of fossils from [the Limbunya Group (opens a new tab)](https://doi.org/10.1002/spp2.1538) in Northern Territory, Australia. Top right: *Tappania plana* from Montana. The delicate membrane and leglike protuberances are indicative of eukaryotic complexity. Bottom right: *Valeria lophostriata* from the Northern Territory, Australia.
+These are among the oldest known fossils of eukaryotic cells, estimated to be between 1.4 billion and 1.65 billion years old.  
+Left: A variety of fossils from [the Limbunya Group (opens a new tab)](https://doi.org/10.1002/spp2.1538) in Northern Territory, Australia.  
+Top right: "Tappania plana" from Montana. The delicate membrane and leglike protuberances are indicative of eukaryotic complexity.  
+Bottom right: "Valeria lophostriata" from the Northern Territory, Australia.
 
 Courtesy of Nick Butterfield
 

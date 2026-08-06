@@ -46,7 +46,8 @@ Scenes from the films “The Ring” and “Nostradamus”. Horror comes in many
 Of course, real archival shelves do host traditionally vintage-looking items, especially large tomes. (These shelves are frequently employed as photo op backdrops when archives appear in the news.) But the archivist’s guilty secret is that most stocked archival shelves look comparatively bland: row on row of identical boxes, filled with identical files, and cryptically labelled.
 
 ![](assets/how-do-archivists-package-things-the-battle-of-the-boxes_04.jpg)  
-Left: *Region of Peel Archives in Brampton, Ontario, Canada.* Right: *Tyne & Wear Archives in Newcastle, UK. (Courtesy of Tyne & Wear Archives.)*
+Left: Region of Peel Archives in Brampton, Ontario, Canada.  
+Right: Tyne & Wear Archives in Newcastle, UK. (Courtesy of Tyne & Wear Archives.)
 
 Why would regularly sized boxes and files be the norm, especially if archival records run the gamut from maps, postcards, and reports, to letters, handbills, and photographs? In a way this question has answered itself, but let’s unpack it – pun intended.
 
@@ -215,7 +216,8 @@ Of course, some documents come to us clipped together with staples or paperclips
 **Stabilizing fragile records**. A particularly fragile document may be placed in an enclosure, such as a polyester sleeve. (Again, only some plastics are suitable for archival use.) This sleeve allows researchers to view and handle the record safely. Similarly, photographic records like slides, negatives, and photographs may require extra protection to ensure the photographic emulsion (image layer) is not damaged. We may also use acid-free tissue paper to protect photographs or other easily scratched surfaces.
 
 ![](assets/how-do-archivists-package-things-the-battle-of-the-boxes_15.jpg)  
-Left: Photographs interleaved with archival tissue paper to protect image surfaces. Right: A fragile 19th-century letter protected by a Mylar sleeve and backed by a stiff piece of card.
+Left: Photographs interleaved with archival tissue paper to protect image surfaces.  
+Right: A fragile 19th-century letter protected by a Mylar sleeve and backed by a stiff piece of card.
 
 **Stabilizing small records**. Small records like tiny cards and notes, or photographic slides, can shift around and be overlooked more easily within standard files, particularly when housed with larger associated records (think of snapshots enclosed in a letter). We may put smaller items in sleeves to bring them closer to standard document sizes.
 
@@ -243,15 +245,15 @@ Archivists in the UK also rely on boxes and folders for basic archival packaging
 
 **Files** are physically constructed in a variety of ways. Sometimes archivists use folders made of acid-free card. These are somewhat similar to standard North American file folders, but unlike the latter, they generally include flaps which enclose records or two or more sides. For thinner sets of records, archivists may use large acid-free envelopes as a file. In lieu of a file folder, they may also wrap sets of records in acid-free paper or tissue.
 
-![](assets/how-do-archivists-package-things-the-battle-of-the-boxes_18.jpg)
-
-Left: *Four-flap folder as used in the West Yorkshire Archive Service. (Courtesy and copyright of the West Yorkshire Archive Service, Conservation)*. Right: *Two-flap folder in use at the Tyne & Wear Archives. (Courtesy of the Tyne & Wear Archives.)*
+![](assets/how-do-archivists-package-things-the-battle-of-the-boxes_18.jpg)  
+Left: Four-flap folder as used in the West Yorkshire Archive Service. (Courtesy and copyright of the West Yorkshire Archive Service, Conservation).  
+Right: Two-flap folder in use at the Tyne & Wear Archives. (Courtesy of the Tyne & Wear Archives.)
 
 **Boxes** for documents in the UK tend to be shallow, with removeable lids.
 
 ![](assets/how-do-archivists-package-things-the-battle-of-the-boxes_19.jpg)
-
-Left: *An empty archive box as used by the Tyne & Wear Archives, who have them specially made to fit their shelves. (Courtesy of Tyne & Wear Archives).* Right: *Archive boxes on the shelves at the West Yorkshire Archives. (Courtesy and copyright of West Yorkshire Archive Service, Wakefield.)*
+Left: An empty archive box as used by the Tyne & Wear Archives, who have them specially made to fit their shelves. (Courtesy of Tyne & Wear Archives).  
+Right: Archive boxes on the shelves at the West Yorkshire Archives. (Courtesy and copyright of West Yorkshire Archive Service, Wakefield.)
 
 **Other UK supplies**:
 
@@ -279,7 +281,8 @@ Closed and tied four-flap folder at the West Yorkshire Archive Service. (Courtes
 Files are laid flat in their boxes, one on top of the next, until the box is full.
 
 ![](assets/how-do-archivists-package-things-the-battle-of-the-boxes_23.jpg)  
-Left: Stack of thicker tied folders ready for stacking into their box. (Courtesy and copyright of West Yorkshire Archive Service.) Right: Loaded box of stacked files. (Courtesy and copyright of The John Goodchild Archive and Antiquarian Collection, West Yorkshire Archive Service, Wakefield.)
+Left: Stack of thicker tied folders ready for stacking into their box. (Courtesy and copyright of West Yorkshire Archive Service.)  
+Right: Loaded box of stacked files. (Courtesy and copyright of The John Goodchild Archive and Antiquarian Collection, West Yorkshire Archive Service, Wakefield.)
 
 For this orientation to work, files must be packaged correctly.
 
@@ -296,14 +299,16 @@ As in North America, UK archives each have their own in-house preferences for co
 That said, one uniquely British way of controlling documents within files includes the use of the “treasury tag,” particularly for modern government files. The treasury tag is piece of cord with wide ends. Holes are punched through one corner of a stack of related papers or enclosures, and the cord loosely passed through them. The tag ensures that papers from a file can’t become disassociated while being used. You can learn more about how tags are applied in [guidance](https://cdn.nationalarchives.gov.uk/documents/paper-files-preparation-guidance.pdf) from the UK’s National Archives. (Not all UK archives apply new tags, but many will receive records that have been tagged before reaching the archives.)
 
 ![](assets/how-do-archivists-package-things-the-battle-of-the-boxes_24.jpg)  
-Left: Treasury tags of different lengths made to accommodate different file thicknesses. Right: A file bound with a treasure tag. (Courtesy of the National Archives [Preparation of Records](https://web.archive.org/web/20211103021220/https://cdn.nationalarchives.gov.uk/documents/information-management/preparation-of-records.pdf).)
+Left: Treasury tags of different lengths made to accommodate different file thicknesses.  
+Right: A file bound with a treasure tag. (Courtesy of the National Archives [Preparation of Records](https://web.archive.org/web/20211103021220/https://cdn.nationalarchives.gov.uk/documents/information-management/preparation-of-records.pdf).)
 
 ## Storing boxes on shelves
 
 Flat storage boxes in the UK are stacked one on top of the other within the limits of shelf depth and the pressure from accumulated weight.
 
 ![](assets/how-do-archivists-package-things-the-battle-of-the-boxes_25.jpg)  
-Left: Double stacks of boxes at the Tyne & Wear Archives. (Courtesy of the Tyne & Wear Archives.) Right: Triple stacks of boxes at the West Yorkshire Archives. (Courtesy and Copyright of the West Yorkshire Archive Service, Wakefield.)
+Left: Double stacks of boxes at the Tyne & Wear Archives. (Courtesy of the Tyne & Wear Archives.)  
+Right: Triple stacks of boxes at the West Yorkshire Archives. (Courtesy and Copyright of the West Yorkshire Archive Service, Wakefield.)
 
 ## Face-off: advantages and disadvantages
 
