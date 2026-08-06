@@ -499,7 +499,9 @@ if [[ "$DRY_RUN" -eq 1 ]]; then
 else
 	echo "Assembling _site ..."
 
-	$PYTHON <<'PYEOF'
+	# Manifest assembly uses pypinyin for Post (ZH-CN) title sorting; run it
+	# under uv so the dependency is available (uv is required by the build).
+	uv run --with pypinyin python <<'PYEOF'
 import json
 import os
 import re
@@ -783,6 +785,22 @@ for pdf_path in sorted(repo_root.rglob("_output/pdfs/*.pdf")):
         "path": manifest_path_str,
         "source": Path(source_guess).as_posix() if source_guess else None,
     })
+
+# Post (ZH-CN) items are sorted by the pinyin of their title (ascending).
+# Chinese titles are converted to pinyin with the pypinyin library; the mixed
+# Latin/pinyin key is lowercased so English titles interleave naturally.
+def _pinyin_key(text):
+    try:
+        from pypinyin import lazy_pinyin, Style
+
+        return "".join(lazy_pinyin(text, style=Style.NORMAL)).lower()
+    except ImportError:
+        return text.lower()
+
+
+_zh_cn = groups_by_dir.get("post_zh-cn")
+if _zh_cn:
+    _zh_cn.items.sort(key=lambda item: _pinyin_key(item["title"]))
 
 for dir_name, display_name in GROUP_ORDER:
     if dir_name in groups_by_dir:
