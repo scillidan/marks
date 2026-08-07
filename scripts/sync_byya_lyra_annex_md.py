@@ -65,6 +65,7 @@ def main() -> int:
     target.mkdir(parents=True, exist_ok=True)
 
     text = source.read_text(encoding="utf-8")
+    order_stems = []
     # Strip YAML frontmatter.
     if text.startswith("---"):
         parts = text.split("---", 2)
@@ -94,8 +95,12 @@ def main() -> int:
         content = "\n".join(quote_lines)
         filename = sanitize_filename(author) + ".md"
         (target / filename).write_text(content + "\n", encoding="utf-8")
+        order_stems.append(Path(filename).stem)
         count += 1
 
+    (target / "annex-order.txt").write_text(
+        "\n".join(order_stems) + "\n", encoding="utf-8"
+    )
     print(f"Synced {count} lyra annex markdown files to {target}")
     return 0
 

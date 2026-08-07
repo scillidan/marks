@@ -834,6 +834,21 @@ _zh_cn = groups_by_dir.get("post_zh-cn")
 if _zh_cn:
     _zh_cn.items.sort(key=lambda item: _pinyin_key(item["title"]))
 
+# byya-lyra-annex items follow the original annex.md order when an order file
+# is present (written by sync_byya_lyra_annex_md.py). Fall back to filename sort.
+_lyra_annex = groups_by_dir.get("byya-lyra-annex")
+if _lyra_annex:
+    _order_file = repo_root / "byya-lyra-annex" / "annex-order.txt"
+    if _order_file.exists():
+        _order = {
+            name.strip(): idx
+            for idx, name in enumerate(_order_file.read_text(encoding="utf-8").splitlines())
+            if name.strip()
+        }
+        _lyra_annex.items.sort(
+            key=lambda item: _order.get(Path(item["path"]).stem, float("inf"))
+        )
+
 for dir_name, display_name in GROUP_ORDER:
     if dir_name in groups_by_dir:
         manifest["groups"].append(node_to_dict(groups_by_dir[dir_name]))

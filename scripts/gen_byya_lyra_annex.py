@@ -17,7 +17,7 @@ def generate_typ(content_path, size, font, output_dir):
 #show: lyra-annex-layout.with(size: {add_pt(size)}, font: {font_tuple(font)})
 
 #let _lines = read("../../{content_path.name}").split("\\n")
-#align(center, _lines.filter(l => l != "").join(linebreak()))"""
+#_lines.filter(l => l != "").join(linebreak())"""
 
     typ_path = typs_dir / f"{content_path.stem}.typ"
     typ_path.write_text(content, encoding="utf-8")
