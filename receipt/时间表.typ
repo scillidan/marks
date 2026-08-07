@@ -5,7 +5,7 @@
 #table(stroke: none, inset: 2pt, align: left, columns: 2,
 	[30@s], [菠菜],
 	[40@s], [西兰花],
-	[1@m], [胡萝卜丁],
+	[1@min], [胡萝卜丁],
 )
 #v(.6em)
 [煮]
