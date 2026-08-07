@@ -4,6 +4,12 @@
 
 set dotenv-load
 
+# == entry,part (A6)
+a6 path size="" font="":
+    uv run scripts/gen_a6.py "{{path}}" \
+        {{ if size != "" { "--size " + size } else { "" } }} \
+        {{ if font != "" { "--font \"" + font + "\"" } else { "" } }}
+
 # == post (A4, 2-column)
 a4 path size="" font="":
     uv run scripts/gen_a4.py "{{path}}" \
@@ -15,27 +21,6 @@ a42 path1 path2 size="" font="":
     uv run scripts/gen_a4.py "{{path1}}" --two-column "{{path2}}" \
         {{ if size != "" { "--size " + size } else { "" } }} \
         {{ if font != "" { "--font \"" + font + "\"" } else { "" } }}
-
-# == mark (A6)
-a6 path size="" font="":
-    uv run scripts/gen_a6.py "{{path}}" \
-        {{ if size != "" { "--size " + size } else { "" } }} \
-        {{ if font != "" { "--font \"" + font + "\"" } else { "" } }}
-
-
-# == receipt (A7)
-receipt path size="" font="":
-    uv run scripts/gen_a7_receipt.py "{{path}}" \
-        {{ if size != "" { "--size " + size } else { "" } }} \
-        {{ if font != "" { "--font \"" + font + "\"" } else { "" } }}
-
-# == receipt (A7, rotated 90 degrees, height locked to 74mm)
-receipt-rotate path size="" font="" width="":
-    uv run scripts/gen_a7_receipt.py "{{path}}" \
-        {{ if size != "" { "--size " + size } else { "" } }} \
-        {{ if font != "" { "--font \"" + font + "\"" } else { "" } }} \
-        {{ if width != "" { "--width " + width } else { "" } }} \
-        --rotate
 
 # == BYYA-nineveh (from .md)
 nineveh-md subdir source="":
@@ -57,6 +42,26 @@ lyra subdir size="" font="":
     uv run scripts/gen_byya_lyra.py "{{subdir}}" \
         {{ if size != "" { "--size " + size } else { "" } }} \
         {{ if font != "" { "--font \"" + font + "\"" } else { "" } }}
+
+# == BYYA-lyra-annex (A6 dynamic height)
+lyra-annex path size="" font="":
+    uv run scripts/gen_byya_lyra_annex.py "{{path}}" \
+        {{ if size != "" { "--size " + size } else { "" } }} \
+        {{ if font != "" { "--font \"" + font + "\"" } else { "" } }}
+
+# == receipt (A7)
+receipt path size="" font="":
+    uv run scripts/gen_a7_receipt.py "{{path}}" \
+        {{ if size != "" { "--size " + size } else { "" } }} \
+        {{ if font != "" { "--font \"" + font + "\"" } else { "" } }}
+
+# == receipt (A7, rotated 90 degrees, height locked to 74mm)
+receipt-rotate path size="" font="" width="":
+    uv run scripts/gen_a7_receipt.py "{{path}}" \
+        {{ if size != "" { "--size " + size } else { "" } }} \
+        {{ if font != "" { "--font \"" + font + "\"" } else { "" } }} \
+        {{ if width != "" { "--width " + width } else { "" } }} \
+        --rotate
 
 # == favorite-image (polario frame)
 polario mode image text-first text-second text-third start resize size:

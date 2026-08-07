@@ -108,6 +108,7 @@ BUILD_RULES=(
 	"entry:1:*.md:just a6 {path}:scripts/gen_a6.py"
 	"part:1:*.md:just a6 {path}:scripts/gen_a6.py"
 	"byya-nineveh-annex:1:*.md:just nineveh-annex {path}:scripts/gen_byya_nineveh_annex.py,scripts/byya-nineveh-annex-template.typ"
+	"byya-lyra-annex:1:*.md:just lyra-annex {path}:scripts/gen_byya_lyra_annex.py,scripts/byya-lyra-annex-template.typ"
 	"receipt:1:*.typ:just receipt {path}:scripts/gen_a7_receipt.py,scripts/receipt-template.typ"
 )
 
@@ -332,8 +333,11 @@ if [[ "$BUILD" -eq 1 ]]; then
 				continue
 			fi
 
-			cmd="${template//\{path\}/\"$file\"}"
-			cmd="${cmd//\{dir\}/\"$dir\"}"
+			# Use Python for placeholder substitution so filenames containing '&'
+			# are not misinterpreted by bash parameter expansion. Force UTF-8
+			# output so non-ASCII paths survive on Windows consoles.
+			cmd="$(PYTHONIOENCODING=utf-8 "$PYTHON" -c 'import sys; sys.stdout.reconfigure(encoding="utf-8"); t=sys.argv[1]; p=sys.argv[2]; print(t.replace("{path}", p))' "$template" "\"$file\"")"
+			cmd="$(PYTHONIOENCODING=utf-8 "$PYTHON" -c 'import sys; sys.stdout.reconfigure(encoding="utf-8"); t=sys.argv[1]; d=sys.argv[2]; print(t.replace("{dir}", d))' "$cmd" "\"$dir\"")"
 			log_file="$LOG_DIR/$(sanitize_log_name "$file").log"
 			status=0
 			run_just "$cmd $JUST_JOBS" "$log_file" || status=$?
@@ -584,6 +588,7 @@ def count_items(node):
 # appended after the listed ones in alphabetical order.
 SUBGROUP_ORDER = {
     "byya-nineveh": ["nineveh", "amphissa", "laguna", "jaffa"],
+    "byya-lyra": ["lyra-a", "lyra-b", "orion-a", "annex"],
 }
 
 
@@ -682,6 +687,22 @@ def extract_markdown_h1(md_path):
     return None
 
 
+def extract_byya_lyra_annex_title(md_path):
+    """Return the original title (author/source) from a lyra annex .md file.
+
+    The generated files end with ' [Author]' where the bracketed text is the
+    original, unsanitized title. This lets the sidebar show '&' and ':' that
+    were removed from the filename.
+    """
+    if not md_path.exists():
+        return None
+    text = md_path.read_text(encoding="utf-8")
+    matches = list(re.finditer(r"\[([^\]]+)\]", text))
+    if matches:
+        return matches[-1].group(1).strip()
+    return None
+
+
 groups_by_dir = {}
 manifest_paths = set()
 
@@ -727,20 +748,38 @@ for pdf_path in sorted(repo_root.rglob("_output/pdfs/*.pdf")):
     manifest_paths.add(_site_dir / manifest_path_str)
 
     top_dir = dir_parts[0]
-    if top_dir not in groups_by_dir:
-        groups_by_dir[top_dir] = GroupNode(
-            name=DISPLAY_NAMES.get(top_dir, top_dir),
-            dir=top_dir,
-        )
+    original_top_dir = top_dir
 
-    node = groups_by_dir[top_dir]
-    for part in dir_parts[1:]:
-        if part not in node.subgroups:
-            node.subgroups[part] = GroupNode(
-                name=part,
-                dir=f"{node.dir}/{part}",
+    if top_dir == "byya-lyra-annex":
+        # Attach annex items as a subgroup under BYYA Lyra.
+        top_dir = "byya-lyra"
+        subgroup_name = "annex"
+        if top_dir not in groups_by_dir:
+            groups_by_dir[top_dir] = GroupNode(
+                name=DISPLAY_NAMES.get(top_dir, top_dir),
+                dir=top_dir,
             )
-        node = node.subgroups[part]
+        parent = groups_by_dir[top_dir]
+        if subgroup_name not in parent.subgroups:
+            parent.subgroups[subgroup_name] = GroupNode(
+                name=subgroup_name,
+                dir=f"{top_dir}/{subgroup_name}",
+            )
+        node = parent.subgroups[subgroup_name]
+    else:
+        if top_dir not in groups_by_dir:
+            groups_by_dir[top_dir] = GroupNode(
+                name=DISPLAY_NAMES.get(top_dir, top_dir),
+                dir=top_dir,
+            )
+        node = groups_by_dir[top_dir]
+        for part in dir_parts[1:]:
+            if part not in node.subgroups:
+                node.subgroups[part] = GroupNode(
+                    name=part,
+                    dir=f"{node.dir}/{part}",
+                )
+            node = node.subgroups[part]
 
     title = Path(filename).stem
     source_guess = None
@@ -781,6 +820,13 @@ for pdf_path in sorted(repo_root.rglob("_output/pdfs/*.pdf")):
     # filename sort key; drop it from the sidebar label.
     if dir_parts[0] == "byya-lyra":
         title = re.sub(r"^\d+_", "", title)
+
+    # For byya-lyra-annex entries, restore the original title from the .md body.
+    if original_top_dir == "byya-lyra-annex":
+        md_source = repo_root.joinpath(*dir_parts) / f"{title}.md"
+        extracted_title = extract_byya_lyra_annex_title(md_source)
+        if extracted_title:
+            title = extracted_title
 
     node.items.append({
         "title": title,

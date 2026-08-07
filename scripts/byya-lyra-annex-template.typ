@@ -1,0 +1,5 @@
+#let lyra-annex-layout(doc, size: 8pt, font: ("MonaspiceNe NFM", "Sarasa Mono SC")) = {
+  set page(paper: "a6", height: auto, margin: (x: 4pt, y: 8pt))
+  set text(font: font, size: size)
+  doc
+}
