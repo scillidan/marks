@@ -549,6 +549,7 @@ GROUP_ORDER = [
     ("post_zh-cn", "Post (ZH-CN)"),
     ("chat", "Chat"),
     ("byya-lyra", "BYYA Lyra"),
+    ("byya-lyra-annex", "BYYA Lyra Annex"),
     ("byya-nineveh", "BYYA Nineveh"),
     ("byya-nineveh-annex", "BYYA Nineveh Annex"),
     ("receipt", "Receipt"),
@@ -588,7 +589,6 @@ def count_items(node):
 # appended after the listed ones in alphabetical order.
 SUBGROUP_ORDER = {
     "byya-nineveh": ["nineveh", "amphissa", "laguna", "jaffa"],
-    "byya-lyra": ["lyra-a", "lyra-b", "orion-a", "annex"],
 }
 
 
@@ -750,36 +750,20 @@ for pdf_path in sorted(repo_root.rglob("_output/pdfs/*.pdf")):
     top_dir = dir_parts[0]
     original_top_dir = top_dir
 
-    if top_dir == "byya-lyra-annex":
-        # Attach annex items as a subgroup under BYYA Lyra.
-        top_dir = "byya-lyra"
-        subgroup_name = "annex"
-        if top_dir not in groups_by_dir:
-            groups_by_dir[top_dir] = GroupNode(
-                name=DISPLAY_NAMES.get(top_dir, top_dir),
-                dir=top_dir,
+    if top_dir not in groups_by_dir:
+        groups_by_dir[top_dir] = GroupNode(
+            name=DISPLAY_NAMES.get(top_dir, top_dir),
+            dir=top_dir,
+        )
+
+    node = groups_by_dir[top_dir]
+    for part in dir_parts[1:]:
+        if part not in node.subgroups:
+            node.subgroups[part] = GroupNode(
+                name=part,
+                dir=f"{node.dir}/{part}",
             )
-        parent = groups_by_dir[top_dir]
-        if subgroup_name not in parent.subgroups:
-            parent.subgroups[subgroup_name] = GroupNode(
-                name=subgroup_name,
-                dir=f"{top_dir}/{subgroup_name}",
-            )
-        node = parent.subgroups[subgroup_name]
-    else:
-        if top_dir not in groups_by_dir:
-            groups_by_dir[top_dir] = GroupNode(
-                name=DISPLAY_NAMES.get(top_dir, top_dir),
-                dir=top_dir,
-            )
-        node = groups_by_dir[top_dir]
-        for part in dir_parts[1:]:
-            if part not in node.subgroups:
-                node.subgroups[part] = GroupNode(
-                    name=part,
-                    dir=f"{node.dir}/{part}",
-                )
-            node = node.subgroups[part]
+        node = node.subgroups[part]
 
     title = Path(filename).stem
     source_guess = None
