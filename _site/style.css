@@ -111,13 +111,13 @@ html, body {
   border-width: 0 2px 2px 0;
   border-color: #666;
 }
-.chevron-left {
-  transform: rotate(135deg);
-  margin-left: 2px;
+.chevron-up {
+  transform: rotate(-135deg);
+  margin-top: 2px;
 }
-.chevron-right {
-  transform: rotate(-45deg);
-  margin-left: -2px;
+.chevron-down {
+  transform: rotate(45deg);
+  margin-top: -2px;
 }
 .layout.sidebar-collapsed .sidebar {
   width: 0;
