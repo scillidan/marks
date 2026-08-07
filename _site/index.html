@@ -21,7 +21,11 @@
       </div>
       <div id="toc">Loading…</div>
       <a class="source" href="https://github.com/scillidan/marks" target="_blank" rel="noopener">Source</a>
-      <button id="toggle-sidebar" type="button" aria-expanded="true" aria-controls="sidebar" title="Toggle sidebar"><span class="tri" aria-hidden="true"></span></button>
+      <div class="sidebar-controls" id="sidebar-controls">
+        <button id="prev-pdf" type="button" title="Previous PDF" aria-label="Previous PDF" disabled><span class="chevron chevron-left" aria-hidden="true"></span></button>
+        <button id="toggle-sidebar" type="button" aria-expanded="true" aria-controls="sidebar" title="Toggle sidebar"><span class="tri" aria-hidden="true"></span></button>
+        <button id="next-pdf" type="button" title="Next PDF" aria-label="Next PDF"><span class="chevron chevron-right" aria-hidden="true"></span></button>
+      </div>
       <div id="sidebar-resizer" role="separator" aria-orientation="vertical" title="Drag to resize"></div>
     </aside>
     <main class="viewer">
@@ -41,9 +45,45 @@
     const viewer = document.getElementById('viewer');
     const layout = document.querySelector('.layout');
     const toggleBtn = document.getElementById('toggle-sidebar');
+    const prevBtn = document.getElementById('prev-pdf');
+    const nextBtn = document.getElementById('next-pdf');
     const sidebarEl = document.getElementById('sidebar');
     const resizer = document.getElementById('sidebar-resizer');
     let manifest = { groups: [] };
+    let flatItems = [];
+
+    function flattenItems(groups) {
+      const items = [];
+      for (const group of groups || []) {
+        if (group.items) {
+          for (const item of group.items) {
+            items.push(item);
+          }
+        }
+        if (group.subgroups) {
+          items.push(...flattenItems(group.subgroups));
+        }
+      }
+      return items;
+    }
+
+    function currentItemIndex() {
+      const path = decodeURIComponent(location.hash.slice(1));
+      return flatItems.findIndex(i => i.path === path);
+    }
+
+    function updateNavButtons() {
+      const idx = currentItemIndex();
+      prevBtn.disabled = idx <= 0;
+      nextBtn.disabled = idx >= flatItems.length - 1;
+    }
+
+    function goToDelta(delta) {
+      const idx = currentItemIndex();
+      const targetIdx = idx < 0 ? (delta > 0 ? 0 : -1) : idx + delta;
+      const target = flatItems[targetIdx];
+      if (target) loadPdf(target.path, target.title);
+    }
 
     const SIDEBAR_W_KEY = 'marks.sidebarWidth';
 
@@ -93,6 +133,9 @@
       toggleBtn.setAttribute('aria-expanded', String(!layout.classList.contains('sidebar-collapsed')));
     });
 
+    prevBtn.addEventListener('click', () => goToDelta(-1));
+    nextBtn.addEventListener('click', () => goToDelta(1));
+
     function findItemByPath(groups, path) {
       for (const group of groups) {
         if (group.items) {
@@ -123,6 +166,7 @@
       viewer.setAttribute('src', url);
       updateActive(path);
       history.replaceState(null, '', '#' + encodeURIComponent(path));
+      updateNavButtons();
     }
 
     function renderItem(item) {
@@ -186,6 +230,7 @@
         const res = await fetch('manifest.json');
         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
         manifest = await res.json();
+        flatItems = flattenItems(manifest.groups);
         renderToc();
 
         const hash = decodeURIComponent(location.hash.slice(1));
@@ -195,6 +240,7 @@
             loadPdf(item.path, item.title);
           }
         }
+        updateNavButtons();
       } catch (err) {
         sidebar.innerHTML = `<div class="error-state">Failed to load manifest.json:<br>${err.message}</div>`;
       }

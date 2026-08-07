@@ -61,12 +61,20 @@ html, body {
   padding-bottom: 0;
   min-width: 0;
 }
-#toggle-sidebar {
+.sidebar-controls {
   position: absolute;
   top: 50%;
   right: -11px;
   transform: translateY(-50%);
   z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+#toggle-sidebar,
+#prev-pdf,
+#next-pdf {
   width: 22px;
   height: 22px;
   display: flex;
@@ -79,8 +87,15 @@ html, body {
   cursor: pointer;
   padding: 0;
 }
-#toggle-sidebar:hover {
+#toggle-sidebar:hover,
+#prev-pdf:hover,
+#next-pdf:hover {
   background: #f0f0f0;
+}
+#prev-pdf:disabled,
+#next-pdf:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 #toggle-sidebar .tri {
   width: 0;
@@ -88,6 +103,21 @@ html, body {
   border-right: 7px solid #666;
   border-top: 5px solid transparent;
   border-bottom: 5px solid transparent;
+}
+.chevron {
+  width: 7px;
+  height: 7px;
+  border-style: solid;
+  border-width: 0 2px 2px 0;
+  border-color: #666;
+}
+.chevron-left {
+  transform: rotate(135deg);
+  margin-left: 2px;
+}
+.chevron-right {
+  transform: rotate(-45deg);
+  margin-left: -2px;
 }
 .layout.sidebar-collapsed .sidebar {
   width: 0;
@@ -97,12 +127,16 @@ html, body {
   border-right: none;
   overflow: hidden;
 }
-.layout.sidebar-collapsed #toggle-sidebar {
+.layout.sidebar-collapsed .sidebar-controls {
   position: fixed;
   top: 50%;
   left: 12px;
   right: auto;
   transform: translateY(-50%);
+}
+.layout.sidebar-collapsed #toggle-sidebar,
+.layout.sidebar-collapsed #prev-pdf,
+.layout.sidebar-collapsed #next-pdf {
   border-color: #ccc;
   box-shadow: 0 1px 4px rgb(31 35 40 / 16%);
 }
