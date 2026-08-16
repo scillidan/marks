@@ -1,0 +1,4 @@
+*.jpg
+assets/
+_output/typs/
+_output/*.jpg
