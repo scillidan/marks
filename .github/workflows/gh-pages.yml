@@ -66,6 +66,13 @@ jobs:
         run: |
           uv run scripts/sync_byya_lyra_md.py --source _deps/BYYA-site/content.zh/docs
 
+      - name: Regenerate byya-nineveh typ files from BYYA-site HTML
+        run: |
+          for collection in amphissa jaffa laguna nineveh; do
+            uv run scripts/gen_byya_nineveh_md.py "$collection" \
+              --source _deps/BYYA-site/content.zh/docs --no-compile
+          done
+
       - name: Sync byya-lyra-annex markdown
         run: |
           uv run scripts/sync_byya_lyra_annex_md.py --source _deps/BYYA-site/content.zh/docs/lyra-a/annex.md

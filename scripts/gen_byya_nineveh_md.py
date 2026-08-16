@@ -174,6 +174,11 @@ def main() -> int:
         action="store_true",
         help="overwrite existing typ files when content differs",
     )
+    parser.add_argument(
+        "--no-compile",
+        action="store_true",
+        help="generate typ files and copy images only, skip PDF/JPG output",
+    )
     args = parser.parse_args()
 
     check_dependencies()
@@ -210,6 +215,12 @@ def main() -> int:
 
     print("\nGenerating Typst files...")
     typ_paths = generate_typ_files(slides, output_dir, force=args.force)
+
+    if args.no_compile:
+        print(
+            f"\nDone: {len(typ_paths)} typ files in {output_dir / '_output' / 'typs'}"
+        )
+        return 0
 
     print("\nCompiling PDFs...")
     compile_all(typ_paths, output_dir)
