@@ -1,0 +1,91 @@
+s:
+  short: s
+  long: second
+  zh-cn: 秒
+min:
+  short: min
+  long: minute
+  zh-cn: 分钟
+h:
+  short: h
+  long: hour
+  zh-cn: 小时
+d:
+  short: d
+  long: day
+  zh-cn: 天
+wk:
+  short: wk
+  long: week
+  zh-cn: 周
+mo:
+  short: mo
+  long: month
+  zh-cn: 月
+yr:
+  short: yr
+  long: year
+  zh-cn: 年
+g:
+  short: g
+  long: gram
+  zh-cn: 克
+kg:
+  short: kg
+  long: kilogram
+  zh-cn: 千克
+lb:
+  short: lb
+  long: libra
+  metric-units: 453.59g
+  zh-cn: 磅
+oz:
+  short: oz
+  long: ounce
+  metric-units: 28.35g
+  zh-cn: 盎司
+in:
+  short: in
+  long: inch
+  metric-units: 2.54cm
+  zh-cn: 英寸
+l:
+  short: L
+  long: litre
+  zh-cn: 升
+ml:
+  short: mL
+  long: millilitre
+  zh-cn: 毫升
+qt:
+  short: qt
+  long: quart
+  metric-units: 946.35ml
+  zh-cn: 夸脱
+tsp:
+  short: tsp
+  long: teaspoon
+  zh-cn: 茶匙
+tbsp:
+  short: tbsp
+  long: tablespoon
+  zh-cn: 汤匙
+qs:
+  short: q.s.
+  long: quantum satis
+  zh-cn: 适量
+whole:
+  short: whole
+  zh-cn: 整个
+cup:
+  short: cup
+  zh-cn: 杯
+clove:
+  short: clove
+  zh-cn: 瓣
+stick:
+  short: stick
+  zh-cn: 块
+bunch:
+  short: bunch
+  zh-cn: 小捆
