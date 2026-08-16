@@ -1,0 +1,1 @@
+Bit Rate ⚪码率 ⚫每秒的比特数 相关的编码形式有 可变码率(VBR, Variable Bit Rate),二次编码平均码率(2-pass ABR, 2-pass Average Bit Rate),固定码率(CBR, Constant Bit Rate) ⚫视频方面 固定码率系数(CRF, Constant Rate Factor)的通用值为23 视觉无损使用17 网络流媒体可用29 ⚫音频方面 MP3默认使用CBR OGG使用VBR

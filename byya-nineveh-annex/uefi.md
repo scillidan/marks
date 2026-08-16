@@ -1,0 +1,1 @@
+UEFI ⚪Unified Extensible Firmware Interface ⚪统一可扩展固件接口 ⚫操作系统和平台固件间的一套软件界面的规范 ⚫用于替代个人电脑开机阶段内 初始化硬件的软件BIOS(Basic Input/Output System 基础输入输出系统) ⚫该标准中的GPT(GUID(Globally Unique Identifier) Partition Table 全局唯一标识符分区表) 一个实体硬盘分区表的结构布局标准 就用来替代旧启动式MBR(Master Boot Record 主引导记录)

@@ -1,0 +1,1 @@
+ttf ⚪truetype font ⚫常见的字体格式 ⚫可嵌入数字版权管理(drm, digital rights management)标签 ⚫排印中 字体(typeface)指单组或多组的字模(font)构成的集合 通常含特定的风格,字重,斜体,装饰,字符集,用途,设计师,铸字厂等特征 ⚫其他格式如 otf(opentype font)用以替代ttf但扩展名存在混用 支持多平台和扩展字符集 eot(embedded open type)只有ie支持 woff(web open font format)受主流的浏览器支持 svg(scalable vector graphics font)由svg元素定义
