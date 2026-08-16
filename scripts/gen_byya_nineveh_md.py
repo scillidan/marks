@@ -6,6 +6,7 @@
 # ]
 # ///
 import argparse
+import json
 import os
 import re
 import shutil
@@ -66,33 +67,58 @@ def parse_slides(md_path):
     return slides
 
 
-def generate_typ_files(slides, output_dir):
+def load_layout_overrides(output_dir):
+    path = output_dir.parent / "layout.json"
+    if not path.exists():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as e:
+        sys.exit(f"Error: cannot read layout.json: {e}")
+    if not isinstance(data, dict):
+        sys.exit("Error: layout.json must be a JSON object")
+    return data
+
+
+def generate_typ_files(slides, output_dir, force=False):
     typs_dir = output_dir / "_output" / "typs"
     typs_dir.mkdir(parents=True, exist_ok=True)
 
-    created = skipped = 0
+    overrides = load_layout_overrides(output_dir)
+    subdir = output_dir.name
+
+    created = skipped = updated = 0
     typ_paths = []
     for i, s in enumerate(slides):
         cap = f", caption: [{s['p']}]" if s["p"] else ""
+        ov = overrides.get(f"{subdir}/{Path(s['img']).stem}", {})
+        force_frac = ov.get("force-frac", 0.5)
+        top = ov.get("top", 4)
+        bottom = ov.get("bottom", 4)
         content = f"""#import "../../../../scripts/byya-nineveh-template.typ": *
-#show: nineveh-layout.with(size: 8pt, top: 4%, bottom: 4%)
+#show: nineveh-layout.with(size: 8pt, top: {top}%, bottom: {bottom}%)
 
 #align(center + horizon, oasis-align(
-  int-dir: -1,
+  force-frac: {force_frac},
   [#figure(image("../../assets/{s["img"]}"){cap})],
   [#figure(balance([{s["h4"] or s["p"]}]))],
 ))
 """
         typ_path = typs_dir / f"{i + 1:02d}_{Path(s['img']).stem}.typ"
         if typ_path.exists():
-            skipped += 1
+            if force and typ_path.read_text(encoding="utf-8") != content:
+                typ_path.write_text(content, encoding="utf-8")
+                updated += 1
+            else:
+                skipped += 1
         else:
             typ_path.write_text(content, encoding="utf-8")
             created += 1
         typ_paths.append(typ_path)
 
     print(
-        f"  {created} created, {skipped} skipped ({len(typ_paths)} total) in {typs_dir}"
+        f"  {created} created, {updated} updated, {skipped} skipped "
+        f"({len(typ_paths)} total) in {typs_dir}"
     )
     return typ_paths
 
@@ -143,6 +169,11 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("subdir")
     parser.add_argument("--source")
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="overwrite existing typ files when content differs",
+    )
     args = parser.parse_args()
 
     check_dependencies()
@@ -178,7 +209,7 @@ def main() -> int:
     copy_images(slides, output_dir, image_source)
 
     print("\nGenerating Typst files...")
-    typ_paths = generate_typ_files(slides, output_dir)
+    typ_paths = generate_typ_files(slides, output_dir, force=args.force)
 
     print("\nCompiling PDFs...")
     compile_all(typ_paths, output_dir)

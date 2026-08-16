@@ -23,9 +23,10 @@ a42 path1 path2 size="" font="":
         {{ if font != "" { "--font \"" + font + "\"" } else { "" } }}
 
 # == BYYA-nineveh (from .md)
-nineveh-md subdir source="":
+nineveh-md subdir source="" force="":
     uv run scripts/gen_byya_nineveh_md.py "{{subdir}}" \
-        {{ if source != "" { "--source \"" + source + "\"" } else { "" } }}
+        {{ if source != "" { "--source \"" + source + "\"" } else { "" } }} \
+        {{ if force != "" { "--force" } else { "" } }}
 
 # == BYYA-nineveh (from .typ)
 nineveh-typ path:
