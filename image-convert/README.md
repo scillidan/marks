@@ -6,10 +6,8 @@ just image-convert portrait light "imagemagick_paint" "demo/assets/Edward John P
 just image-convert portrait light "imagemagick_sketch" "demo/assets/Edward John Poynter_Pea Blossoms, 1890.jpg" "magick $1 -colorspace gray -sketch 0x10+120 $2"
 just image-convert landscape light "imagemagick_colors8" "demo/assets/514_Blade Runner 2049_2017.png" "magick $1 -colors 8 -despeckle $2"
 just image-convert landscape light "imagemagick_colors16" "demo/assets/514_Blade Runner 2049_2017.png" "magick $1 -colors 16 -despeckle $2"
-```
-
-```sh
 just image-convert landscape light "imagemagick_threshold" "demo/assets/20200518_12_34_59.jpg" "magick $1 -threshold 60% -despeckle -transparent white $2"
+just image-convert portrait light "imagemagick_annotate" "demo/assets/Edward John Poynter_Pea Blossoms, 1890.jpg" "magick $1 -undercolor #00000050 -fill #FFFFFF -gravity SouthWest -font ""C:/Users/User/Scoop/apps/Sarasa-Term-SC-Nerd/current/SarasaTermSCNerd-Regular.ttf"" -pointsize 20 -interline-spacing 2 -annotate +5+5 \"Pea Blossoms (1890),\n  Edward John Poynter\" $2"
 ```
 
 ```sh
