@@ -21,8 +21,8 @@
 #let title-block = pad(top: 20pt, align(center, text(size: 10pt)[
   Typst Package: bulb \
   Version: 0.1.0 \
-  Author: Miet Peeters \
-  Sample Image: ゲン助, _有限_ (2020)
+  Author: Edward John Poynter \
+  Sample Image: Pea Blossoms (1890)
 ]))
 
 // Page 1: 3x2 thumbnail grid + title, sized so everything fits the page.
