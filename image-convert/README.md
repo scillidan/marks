@@ -8,6 +8,8 @@ just image-convert landscape light "imagemagick_colors8" "demo/assets/514_Blade 
 just image-convert landscape light "imagemagick_colors16" "demo/assets/514_Blade Runner 2049_2017.png" "magick $1 -colors 16 -despeckle $2"
 just image-convert landscape light "imagemagick_threshold" "demo/assets/20200518_12_34_59.jpg" "magick $1 -threshold 60% -despeckle -transparent white $2"
 just image-convert portrait light "imagemagick_annotate" "demo/assets/Edward John Poynter_Pea Blossoms, 1890.jpg" "magick $1 -undercolor #00000050 -fill #FFFFFF -gravity SouthWest -font ""C:/Users/User/Scoop/apps/Sarasa-Term-SC-Nerd/current/SarasaTermSCNerd-Regular.ttf"" -pointsize 20 -interline-spacing 2 -annotate +5+5 \"Pea Blossoms (1890),\n  Edward John Poynter\" $2"
+# https://brontosaurusrex.github.io/2019/08/12/Halftone,-Imagemagick
+just image-convert portrait light "imagemagick_halftone" "demo/assets/Edward John Poynter_Pea Blossoms, 1890.jpg" "magick $1 -level 0x70% -set option:distort:viewport '%wx%h+0+0' -colorspace CMYK -separate null: ( -size 2x2 xc: ( +clone -negate ) +append ( +clone -negate ) -append ) -virtual-pixel tile -filter gaussian ( +clone -distort SRT 60 ) +swap ( +clone -distort SRT 30 ) +swap ( +clone -distort SRT 45 ) +swap ( +clone -distort SRT 0 )  +swap +delete -compose Overlay -layers composite -set colorspace CMYK -combine -colorspace RGB $2"
 ```
 
 ```sh
