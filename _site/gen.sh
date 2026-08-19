@@ -101,7 +101,7 @@ fi
 # NOTE: byya-nineveh is handled separately below (its .typ files live under
 # _output/typs/, which the main BUILD_RULES find loop prunes via -name _output).
 BUILD_RULES=(
-	"demo:1:*-demo.typ:mkdir -p \$(dirname {path})/_output/pdfs && typst compile --root {dir} {path} \$(dirname {path})/_output/pdfs/\$(basename {path} .typ).pdf:demo/assets,demo/codly-template.typ,demo/nineveh-template.typ,demo/polario-frame-template.typ,demo/receipt-template.typ,demo/tooltip-template.typ"
+	"typst-demo:1:*-demo.typ:mkdir -p \$(dirname {path})/_output/pdfs && typst compile --root {dir} {path} \$(dirname {path})/_output/pdfs/\$(basename {path} .typ).pdf:typst-demo/assets,typst-demo/codly-template.typ,typst-demo/nineveh-template.typ,typst-demo/polario-frame-template.typ,typst-demo/receipt-template.typ,typst-demo/tooltip-template.typ"
 	"post:99:*.md:just a4 {path}:scripts/gen_a4.py"
 	"post_zh-cn:99:*.md:just a4 {path}:scripts/gen_a4.py"
 	"chat:1:*.md:just a6 {path}:scripts/gen_a6.py"
@@ -109,17 +109,17 @@ BUILD_RULES=(
 	"part:1:*.md:just a6 {path}:scripts/gen_a6.py"
 	"byya-nineveh-annex:1:*.md:just nineveh-annex {path}:scripts/gen_byya_nineveh_annex.py,scripts/byya-nineveh-annex-template.typ"
 	"byya-lyra-annex:1:*.md:just lyra-annex {path}:scripts/gen_byya_lyra_annex.py,scripts/byya-lyra-annex-template.typ"
-	"latex-annex:1:*.md:just latex-annex {path}:scripts/gen_latex_annex.py,scripts/latex-annex-template.typ"
+	"ctan-annex:1:*.md:just ctan-annex {path}:scripts/gen_ctan_annex.py,scripts/ctan-annex-template.typ"
 	"receipt:1:*.typ:just receipt {path}:scripts/gen_a7_receipt.py,scripts/receipt-template.typ"
-	"latex:1:*.tex:just latex {path}:scripts/gen_latex.py"
+	"ctan:1:*.tex:just ctan {path}:scripts/gen_ctan.py"
 )
 
 # Paths to exclude from both PDF builds and the generated manifest.
-# Each entry is a path prefix relative to the repo root (e.g., "chat/latex/").
+# Each entry is a path prefix relative to the repo root (e.g., "chat/ctan/").
 # Set via .env or environment variable:
-#   GEN_EXCLUDE="chat/latex/;post/laws-of-software-engineering/"
+#   GEN_EXCLUDE="chat/ctan/;post/laws-of-software-engineering/"
 # Entries may be separated by spaces and/or semicolons:
-#   GEN_EXCLUDE="chat/latex/;post/laws-of-software-engineering/"
+#   GEN_EXCLUDE="chat/ctan/;post/laws-of-software-engineering/"
 EXCLUDE_PATHS=()
 
 # Merge any extra exclusions from .env / environment.
@@ -471,7 +471,7 @@ pdfs_dir = _site_dir / "pdfs"
 manifest_path = _site_dir / "manifest.json"
 
 # Paths to exclude from the generated manifest and _site/pdfs copy.
-# Each entry is a path prefix relative to the repo root (e.g., "chat/latex/").
+# Each entry is a path prefix relative to the repo root (e.g., "chat/ctan/").
 EXCLUDE_PATHS = json.loads(os.environ.get("_SITE_EXCLUDE_PATHS_JSON", "[]"))
 
 # Optional per-item sidebar title overrides for byya-nineveh entries.
@@ -492,7 +492,6 @@ manifest = {
 }
 
 GROUP_ORDER = [
-    ("demo", "Demo"),
     ("entry", "Entry"),
     ("part", "Part"),
     ("post", "Post"),
@@ -505,8 +504,9 @@ GROUP_ORDER = [
     ("receipt", "Receipt"),
     ("favorite-image", "Favorite Image"),
     ("image-convert", "Image Convert"),
-    ("latex", "LaTeX"),
-    ("latex-annex", "LaTeX Annex"),
+    ("typst-demo", "Typst Demo"),
+    ("ctan", "CTAN"),
+    ("ctan-annex", "CTAN Annex"),
 ]
 
 DISPLAY_NAMES = dict(GROUP_ORDER)

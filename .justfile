@@ -90,12 +90,12 @@ image-convert-norun mode theme output image="" commands="":
         {{ if commands != "" { "--commands '" + commands + "'" } else { "" } }} \
         --output '{{output}}'
 
-# == latex (LaTeX cards; add latex/<stem>.tex + matching <stem>.jpg to compile)
-latex path:
-    uv run scripts/gen_latex.py --compile "{{path}}"
+# == ctan (CTAN cards; add ctan/<stem>.tex + matching <stem>.jpg to compile)
+ctan path:
+    uv run scripts/gen_ctan.py --compile "{{path}}"
 
-# == latex-annex (A6 dynamic height)
-latex-annex path size="" font="":
-    uv run scripts/gen_latex_annex.py "{{path}}" \
+# == ctan-annex (A6 dynamic height)
+ctan-annex path size="" font="":
+    uv run scripts/gen_ctan_annex.py "{{path}}" \
         {{ if size != "" { "--size " + size } else { "" } }} \
         {{ if font != "" { "--font \"" + font + "\"" } else { "" } }}
