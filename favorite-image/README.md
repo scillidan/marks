@@ -11,7 +11,6 @@ just polario landscape "favorite-image/assets/Wadjet.jpg" "Felix Riaño" "2025.1
 just polario landscape "favorite-image/assets/Truck stop 117.jpg" "sparkle7479" "2024.8.15" "Truck stop 117" "(0%, 5%)" 100% "(100%, 100%)"
 just polario landscape "favorite-image/assets/Bunker.jpg" "ArseniXC" "2012.12.12" "Bunker" "(6%, 0%)" 100% "(100%, 100%)"
 just polario portrait "favorite-image/assets/風船の旅立ち.jpg" "しまざきジョゼ" "2016.1.2" "風船の旅立ち [气球的旅行]" "(0%, 6%)" 100% "(100%, 100%)"
-just polario landscape "favorite-image/assets/2767467.jpg" "kukka" "(2017.6.25)" "(ID 2767467)" "(5%, 0%)" 100% "(100%, 100%)"
 just polario landscape "favorite-image/assets/Wild Night Club.jpg" "ArseniXC" "2016.10.19" "Wild Night Club" "(4%, 0%)" 100% "(100%, 100%)"
 just polario landscape "favorite-image/assets/長門さん.jpg" "nanabuluku" "2017.10.1" "長門さん [长门有希]" "(5%, 0%)" 100% "(100%, 100%)"
 just polario landscape "favorite-image/assets/egarots yoT.png" "かぐまにくす(kgmnx)" "2020.5.29" "egarots yoT" "(6%, 0%)" 100% "(100%, 100%)"
