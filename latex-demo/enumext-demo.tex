@@ -1,0 +1,21 @@
+\documentclass{article}
+%% https://www.ctan.org/pkg/enumext
+\usepackage{enumext}
+
+\begin{document}
+
+\begin{enumext*}[widest=10,columns=4]
+\item The first
+\item* The second
+\item The third
+\item The fourth
+\item(3)* The fifth item is way too long for this and needs three columns
+\item The sixth
+\item The seventh
+\item(2)[X] The eighth item is way too long for this and needs two columns
+  (\the\itemwidth)
+\item The ninth
+\item[Z] The tenth (\the\itemwidth)
+\end{enumext*}
+
+\end{document}

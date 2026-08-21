@@ -1,0 +1,66 @@
+% !TeX program = xelatex
+
+\documentclass{article}
+\usepackage{fontspec}
+%% https://www.ctan.org/pkg/polyglossia
+\usepackage{polyglossia}
+\setdefaultlanguage{chinese}
+\setotherlanguage{english}
+% Package noto, notoCJKsc
+\setmainfont{Sarasa Mono SC}[Script=CJK]
+\newfontfamily\chinesefont{Sarasa Mono SC}[Script=CJK]
+% Package arphic-ttf
+%\setmainfont{bkai00mp.ttf}[Script=CJK]% ZenKai-Medium
+%\setmainfont{bsmi00lp.ttf}[Script=CJK]% ShanHeiSun-Light
+%\setmainfont{gbsn00lp.ttf}[Script=CJK]% BousungEG-Light-GB
+%\setmainfont{gkai00mp.ttf}[Script=CJK]% GBZenKai-Medium
+\begin{document}
+\parindent0em
+
+\begin{center}
+  \abstractname
+\end{center}
+\begin{english}
+  This package provides an alternative to Babel for users of XeLaTeX
+  and LuaLaTeX. This version includes support for over 80 different
+  languages, some of which in different regional or national
+  varieties, or using a different writing system.
+  \footnote{%
+  This is a footnote.}
+
+  This is today: \today
+\end{english}
+
+\section{(简体中文, Simplified Chinese)}
+
+该软件包为使用XeLaTeX和LuaLaTeX的用户提供了Babel的替代方案。此版本支持超过80种不同的语言，其中一些具有不同的区域或国家变体，或使用不同的书写系统。
+
+\today
+
+localnumeral: \localnumeral{1863}, chinesenumeral: \chinesenumeral{1863}
+
+\renewfontfamily\chinesefont{Sarasa Mono SC}[Script=CJK]
+\begin{chinese}[variant=traditional,numerals=chinese]
+
+  \section{(繁體中文, Traditional Chinese)}
+
+  該軟體包為使用XeLaTeX和LuaLaTeX的用戶提供了Babel的替代方案。此版本支持超過80種不同的語言，其中一些具有不同的區域或國家變體，或使用不同的書寫系統。
+
+  \today
+
+  localnumeral: \localnumeral{1863}, chinesenumeral: \chinesenumeral{1863}
+
+\end{chinese}
+
+\section{numeral}
+\begin{english}
+
+  numerals=arabic: \textchinese[numerals=arabic]{\localnumeral{1863},
+  \chinesenumeral{1863}}
+
+  numerals=chinese:
+  \textchinese[numerals=chinese]{\localnumeral{1863}, \chinesenumeral{1863}}
+
+\end{english}
+
+\end{document}

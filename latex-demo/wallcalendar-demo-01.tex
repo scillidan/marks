@@ -1,0 +1,43 @@
+% !TeX program = lualatex
+%% https://github.com/profound-labs/wallcalendar/blob/master/doc/examples/cal-year-planner-grid.tex
+%% == dependence
+%% https://github.com/googlefonts/noto-emoji/blob/main/fonts/NotoColorEmoji.ttf
+%% == command
+%% lualatex file.tex
+%% (Bugs, 2026-05-05)
+\documentclass[
+  year=2026,
+  % eventsCsv=./data/holidays-compact-2026.csv,
+  %% https://www.timeanddate.com/moon/phases/
+  %% https://github.com/isaacbernat/moon-data
+  % moonsCsv=./data/moonphases-2026.csv,
+  markDefaultsCsv=./data/mark_defaults.csv,
+  dateAnnotations=false,
+  a4PaperLandscape,
+  hMargin=5mm,
+  topMargin=5mm,
+  bottomMargin=5mm,
+]{wallcalendar}
+
+\makeatletter
+\usepackage{fontspec}
+\defaultfontfeatures{Ligatures=TeX}
+\setmainfont{Sarasa Mono SC}
+\newfontfamily\AlegreyaSans{Sarasa Mono SC}
+\newfontfamily\AlegreyaSansExtraBold{Sarasa Mono SC}
+\newfontfamily\EmojiFont{Sarasa Mono SC}[Renderer=Harfbuzz]
+\newcommand\emoji[1]{{\EmojiFont\selectfont #1}}
+
+\renewcommand\plannerGridYearNumberFont{\AlegreyaSans}
+\renewcommand\plannerGridMonthFont{\AlegreyaSansExtraBold}
+\renewcommand\plannerGridNotesFont{\AlegreyaSans}
+\renewcommand\monthMarkFmt{\fontsize{7}{7}\selectfont\color{textbody}}
+\renewcommand\plannerMoonSize{\@setfontsize\plannerMoonSize{13}{13}}
+\makeatother
+
+\begin{document}
+
+\mbox{}
+\YearPlannerLandscapeGridPage
+
+\end{document}

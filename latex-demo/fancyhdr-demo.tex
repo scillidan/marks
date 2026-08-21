@@ -1,0 +1,19 @@
+\documentclass{article}
+%% https://www.ctan.org/pkg/fancyhdr
+\usepackage{fancyhdr}
+\usepackage{lipsum}
+
+\begin{document}
+
+\fancyhf{}
+\fancyhead[L]{Left Header}
+\fancyhead[C]{Center Header}
+\fancyhead[R]{Right Header}
+\fancyfoot[L]{Page \thepage}
+\fancyfoot[C]{}
+\fancyfoot[R]{\today}
+\pagestyle{fancy}
+
+\lipsum[1-2]
+
+\end{document}

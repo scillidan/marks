@@ -1,0 +1,23 @@
+\documentclass[twoside,10pt,ragged]{article}
+\usepackage[a4paper,bindingoffset=3mm,left=20mm,textwidth=110mm,
+  marginparsep=10mm,marginparwidth=55mm,top=20mm,bottom=20mm,
+headsep=\baselineskip,footskip=2\baselineskip,includeall]{geometry}
+\usepackage[utf8]{inputenc}\usepackage[T1]{fontenc}
+%% https://www.ctan.org/pkg/sidenotesplus
+%% == references
+%% https://github.com/anton-vrba/sidenotesplus/blob/main/tests-sidenoteplus.tex
+\usepackage[alerton]{sidenotesplus}
+\usepackage[svgnames,dvipsnames]{xcolor}
+\usepackage{listings}
+\lstset{basicstyle=\sffamily,lineskip=0pt,aboveskip=3pt,belowskip=0pt}
+
+\begin{document}
+
+Here we have three \sidenote<-15pt>{\textsf{\upshape\textbackslash sidenote<-15pt>} Test up}\sidenote!Blue!{\textsf{\upshape\textbackslash sidenote!Blue!} Test colour}\sidenote|-12mm|{\textsf{\upshape\textbackslash sidenote|-12mm|} but cannot float past \textsuperscript d above} and the commas are inserted automatically between the text markers. But, if a line break is between the two \verb"\sidenote " commands, then that requires a \% sign before the line break.
+
+Side notes can be placed without \sidenotetext*|-20.pt|{A sidenotetext without a mark. Also testing if the command \emph{sidepar} works.
+\sidepar And here we have a new paragraph. And here we have a new paragraph. And here we have a new paragraph} references by using the \verb"\sidenote*" option
+
+The command \verb"\sidealert" provides a temporary margin notes rendered in red or by the user’s defined \verb"!colour!". The alert mark\sidealert{This paragraph needs to be expanded} has zero width so it does not alter the main text layout and is also rendered in colour The package option \verb"alerton" needs to be specified in the document preamble, if omitted the alerts are not printed.
+
+\end{document}

@@ -1,0 +1,63 @@
+\documentclass{article}
+\usepackage{lipsum}
+%% https://www.ctan.org/pkg/responsive
+\usepackage{responsive}
+
+\begin{document}
+
+\noindent
+\fbox{
+  \begin{minipage}{8cm}
+    \setsizes[38]{28}
+    \huge huge \\
+    \large large \\
+    \normalsize normal \\
+    \scriptsize scriptsize
+  \end{minipage}
+}
+\fbox{
+  \begin{minipage}{4cm}
+    \mediaquery{min-textwidth=3.9cm}{
+      media query matched
+      \ResponsiveSetup{scale=tetratonic}
+      \setsizes[38]{28}
+    }{media query not matched}
+    \huge huge \\
+    \large large \\
+    \normalsize normal \\
+    \scriptsize scriptsize
+  \end{minipage}
+}
+\noindent
+\fbox{
+  \begin{minipage}{4cm}
+    \ResponsiveSetup{scale=tritonic}
+    \setsizes[38]{28}
+    \huge huge \\
+    \large large \\
+    \normalsize normal \\
+    \scriptsize scriptsize
+  \end{minipage}
+}
+\fbox{
+  \begin{minipage}{4cm}
+    \ResponsiveSetup{scale=heptatonic}
+    \setsizes[38]{28}
+    \huge huge \\
+    \large large \\
+    \normalsize normal \\
+    \scriptsize scriptsize
+  \end{minipage}
+}
+\fbox{
+  \begin{minipage}{4cm}
+    \ResponsiveSetup{number=10,ratio=6}
+    \setsizes[38]{28}
+    \huge huge \\
+    \large large \\
+    \normalsize normal \\
+    \scriptsize scriptsize
+  \end{minipage}
+}
+
+\end{document}

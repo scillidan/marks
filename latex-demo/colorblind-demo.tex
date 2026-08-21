@@ -1,0 +1,26 @@
+\documentclass{article}
+\usepackage{xcolor}
+\usepackage{soul}
+%% https://www.ctan.org/pkg/colorblind
+%% == reference
+%% https://github.com/simon-pfahler/colorblind/blob/main/colorblind_doc.tex
+\usepackage[keep-defaults, Tol, OkabeIto, pgf]{colorblind}
+
+\newcommand\colorblind{\textbf{colorblind}}
+\newcommand\hlc[2][T-Q-PH4]{{
+    \colorlet{foo}{#1}
+  \sethlcolor{foo}\hl{#2}}
+}
+
+\begin{document}
+
+\hlc[T-Q-B1]{blue} \\
+\hlc[T-Q-B2]{cyan} \\
+\hlc[T-Q-B3]{green} \\
+\hlc[T-Q-B4]{yellow} \\
+\hlc[T-Q-B5]{red} \\
+\hlc[T-Q-B6]{violet} \\
+\hlc[T-Q-B0]{gray}
+
+\end{document}
+

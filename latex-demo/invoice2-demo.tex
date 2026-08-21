@@ -1,0 +1,13 @@
+\documentclass{article}
+%% https://www.ctan.org/pkg/invoice2
+\usepackage{invoice2}
+
+\begin{document}
+
+\begin{invoice}[currency-symbol={CHY}, currency-in-header]
+  \invoicesingleitem{Ignition!}{4087.99}
+  \invoicesingleitem{The Art of Computer Programming 1--4}{162.99}
+  \invoicesingleitem{The TeXbook}{55.69}
+\end{invoice}
+
+\end{document}
