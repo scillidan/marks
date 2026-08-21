@@ -36,7 +36,20 @@ jobs:
             scripts/*.py
             .justfile
 
-      - run: sudo apt-get update && sudo apt-get install -y ghostscript imagemagick ffmpeg texlive-xetex texlive-latex-extra texlive-lang-chinese
+      # TeX Live from apt (Ubuntu 24.04 ships TeX Live 2023) is too old for
+      # some latex-demo packages (colorblind, enumext, fontawesome7 were added
+      # after 2023), so install the latest TeX Live via install-tl/tlmgr.
+      - uses: zauguin/install-texlive@f5e7d0b117035fff797d4392ea94131747e03d60  # v4
+        with:
+          packages: |
+            scheme-basic
+            collection-xetex
+            collection-luatex
+            collection-latexextra
+            collection-fonts-extra
+            collection-langchinese
+
+      - run: sudo apt-get update && sudo apt-get install -y ghostscript imagemagick ffmpeg qpdf
 
       - uses: ./.github/actions/install-fonts
         with:
