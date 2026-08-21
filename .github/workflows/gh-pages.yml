@@ -39,8 +39,11 @@ jobs:
       # TeX Live from apt (Ubuntu 24.04 ships TeX Live 2023) is too old for
       # some latex-demo packages (colorblind, enumext, fontawesome7 were added
       # after 2023), so install the latest TeX Live via install-tl/tlmgr.
-      - uses: zauguin/install-texlive@f5e7d0b117035fff797d4392ea94131747e03d60  # v4
+      - uses: zauguin/install-texlive@6671d0c62046c7e349fe154d5208fe746b07e037  # v4.4.0
         with:
+          # Bump this whenever the TeX Live installation needs to be rebuilt
+          # from scratch (e.g. after a transient fmtutil failure or stale cache).
+          cache_version: 1
           packages: |
             scheme-basic
             collection-xetex
