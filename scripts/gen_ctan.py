@@ -24,6 +24,24 @@ PROJECT_ROOT = SCRIPT_DIR.parent.resolve()
 IMAGE_DIR_ENV = "CTAN_SOURCE"
 IMAGE_DIR_FALLBACK = PROJECT_ROOT / "ctan" / "assets"
 
+IMAGE_EXTENSIONS = (".jpg", ".jpeg", ".png", ".pdf")
+
+
+def resolve_image(image_dir, stem):
+    for ext in IMAGE_EXTENSIONS:
+        candidate = image_dir / f"{stem}{ext}"
+        if candidate.exists():
+            return candidate
+    return None
+
+
+def build_imgdir_content(image_dir):
+    cdn_dir = image_dir.as_posix().rstrip("/") + "/"
+    return (
+        f"\\providecommand{{\\CDNImageDir}}{{{cdn_dir}}}\n"
+        "\\graphicspath{{\\CDNImageDir}}\n"
+    )
+
 
 def resolve_image_dir():
     env = os.environ.get(IMAGE_DIR_ENV)
@@ -55,13 +73,16 @@ def compile_tex(tex_path, fail_on_error=True):
         )
 
     image_stem = tex_path.stem
-    image_path = image_dir / f"{image_stem}.jpg"
-    if not image_path.exists():
-        print(f"✗ {image_path.name} not found in {image_dir}; skipping compile")
+    image_path = resolve_image(image_dir, image_stem)
+    if image_path is None:
+        print(
+            f"✗ {image_stem} (jpg/jpeg/png/pdf) not found in {image_dir}; "
+            "skipping compile"
+        )
         return None
 
     imgdir_path = out_dir / "imgdir.tex"
-    imgdir_content = f"\\providecommand{{\\CDNImageDir}}{{{image_dir.as_posix().rstrip('/') + '/'}}}\n"
+    imgdir_content = build_imgdir_content(image_dir)
     if (
         not imgdir_path.exists()
         or imgdir_path.read_text(encoding="utf-8") != imgdir_content
@@ -107,10 +128,7 @@ def compile_all(out_dir, jobs=None):
         sys.exit(f"✗ Cannot resolve image dir. Set {IMAGE_DIR_ENV}")
     imgdir = out_dir / "_output" / "imgdir.tex"
     imgdir.parent.mkdir(parents=True, exist_ok=True)
-    imgdir.write_text(
-        f"\\providecommand{{\\CDNImageDir}}{{{image_dir.as_posix().rstrip('/') + '/'}}}\n",
-        encoding="utf-8",
-    )
+    imgdir.write_text(build_imgdir_content(image_dir), encoding="utf-8")
     jobs = jobs or (os.cpu_count() or 4)
     with concurrent.futures.ThreadPoolExecutor(max_workers=jobs) as ex:
         results = list(ex.map(lambda p: compile_tex(p, fail_on_error=False), tex_files))
