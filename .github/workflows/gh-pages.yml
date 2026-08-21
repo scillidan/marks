@@ -36,24 +36,13 @@ jobs:
             scripts/*.py
             .justfile
 
-      - run: sudo apt-get update && sudo apt-get install -y ghostscript ffmpeg texlive-xetex texlive-latex-extra texlive-lang-chinese imagemagick inkscape
+      - run: sudo apt-get update && sudo apt-get install -y ghostscript imagemagick ffmpeg texlive-xetex texlive-latex-extra texlive-lang-chinese
 
       - uses: ./.github/actions/install-fonts
         with:
           manifests: |
             https://raw.githubusercontent.com/scillidan/scoop-pile/master/bucket/Sarasa-Mono-SC.json
             https://raw.githubusercontent.com/matthewjberger/scoop-nerd-fonts/master/bucket/Monaspace-NF-Mono.json
-
-      - name: Make pagelayoutapi available on PATH
-        run: |
-          script=$(find /usr/share/texlive -name pagelayoutapi -type f 2>/dev/null | head -n 1)
-          if [[ -n "$script" ]]; then
-            chmod +x "$script"
-            sudo ln -sf "$script" /usr/local/bin/pagelayoutapi
-          else
-            echo "pagelayoutapi script not found in /usr/share/texlive"
-            exit 1
-          fi
 
       - name: Fetch cdn_image_latex images for ctan/
         run: |
