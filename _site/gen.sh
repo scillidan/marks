@@ -505,6 +505,7 @@ GROUP_ORDER = [
     ("favorite-image", "Favorite Image"),
     ("image-convert", "Image Convert"),
     ("typst-demo", "Typst Demo"),
+    ("latex-demo", "LaTeX Demo"),
     ("ctan", "CTAN"),
     ("ctan-annex", "CTAN Annex"),
 ]
@@ -770,18 +771,6 @@ for pdf_path in sorted(repo_root.rglob("_output/pdfs/*.pdf")):
         "path": manifest_path_str,
         "source": Path(source_guess).as_posix() if source_guess else None,
     })
-
-# Merge LaTeX Demo items into CTAN Annex so they appear directly under it
-# instead of as a nested subgroup.
-if "latex-demo" in groups_by_dir:
-    latex_node = groups_by_dir.pop("latex-demo")
-    if "ctan-annex" not in groups_by_dir:
-        groups_by_dir["ctan-annex"] = GroupNode(
-            name=DISPLAY_NAMES.get("ctan-annex", "ctan-annex"),
-            dir="ctan-annex",
-        )
-    ctan_annex_node = groups_by_dir["ctan-annex"]
-    ctan_annex_node.items = latex_node.items + ctan_annex_node.items
 
 # Post (ZH-CN) items are sorted by the pinyin of their title (ascending).
 # Chinese titles are converted to pinyin with the pypinyin library; the mixed
