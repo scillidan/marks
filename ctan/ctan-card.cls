@@ -7,7 +7,6 @@
 
 \RequirePackage{graphicx}
 \RequirePackage{xcolor}
-\RequirePackage{adjustbox}
 \RequirePackage{fontspec}
 \RequirePackage{xeCJK}
 \RequirePackage{hyperref}
@@ -58,7 +57,7 @@
   % Measure the natural height of the background image.
   \setbox2=\hbox{\ctan@includeimage[width=\textwidth]{\CardImage}}%
   \setlength{\ctan@imgheight}{\ht2}%
-  % Measure the text block so we know how much of the image to clip.
+  % Measure the text block so we know how much space to reserve at the bottom.
   \setbox3=\vbox{%
     \hsize=\textwidth
     \vspace*{5pt}%
@@ -74,14 +73,18 @@
     \vspace*{5pt}%
   }%
   \setlength{\ctan@txtblockheight}{\dimexpr\ht3+\dp3\relax}%
-  % Compose the final page: full image, then a clipped copy with the text block
-  % overlaid at the bottom.  Links are built inline here (not reused from box3).
+  % Compose the final page: full image with the text block overlaid at the
+  % bottom.  The old implementation included the image a second time and clipped
+  % it with \clipbox; that caused some vector PDF backgrounds to have their
+  % internal line spacing squeezed.  We now use an invisible strut with the same
+  % vertical footprint as the clipped image to keep the layout math identical
+  % while only including the background once.
   \setbox0=\vbox to \ctan@imgheight{%
     \hsize=\textwidth
     \noindent\ctan@includeimage[width=\textwidth]{\CardImage}\par
     \nointerlineskip
     \kern-\dimexpr\ctan@imgheight\relax
-    \noindent\clipbox{0 0 0 \ctan@txtblockheight}{\ctan@includeimage[width=\textwidth]{\CardImage}}\par
+    \noindent\rule[\dimexpr\ctan@txtblockheight-\ctan@imgheight\relax]{\textwidth}{0pt}\par
     \nointerlineskip
     \vspace*{5pt}%
     \noindent\hbox{%
