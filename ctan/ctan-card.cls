@@ -30,7 +30,7 @@
   \endgroup
 }
 
-\setlength{\textwidth}{148mm}
+\setlength{\textwidth}{210mm}
 \setmainfont{MonaspiceNe NFM}
 \setCJKmainfont{Sarasa Mono SC}
 
@@ -46,7 +46,7 @@
 \newlength{\ctan@imgheight}
 \newlength{\ctan@txtblockheight}
 
-\RequirePackage[paperwidth=148mm,paperheight=1200pt,margin=0pt]{geometry}
+\RequirePackage[paperwidth=210mm,paperheight=1200pt,margin=0pt]{geometry}
 
 % Per-card data.  Each .tex file redefines these two macros.
 \providecommand{\CardImage}{}
