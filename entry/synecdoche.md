@@ -1,0 +1,3 @@
+> Metonymy is useful for problem solving, up to a point, but then synecdoche offers a broader set of strategies of representation: "part for whole, whole for part, container for the contained, sign for the thing signified, … cause for effect, effect for cause, genus for species, species for genus, etc." All such conversions imply an integral relationship, a relationship of convertibility, between the two terms. [Kenneth Burke, "University of California Press"]
+
+译：旁代在解决问题上是有用的，但有一定的限度；而代全提供了一套更为广泛的再现策略：“以部分代整体、以整体代部分、以容器代其所容之物、以符号代其所指之物……以因代果、以果代因、以属代种、以种代属，等等。”所有这些转换都暗示着两端之间一种整体的关系，一种可互换的关系。 [肯尼斯·伯克，《机动语法学》]
