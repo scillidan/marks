@@ -1,2 +1,3 @@
-_output/
+_output/pdfs/*.aux
+_output/pdfs/*.log
 cache/
