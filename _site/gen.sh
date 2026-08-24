@@ -505,9 +505,9 @@ GROUP_ORDER = [
     ("favorite-image", "Favorite Image"),
     ("image-convert", "Image Convert"),
     ("typst-demo", "Typst Demo"),
-    ("latex-demo", "LaTeX Demo"),
     ("ctan", "CTAN"),
     ("ctan-annex", "CTAN Annex"),
+    ("latex-demo", "LaTeX Demo"),
 ]
 
 DISPLAY_NAMES = dict(GROUP_ORDER)
