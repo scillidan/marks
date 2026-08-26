@@ -11,6 +11,7 @@
 \RequirePackage{xeCJK}
 \RequirePackage{hyperref}
 \RequirePackage{tabularx}
+\RequirePackage{collcell}
 \RequirePackage{xurl}
 
 % The build script writes this file to tell us where the background images live.
@@ -39,11 +40,28 @@
 \urlstyle{same}
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{0pt}
-\setlength{\fboxsep}{5pt}
+\setlength{\fboxsep}{10pt}
 \setlength{\fboxrule}{1pt}
 
 \newlength{\ctan@imgheight}
 \newlength{\ctan@txtblockheight}
+\newlength{\ctan@labelwidth}
+\newlength{\ctan@colongap}
+\newlength{\ctan@colonwidth}
+\newlength{\ctan@colsep}
+\newlength{\ctan@hmargin}
+\newlength{\ctan@vmargin}
+
+% Label column: strip the trailing colon, right-align the label in a fixed
+% width box, and place the colon in a zero-width rlap so it sits one space
+% width to the right of the label text.  The source remains "Label: & value".
+\newcommand{\ctan@formatlabel}[1]{%
+  \ctan@formatlabel@aux#1:\@nil
+}
+\def\ctan@formatlabel@aux#1:#2\@nil{%
+  \makebox[\ctan@labelwidth][r]{#1\rlap{\kern\ctan@colongap:}}%
+}
+\newcolumntype{L}{>{\collectcell\ctan@formatlabel}r<{\endcollectcell}}
 
 \RequirePackage[paperwidth=210mm,paperheight=1200pt,margin=0pt]{geometry}
 
@@ -51,26 +69,33 @@
 \providecommand{\CardImage}{}
 \providecommand{\CardRows}{}
 
-\AtBeginDocument{\fontsize{6pt}{7.2pt}\selectfont}
+\AtBeginDocument{\fontsize{8pt}{10pt}\selectfont}
 
 \newcommand{\makectancard}{%
+  % Compute layout parameters in the current (7pt) font.
+  \setlength{\ctan@colongap}{\fontdimen2\font}%
+  \settowidth{\ctan@labelwidth}{Maintainer}%
+  \settowidth{\ctan@colonwidth}{:}%
+  \setlength{\ctan@colsep}{\dimexpr2\ctan@colongap+\ctan@colonwidth\relax}%
+  \setlength{\ctan@hmargin}{29pt}% page edge to frame outer edge -> white fill 30pt from edge
+  \setlength{\ctan@vmargin}{29pt}% page edge to frame outer edge -> white fill 30pt from edge
   % Measure the natural height of the background image.
   \setbox2=\hbox{\ctan@includeimage[width=\textwidth]{\CardImage}}%
   \setlength{\ctan@imgheight}{\ht2}%
   % Measure the text block so we know how much space to reserve at the bottom.
   \setbox3=\vbox{%
     \hsize=\textwidth
-    \vspace*{5pt}%
+    \vspace*{\ctan@vmargin}%
     \noindent\hbox{%
-      \kern5pt%
+      \kern\ctan@hmargin%
       \fcolorbox{black}{white}{%
-        \begin{tabularx}{\dimexpr\textwidth-22pt\relax}{@{}r@{\hspace{8pt}}X@{}}%
+        \begin{tabularx}{\dimexpr\textwidth-80pt\relax}{@{}L@{\hspace{\ctan@colsep}}X@{}}%
           \CardRows
         \end{tabularx}%
       }%
-      \kern5pt%
+      \kern\ctan@hmargin%
     }%
-    \vspace*{5pt}%
+    \vspace*{\ctan@vmargin}%
   }%
   \setlength{\ctan@txtblockheight}{\dimexpr\ht3+\dp3\relax}%
   % Compose the final page: full image with the text block overlaid at the
@@ -86,17 +111,17 @@
     \kern-\dimexpr\ctan@imgheight\relax
     \noindent\rule[\dimexpr\ctan@txtblockheight-\ctan@imgheight\relax]{\textwidth}{0pt}\par
     \nointerlineskip
-    \vspace*{5pt}%
+    \vspace*{\ctan@vmargin}%
     \noindent\hbox{%
-      \kern5pt%
+      \kern\ctan@hmargin%
       \fcolorbox{black}{white}{%
-        \begin{tabularx}{\dimexpr\textwidth-22pt\relax}{@{}r@{\hspace{8pt}}X@{}}%
+        \begin{tabularx}{\dimexpr\textwidth-80pt\relax}{@{}L@{\hspace{\ctan@colsep}}X@{}}%
           \CardRows
         \end{tabularx}%
       }%
-      \kern5pt%
+      \kern\ctan@hmargin%
     }%
-    \vspace*{5pt}%
+    \vspace*{\ctan@vmargin}%
   }%
   \pdfpageheight=\ctan@imgheight
   \box0

@@ -457,16 +457,9 @@ def generate_typ_single(content_path, size_str, fonts, output_dir):
 #show image: set align(center)
 #set image(width: 90%)
 
-#show figure: it => {{
-  show image: set image(width: 100%)
-  align(center, block(width: 90%, stack(
-    spacing: 0.25em,
-    it.body,
-    if it.caption != none {{
-      align(left, par(justify: false, it.caption.body))
-    }}
-  )))
-}}
+// Allow figures to float within the column/grid cell to reduce whitespace.
+#set figure(placement: auto, gap: 0.25em)
+#show figure.caption: it => align(left, par(justify: false, it.body))
 
 #cmarker.render(read("../{md_processed_path.name}"))"""
 
@@ -505,16 +498,9 @@ def generate_typ_dual_two_files(
 #show image: set align(center)
 #set image(width: 90%)
 
-#show figure: it => {{
-  show image: set image(width: 100%)
-  align(center, block(width: 90%, stack(
-    spacing: 0.25em,
-    it.body,
-    if it.caption != none {{
-      align(left, par(justify: false, it.caption.body))
-    }}
-  )))
-}}
+// Allow figures to float within the column/grid cell to reduce whitespace.
+#set figure(placement: auto, gap: 0.25em)
+#show figure.caption: it => align(left, par(justify: false, it.body))
 
 #grid(
   columns: (1fr, 1fr),
