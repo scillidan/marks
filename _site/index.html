@@ -86,6 +86,9 @@
     }
 
     const SIDEBAR_W_KEY = 'marks.sidebarWidth';
+    const SIDEBAR_COLLAPSED_KEY = 'marks.sidebarCollapsed';
+    const SIDEBAR_SCROLL_KEY = 'marks.sidebarScroll';
+    const DETAILS_STATE_KEY = 'marks.detailsState';
 
     function clampSidebarWidth(w) {
       const max = Math.min(window.innerWidth * 0.4, 40 * window.innerWidth / 100);
@@ -103,10 +106,28 @@
       }
     }
 
+    function readDetailsState() {
+      try {
+        return JSON.parse(localStorage.getItem(DETAILS_STATE_KEY) || '{}');
+      } catch {
+        return {};
+      }
+    }
+
+    function writeDetailsState(state) {
+      localStorage.setItem(DETAILS_STATE_KEY, JSON.stringify(state));
+    }
+
     // Restore persisted width on load.
     const savedWidth = parseFloat(localStorage.getItem(SIDEBAR_W_KEY));
     if (savedWidth > 0) {
       setSidebarWidth(savedWidth);
+    }
+
+    // Restore collapsed state on load.
+    if (localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === 'true') {
+      layout.classList.add('sidebar-collapsed');
+      toggleBtn.setAttribute('aria-expanded', 'false');
     }
 
     resizer.addEventListener('mousedown', (e) => {
@@ -130,7 +151,17 @@
 
     toggleBtn.addEventListener('click', () => {
       layout.classList.toggle('sidebar-collapsed');
-      toggleBtn.setAttribute('aria-expanded', String(!layout.classList.contains('sidebar-collapsed')));
+      const collapsed = layout.classList.contains('sidebar-collapsed');
+      toggleBtn.setAttribute('aria-expanded', String(!collapsed));
+      localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(collapsed));
+    });
+
+    let scrollSaveTimeout;
+    sidebar.addEventListener('scroll', () => {
+      clearTimeout(scrollSaveTimeout);
+      scrollSaveTimeout = setTimeout(() => {
+        localStorage.setItem(SIDEBAR_SCROLL_KEY, String(sidebar.scrollTop));
+      }, 100);
     });
 
     prevBtn.addEventListener('click', () => goToDelta(-1));
@@ -186,9 +217,16 @@
 
     function renderGroup(group, container) {
       const details = document.createElement('details');
+      details.dataset.key = group.dir;
       const summary = document.createElement('summary');
       summary.textContent = group.name;
       details.appendChild(summary);
+
+      details.addEventListener('toggle', () => {
+        const state = readDetailsState();
+        state[group.dir] = details.open;
+        writeDetailsState(state);
+      });
 
       if (group.items && group.items.length > 0) {
         const ul = document.createElement('ul');
@@ -223,6 +261,18 @@
       }
       sidebar.innerHTML = '';
       sidebar.appendChild(frag);
+
+      const detailsState = readDetailsState();
+      document.querySelectorAll('#toc details[data-key]').forEach(d => {
+        if (d.dataset.key in detailsState) {
+          d.open = detailsState[d.dataset.key];
+        }
+      });
+
+      const savedScroll = parseFloat(localStorage.getItem(SIDEBAR_SCROLL_KEY));
+      if (!isNaN(savedScroll)) {
+        sidebar.scrollTop = savedScroll;
+      }
     }
 
     async function init() {
