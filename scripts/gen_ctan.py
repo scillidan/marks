@@ -4,7 +4,7 @@
 # dependencies = []
 # ///
 
-"""Compile committed CTAN card files under ctan/ into PDFs and JPGs."""
+"""Compile committed CTAN card files under ctan/ into PDFs."""
 
 import argparse
 import concurrent.futures
@@ -13,48 +13,13 @@ import subprocess
 import sys
 from pathlib import Path
 
-from _common import check_dependencies, convert_to_jpg
+from _common import check_dependencies
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 SCRIPT_DIR = Path(__file__).parent.resolve()
 PROJECT_ROOT = SCRIPT_DIR.parent.resolve()
-
-IMAGE_DIR_ENV = "CTAN_SOURCE"
-IMAGE_DIR_FALLBACK = PROJECT_ROOT / "ctan" / "assets"
-
-IMAGE_EXTENSIONS = (".jpg", ".jpeg", ".png", ".pdf")
-
-
-def resolve_image(image_dir, stem):
-    for ext in IMAGE_EXTENSIONS:
-        candidate = image_dir / f"{stem}{ext}"
-        if candidate.exists():
-            return candidate
-    return None
-
-
-def build_imgdir_content(image_dir):
-    cdn_dir = image_dir.as_posix().rstrip("/") + "/"
-    return (
-        f"\\providecommand{{\\CDNImageDir}}{{{cdn_dir}}}\n"
-        "\\graphicspath{{\\CDNImageDir}}\n"
-    )
-
-
-def resolve_image_dir():
-    env = os.environ.get(IMAGE_DIR_ENV)
-    if env:
-        path = Path(os.path.expandvars(env).strip())
-        if path.is_dir():
-            print(f"✓ Image dir (env {IMAGE_DIR_ENV}): {path}")
-            return path
-        print(f"✗ {IMAGE_DIR_ENV}: {env} (not found)")
-    if IMAGE_DIR_FALLBACK.is_dir():
-        print(f"✓ Image dir (fallback): {IMAGE_DIR_FALLBACK}")
-        return IMAGE_DIR_FALLBACK
-    return None
 
 
 def compile_tex(tex_path, fail_on_error=True):
@@ -65,29 +30,6 @@ def compile_tex(tex_path, fail_on_error=True):
     pdfs_dir = out_dir / "pdfs"
     pdfs_dir.mkdir(parents=True, exist_ok=True)
     out_rel = pdfs_dir.relative_to(ctan_dir).as_posix()
-
-    image_dir = resolve_image_dir()
-    if not image_dir:
-        sys.exit(
-            f"✗ Cannot resolve image dir. Set {IMAGE_DIR_ENV} or place images in {IMAGE_DIR_FALLBACK}"
-        )
-
-    image_stem = tex_path.stem
-    image_path = resolve_image(image_dir, image_stem)
-    if image_path is None:
-        print(
-            f"✗ {image_stem} (jpg/jpeg/png/pdf) not found in {image_dir}; "
-            "skipping compile"
-        )
-        return None
-
-    imgdir_path = out_dir / "imgdir.tex"
-    imgdir_content = build_imgdir_content(image_dir)
-    if (
-        not imgdir_path.exists()
-        or imgdir_path.read_text(encoding="utf-8") != imgdir_content
-    ):
-        imgdir_path.write_text(imgdir_content, encoding="utf-8")
 
     r = subprocess.run(
         [
@@ -110,11 +52,6 @@ def compile_tex(tex_path, fail_on_error=True):
         print(f"✗ {tex_path.name}: xelatex failed")
         return None
     print(f"Created: {pdf_path}")
-
-    for stale in out_dir.glob(f"{tex_path.stem}_p*.jpg"):
-        stale.unlink(missing_ok=True)
-    convert_to_jpg(str(pdf_path), str(out_dir / f"{tex_path.stem}_p%02d.jpg"))
-    print(f"Created: {out_dir}/{tex_path.stem}_p*.jpg")
     return pdf_path
 
 
@@ -123,12 +60,6 @@ def compile_all(out_dir, jobs=None):
     if not tex_files:
         print("No .tex files to compile.")
         return
-    image_dir = resolve_image_dir()
-    if not image_dir:
-        sys.exit(f"✗ Cannot resolve image dir. Set {IMAGE_DIR_ENV}")
-    imgdir = out_dir / "_output" / "imgdir.tex"
-    imgdir.parent.mkdir(parents=True, exist_ok=True)
-    imgdir.write_text(build_imgdir_content(image_dir), encoding="utf-8")
     jobs = jobs or (os.cpu_count() or 4)
     with concurrent.futures.ThreadPoolExecutor(max_workers=jobs) as ex:
         results = list(ex.map(lambda p: compile_tex(p, fail_on_error=False), tex_files))

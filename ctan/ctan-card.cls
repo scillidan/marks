@@ -14,10 +14,6 @@
 \RequirePackage{collcell}
 \RequirePackage{xurl}
 
-% The build script writes this file to tell us where the background images live.
-\IfFileExists{_output/imgdir.tex}{\input{_output/imgdir.tex}}{\providecommand{\CDNImageDir}{}}
-\graphicspath{{\CDNImageDir}}
-
 % Keep a reference to the original \includegraphics in case a build-time patch
 % redefines it, and provide a helper that strips the extension so a .tex file
 % can say "archivo.jpg" while the actual asset is "archivo.pdf"/".png".

@@ -44,11 +44,6 @@ jobs:
             https://raw.githubusercontent.com/scillidan/scoop-fonts/master/bucket/Sarasa-Mono-SC.json
             https://raw.githubusercontent.com/matthewjberger/scoop-nerd-fonts/master/bucket/Monaspace-NF-Mono.json
 
-      - name: Fetch cdn_image_latex images for ctan/
-        run: |
-          git clone --depth 1 https://github.com/scillidan/cdn_image_latex.git _deps/cdn_image_latex
-          echo "CTAN_SOURCE=$GITHUB_WORKSPACE/_deps/cdn_image_latex" >> "$GITHUB_ENV"
-
       - name: Fetch BYYA-site images for byya-nineveh
         run: |
           git clone --depth 1 https://github.com/scillidan/BYYA-site.git _deps/BYYA-site

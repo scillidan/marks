@@ -90,7 +90,7 @@ image-convert-norun mode theme output image="" commands="":
         {{ if commands != "" { "--commands '" + commands + "'" } else { "" } }} \
         --output '{{output}}'
 
-# == ctan (CTAN cards; add ctan/<stem>.tex + matching <stem>.jpg/.pdf to compile)
+# == ctan (CTAN cards; add ctan/<stem>.tex + matching pdfs/<stem>.pdf to compile)
 ctan path:
     uv run scripts/gen_ctan.py --compile "{{path}}"
 
