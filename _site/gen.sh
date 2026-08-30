@@ -109,7 +109,6 @@ BUILD_RULES=(
 	"part:1:*.md:just a6 {path}:scripts/gen_a6.py"
 	"byya-nineveh-annex:1:*.md:just nineveh-annex {path}:scripts/gen_byya_nineveh_annex.py,scripts/byya-nineveh-annex-template.typ"
 	"byya-lyra-annex:1:*.md:just lyra-annex {path}:scripts/gen_byya_lyra_annex.py,scripts/byya-lyra-annex-template.typ"
-	"ctan-annex:1:*.md:just ctan-annex {path}:scripts/gen_ctan_annex.py,scripts/ctan-annex-template.typ"
 	"receipt:1:*.typ:just receipt {path}:scripts/gen_a7_receipt.py,scripts/receipt-template.typ"
 	"ctan:1:*.tex:just ctan {path}:scripts/gen_ctan.py"
 )
@@ -506,7 +505,6 @@ GROUP_ORDER = [
     ("image-convert", "Image Convert"),
     ("typst-demo", "Typst Demo"),
     ("ctan", "CTAN"),
-    ("ctan-annex", "CTAN Annex"),
     ("latex-demo", "LaTeX Demo"),
 ]
 
