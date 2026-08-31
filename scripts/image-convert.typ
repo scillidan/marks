@@ -6,11 +6,16 @@
 #let bg = if theme == "light" { white } else { black }
 #let fg = if theme == "light" { black } else { white }
 
+// Layout: fixed page width, equal border on all sides, image fills content
+// width. The image is pre-sized in Python so Typst does not have to resample.
+#let page-width = if mode == "landscape" { 210mm } else { 148mm }
+#let border = 5pt
+
 #set page(
-  width: if mode == "landscape" { 210mm } else { 148mm },
+  width: page-width,
   height: auto,
   fill: bg,
-  margin: (top: 5pt, right: 5pt, bottom: 5pt, left: 5pt),
+  margin: border,
 )
 
 #let annotation = if commands != "" {

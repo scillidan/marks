@@ -31,6 +31,19 @@ def compile_tex(tex_path, fail_on_error=True):
     pdfs_dir.mkdir(parents=True, exist_ok=True)
     out_rel = pdfs_dir.relative_to(ctan_dir).as_posix()
 
+    # Subdirectory cards (e.g. ctan/font/*.tex) need ctan-card.cls, which lives
+    # in the top-level ctan/ directory. Add that directory to TEXINPUTS while
+    # preserving the default kpathsea search paths.
+    cls_dir = ctan_dir
+    while cls_dir != cls_dir.parent and not (cls_dir / "ctan-card.cls").exists():
+        cls_dir = cls_dir.parent
+    env = os.environ.copy()
+    if (cls_dir / "ctan-card.cls").exists() and cls_dir != ctan_dir:
+        sep = ";" if os.name == "nt" else ":"
+        texinputs = env.get("TEXINPUTS", "")
+        prefix = f".{sep}{cls_dir.as_posix()}{sep}"
+        env["TEXINPUTS"] = prefix + texinputs if texinputs else prefix
+
     r = subprocess.run(
         [
             "xelatex",
@@ -40,6 +53,7 @@ def compile_tex(tex_path, fail_on_error=True):
             tex_path.name,
         ],
         cwd=str(ctan_dir),
+        env=env,
         capture_output=True,
         text=True,
         encoding="utf-8",

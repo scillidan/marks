@@ -52,6 +52,42 @@ def compute_output_path(input_path):
         seq += 1
 
 
+def compute_target_image_width_px(mode, margin_pt=5, dpi=150):
+    """Return the exact content width in pixels at the target DPI.
+
+    The image is pre-sized to this width so Typst does not have to resample it,
+    avoiding the uneven left/right margins that come from sub-pixel scaling.
+    """
+    page_width_mm = 210 if mode == "landscape" else 148
+    page_width_px = round(page_width_mm * dpi / 25.4)
+    margin_px = round(margin_pt * dpi / 72)
+    return max(1, page_width_px - 2 * margin_px)
+
+
+def resize_to_width(input_path, output_path, width_px):
+    """Resize `input_path` to `width_px` pixels wide, preserving aspect ratio."""
+    r = subprocess.run(
+        [
+            "magick",
+            str(input_path),
+            "-resize",
+            f"{width_px}x",
+            str(output_path),
+        ],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        check=False,
+    )
+    if r.returncode != 0:
+        sys.exit(f"Resize failed:\n{r.stderr or r.stdout}")
+    if not output_path.exists():
+        sys.exit(f"✗ Resize did not produce: {output_path}")
+    print(f"  ✓ resized to {width_px}px wide: {output_path}")
+    return output_path
+
+
 def run_commands(commands, input_path):
     output_path = compute_output_path(input_path)
 
@@ -129,7 +165,14 @@ def main():
     else:
         typ_image = input_path
 
+    # Pre-size the image to the exact content width at the target DPI so Typst
+    # does not have to resample it, avoiding uneven left/right margins.
+    ASSETS_DIR.mkdir(parents=True, exist_ok=True)
     output_stem = Path(args.output).stem
+    target_width_px = compute_target_image_width_px(mode)
+    resized_path = ASSETS_DIR / f"{output_stem}_resized.png"
+    typ_image = resize_to_width(typ_image, resized_path, target_width_px)
+
     typ_path = TYPS_DIR / f"{output_stem}.typ"
     shutil.copy2(SCRIPT_DIR / "image-convert.typ", typ_path)
     print(f"Created: {typ_path}")
