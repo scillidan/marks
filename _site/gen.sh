@@ -541,6 +541,7 @@ def count_items(node):
 # appended after the listed ones in alphabetical order.
 SUBGROUP_ORDER = {
     "byya-nineveh": ["nineveh", "amphissa", "laguna", "jaffa"],
+    "ctan": ["font"],
 }
 
 

@@ -182,7 +182,7 @@
     }
 
     function updateActive(path) {
-      document.querySelectorAll('.item-list a').forEach(a => a.classList.toggle('active', a.dataset.path === path));
+      document.querySelectorAll('.item-list a, .group-link').forEach(a => a.classList.toggle('active', a.dataset.path === path));
     }
 
     function loadPdf(path, title) {
@@ -219,7 +219,34 @@
       const details = document.createElement('details');
       details.dataset.key = group.dir;
       const summary = document.createElement('summary');
-      summary.textContent = group.name;
+
+      const toggle = document.createElement('span');
+      toggle.className = 'group-toggle';
+      toggle.setAttribute('aria-hidden', 'true');
+      summary.appendChild(toggle);
+
+      const hasItems = group.items && group.items.length > 0;
+      if (hasItems) {
+        const first = group.items[0];
+        const link = document.createElement('a');
+        link.href = '#' + encodeURIComponent(first.path);
+        link.textContent = group.name;
+        link.title = group.name;
+        link.className = 'group-link';
+        link.dataset.path = first.path;
+        link.addEventListener('click', e => {
+          e.preventDefault();
+          e.stopPropagation();
+          details.open = true;
+          loadPdf(first.path, first.title);
+        });
+        summary.appendChild(link);
+      } else {
+        const span = document.createElement('span');
+        span.textContent = group.name;
+        span.className = 'group-name';
+        summary.appendChild(span);
+      }
       details.appendChild(summary);
 
       details.addEventListener('toggle', () => {
@@ -228,15 +255,6 @@
         writeDetailsState(state);
       });
 
-      if (group.items && group.items.length > 0) {
-        const ul = document.createElement('ul');
-        ul.className = 'item-list';
-        for (const item of group.items) {
-          ul.appendChild(renderItem(item));
-        }
-        details.appendChild(ul);
-      }
-
       if (group.subgroups && group.subgroups.length > 0) {
         const subContainer = document.createElement('div');
         subContainer.className = 'subgroups';
@@ -244,6 +262,15 @@
           renderGroup(sub, subContainer);
         }
         details.appendChild(subContainer);
+      }
+
+      if (hasItems) {
+        const ul = document.createElement('ul');
+        ul.className = 'item-list';
+        for (const item of group.items) {
+          ul.appendChild(renderItem(item));
+        }
+        details.appendChild(ul);
       }
 
       container.appendChild(details);
