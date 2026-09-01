@@ -1,3 +1,14 @@
 _output/pdfs/*.aux
 _output/pdfs/*.log
 cache/
+
+# vimtex / latexmk in-place build artifacts
+*.aux
+*.log
+*.out
+*.toc
+*.xdv
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+/*.pdf

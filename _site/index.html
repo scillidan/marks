@@ -220,30 +220,24 @@
       details.dataset.key = group.dir;
       const summary = document.createElement('summary');
 
-      const toggle = document.createElement('span');
-      toggle.className = 'group-toggle';
-      toggle.setAttribute('aria-hidden', 'true');
-      summary.appendChild(toggle);
-
       const hasItems = group.items && group.items.length > 0;
+      const displayName = group.name + '/';
       if (hasItems) {
         const first = group.items[0];
         const link = document.createElement('a');
         link.href = '#' + encodeURIComponent(first.path);
-        link.textContent = group.name;
-        link.title = group.name;
+        link.textContent = displayName;
+        link.title = displayName;
         link.className = 'group-link';
         link.dataset.path = first.path;
         link.addEventListener('click', e => {
           e.preventDefault();
-          e.stopPropagation();
-          details.open = true;
           loadPdf(first.path, first.title);
         });
         summary.appendChild(link);
       } else {
         const span = document.createElement('span');
-        span.textContent = group.name;
+        span.textContent = displayName;
         span.className = 'group-name';
         summary.appendChild(span);
       }

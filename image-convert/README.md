@@ -22,10 +22,11 @@ just image-convert portrait light "gmic_quantize_blur" "typst-demo/assets/Edward
 just image-convert portrait light "gmic_srgb2lab_blend" "typst-demo/assets/Edward John Poynter_Pea Blossoms, 1890.jpg" "gmic $1 +srgb2lab slic[-1] 16 +blend shapeaverage f[-2] ""j(1,0)==is && j(0,1)==i"" *[-1][-2] rm[0,1] -o $2"
 just image-convert portrait light "gmic_topographic-map" "typst-demo/assets/Edward John Poynter_Pea Blossoms, 1890.jpg" "gmic $1 topographic_map 10 -o $2"
 just image-convert portrait light "gmic_watershed" "typst-demo/assets/Edward John Poynter_Pea Blossoms, 1890.jpg" "gmic $1 segment_watershed 4 -o $2"
-# just image-convert portrait light gmic_matchpath "typst-demo/assets/Edward John Poynter_Pea Blossoms, 1890.jpg" "gmic $1 <pattern> +channels[1] 0,2 rm[1] +matchpatch[0] [1],3 +warp[2] [-1],0 rm[0-2] -o $2"
 just image-convert portrait light "gmic_cutout" "typst-demo/assets/Edward John Poynter_Pea Blossoms, 1890.jpg" "gmic $1 fx_cutout 6,0,8,2 -o $2"
 just image-convert portrait light "gmic_engrave" "typst-demo/assets/Edward John Poynter_Pea Blossoms, 1890.jpg" "gmic $1 fx_engrave 0.6,60,2,8.8,40,2,4,1,10,1,0,12,0,1,0 gui_merge_layers -o $2"
 just image-convert landscape light "gmic_transfer-rgb" "typst-demo/assets/20200518_12_34_59.jpg" "gmic $1 ""typst-demo/assets/514_Blade Runner 2049_2017.png"" +transfer_rgb[0] [1] rm[0,1] -o $2"
+just image-convert landscape light "gmic_matchpath_01" "typst-demo/assets/20200518_12_34_59.jpg" "gmic $1 ""typst-demo\assets\Edward John Poynter_Pea Blossoms, 1890.jpg"" +matchpatch[0] [1],3 +warp[-2] [-1],0 rm[0-2] -o $2"
+just image-convert landscape light "gmic_matchpath_02" "typst-demo/assets/20200518_12_34_59.jpg" "gmic $1 ""favorite-image\assets\待ちぼうけ.jpg"" +matchpatch[0] [1],3 +warp[-2] [-1],0 rm[0-2] -o $2"
 ```
 
 ```sh
