@@ -187,17 +187,22 @@ details {
   margin-bottom: 4px;
 }
 #toc summary {
+  display: block;
   cursor: pointer;
   font-weight: 400;
   font-size: 14px;
   padding: 6px 4px;
   border-radius: 4px;
   user-select: none;
-  list-style: none;
+  list-style: none !important;
 }
 #toc summary::-webkit-details-marker,
 #toc summary::marker {
-  display: none;
+  display: none !important;
+  content: none;
+}
+#toc .group-toggle {
+  display: none !important;
 }
 summary:hover {
   background: #f0f0f0;
