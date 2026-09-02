@@ -669,21 +669,34 @@ for prefix in EXCLUDE_PATHS:
         print(f"Removed excluded directory: {excluded_pdfs_dir.relative_to(_site_dir)}")
 
 copied = 0
-for pdf_path in sorted(repo_root.rglob("_output/pdfs/*.pdf")):
+
+# Collect PDFs from the automatic build output tree (_output/pdfs) and from
+# manually-maintained <dir>/pdfs/ directories (e.g. latex-demo/pdfs).
+pdf_paths = sorted(repo_root.rglob("_output/pdfs/*.pdf"))
+pdf_paths.extend(sorted((repo_root / "latex-demo" / "pdfs").glob("*.pdf")))
+
+for pdf_path in pdf_paths:
     rel = pdf_path.relative_to(repo_root)
     parts = rel.parts
-    if len(parts) < 4:
+    if len(parts) < 3:
         continue
 
-    # Find the _output/pdfs segment and strip it out.
-    try:
-        output_idx = parts.index("_output")
-    except ValueError:
-        continue
-    if output_idx + 2 >= len(parts) or parts[output_idx + 1] != "pdfs":
-        continue
+    # Find the directory parts and filename. The PDF may live under an
+    # _output/pdfs tree, or directly under a pdfs/ folder.
+    if "_output" in parts:
+        try:
+            output_idx = parts.index("_output")
+        except ValueError:
+            continue
+        if output_idx + 2 >= len(parts) or parts[output_idx + 1] != "pdfs":
+            continue
+        dir_parts = parts[:output_idx]
+    else:
+        # Direct pdfs/ directory (e.g. latex-demo/pdfs/<name>.pdf).
+        if parts[-2] != "pdfs":
+            continue
+        dir_parts = parts[:-2]
 
-    dir_parts = parts[:output_idx]
     filename = parts[-1]
 
     if not dir_parts or is_excluded(dir_parts):

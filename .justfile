@@ -94,6 +94,3 @@ image-convert-norun mode theme output image="" commands="":
 ctan path:
     uv run scripts/gen_ctan.py --compile "{{path}}"
 
-# == latex-demo
-latex-demo path:
-    uv run scripts/gen_latex_demo.py --compile "{{path}}"

@@ -1,0 +1,66 @@
+% !TeX program = xelatex
+
+\documentclass[a5paper]{article}
+
+%% https://www.ctan.org/pkg/geometry
+\usepackage[a5paper, margin=1cm]{geometry}
+%% https://www.ctan.org/pkg/pgfmorepages
+\usepackage{pgfmorepages}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+%% https://www.ctan.org/pkg/colorblind
+\usepackage[keep-defaults, Tol, OkabeIto, pgf]{colorblind}
+%% https://www.ctan.org/pkg/fontspec
+\usepackage{fontspec}
+\usepackage{eso-pic}
+
+\def\sampletex{sidenotesplus-demo.tex}
+\def\samplepdf{pdfs/sidenotesplus-demo.pdf}
+
+\pgfpagesuselayout{2 on 1}[a4paper, landscape]
+
+\pagestyle{empty}
+
+\newfontfamily\codefont{Sarasa Mono SC}
+
+\AddToShipoutPictureBG{%
+  \put(\LenToUnit{148.5mm},\LenToUnit{0mm}){{\color{T-Q-B0}\rule{1bp}{210mm}}}%
+}
+
+\lstset{
+  language=[LaTeX]TeX,
+  basicstyle=\codefont\footnotesize,
+  keywordstyle=\color{T-Q-B3},
+  commentstyle=\color{T-Q-B0},
+  stringstyle=\color{T-Q-B5},
+  frame=single,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=2,
+  aboveskip=0pt,
+  belowskip=0pt,
+  xleftmargin=1em,
+  xrightmargin=1em,
+}
+
+\begin{document}
+
+\vspace*{\fill}
+\begin{center}
+  \includegraphics[page=1, width=\textwidth, keepaspectratio]{\samplepdf}
+\end{center}
+\vspace*{\fill}
+
+\clearpage
+
+\vspace*{\fill}
+\noindent
+\makebox[\textwidth]{%
+  \begin{minipage}{0.85\textwidth}
+    \lstinputlisting{\sampletex}
+  \end{minipage}%
+}
+\vspace*{\fill}
+
+\end{document}

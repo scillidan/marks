@@ -1,6 +1,12 @@
-_output/pdfs/*.aux
-_output/pdfs/*.log
 cache/
+
+# docshots temporary render directories
+_docshots/
+_docshots-*/
+
+# iexec temporary files
+iexec.ret
+iexec.tmp
 
 # vimtex / latexmk in-place build artifacts
 *.aux
@@ -11,4 +17,5 @@ cache/
 *.fls
 *.fdb_latexmk
 *.synctex.gz
+*.synctex(busy)
 /*.pdf
