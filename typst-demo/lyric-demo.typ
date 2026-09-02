@@ -1,7 +1,7 @@
 // References:
 // Authors: MiniMax-M2.1🧙‍♂️, scillidan🤡
 
-#let src = sys.inputs.at("path", default: "assets/Avalon (Sieren Remix) - Equador.lrc")
+#let src = sys.inputs.at("path", default: "/assets/Avalon (Sieren Remix) - Equador.lrc")
 #let title = sys.inputs.at("title", default: "Avalon (Sieren Remix)")
 #let artist = sys.inputs.at("artist", default: "Equador")
 

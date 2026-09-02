@@ -13,7 +13,7 @@
   (mode: "rgb", method: "cluster6"),
   (mode: "rgb", method: "cluster8"),
 )
-#let img-data = read("assets/Edward John Poynter_Pea Blossoms, 1890.jpg", encoding: none)
+#let img-data = read("/assets/Edward John Poynter_Pea Blossoms, 1890.jpg", encoding: none)
 
 // Fit an image (raw bytes) into an area while preserving its aspect ratio.
 #let fit-image(data, width, height) = image(data, width: width, height: height, fit: "contain")

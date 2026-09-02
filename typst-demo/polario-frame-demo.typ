@@ -15,7 +15,7 @@
 #let params = (
   "theme": "classic-bottom-three",
   "flipped": true,
-  "img-path": "assets/Edward John Poynter_Pea Blossoms, 1890.jpg",
+  "img-path": "/assets/Edward John Poynter_Pea Blossoms, 1890.jpg",
   "ext-info": ext-info,
 )
 

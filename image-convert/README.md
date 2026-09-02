@@ -26,7 +26,7 @@ just image-convert portrait light "gmic_watershed" "assets/Edward John Poynter_P
 just image-convert portrait light "gmic_cutout" "assets/Edward John Poynter_Pea Blossoms, 1890.jpg" "gmic $1 fx_cutout 6,0,8,2 -o $2"
 just image-convert portrait light "gmic_engrave" "assets/Edward John Poynter_Pea Blossoms, 1890.jpg" "gmic $1 fx_engrave 0.6,60,2,8.8,40,2,4,1,10,1,0,12,0,1,0 gui_merge_layers -o $2"
 just image-convert landscape light "gmic_transfer-rgb" "assets/20200518_12_34_59.jpg" "gmic $1 ""assets/514_Blade Runner 2049_2017.png"" +transfer_rgb[0] [1] rm[0,1] -o $2"
-just image-convert landscape light "gmic_matchpath_01" "assets/20200518_12_34_59.jpg" "gmic $1 ""typst-demo\assets\Edward John Poynter_Pea Blossoms, 1890.jpg"" +matchpatch[0] [1],3 +warp[-2] [-1],0 rm[0-2] -o $2"
+just image-convert landscape light "gmic_matchpath_01" "assets/20200518_12_34_59.jpg" "gmic $1 ""assets/Edward John Poynter_Pea Blossoms, 1890.jpg"" +matchpatch[0] [1],3 +warp[-2] [-1],0 rm[0-2] -o $2"
 just image-convert landscape light "gmic_matchpath_02" "assets/20200518_12_34_59.jpg" "gmic $1 ""favorite-image\assets\待ちぼうけ.jpg"" +matchpatch[0] [1],3 +warp[-2] [-1],0 rm[0-2] -o $2"
 just image-convert landscape light "gmic_quantize" "assets/20200518_12_34_59.jpg" "gmic $1 quantize 8 -o $2"
 # gmic $1 quantize 8 +split_colors 3 -o "output_%d.png"
