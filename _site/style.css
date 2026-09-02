@@ -186,7 +186,7 @@ html, body {
 details {
   margin-bottom: 4px;
 }
-summary {
+#toc summary {
   cursor: pointer;
   font-weight: 400;
   font-size: 14px;
@@ -195,7 +195,8 @@ summary {
   user-select: none;
   list-style: none;
 }
-summary::-webkit-details-marker {
+#toc summary::-webkit-details-marker,
+#toc summary::marker {
   display: none;
 }
 summary:hover {

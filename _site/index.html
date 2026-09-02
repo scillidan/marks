@@ -215,13 +215,15 @@
       return li;
     }
 
-    function renderGroup(group, container) {
+    function renderGroup(group, container, depth = 0) {
       const details = document.createElement('details');
       details.dataset.key = group.dir;
       const summary = document.createElement('summary');
 
       const hasItems = group.items && group.items.length > 0;
-      const displayName = group.name + '/';
+      // Only nested directories get a trailing slash so they read as paths
+      // (e.g. CTAN/font/), while top-level groups keep their display name.
+      const displayName = depth > 0 ? group.name + '/' : group.name;
       if (hasItems) {
         const first = group.items[0];
         const link = document.createElement('a');
@@ -253,7 +255,7 @@
         const subContainer = document.createElement('div');
         subContainer.className = 'subgroups';
         for (const sub of group.subgroups) {
-          renderGroup(sub, subContainer);
+          renderGroup(sub, subContainer, depth + 1);
         }
         details.appendChild(subContainer);
       }
