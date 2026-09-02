@@ -1,0 +1,153 @@
+% Shared LaTeX post template.
+% The wrapper file must define:
+%   \poststem      - stem of the generated output directory
+%   \postlayout    - 'a4' or 'a5'
+%   \postimagedir  - relative path from the wrapper to the images directory
+%   \posttwocolumn - define this for two-column layouts
+
+\ifdefined\postimagedir\else\def\postimagedir{}\fi
+
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\usepackage{responsive}
+\usepackage{fitbox}
+\usepackage{graphicx}
+\usepackage[underscores=false, fencedCode=true, hybrid=true]{markdown}
+\usepackage{hyperref}
+\usepackage{microtype}
+\usepackage{ragged2e}
+
+% Fonts
+\setmainfont{MonaspiceNe NFM}
+\setmonofont{MonaspiceNe NFM}
+\setCJKmainfont{Sarasa Mono SC}
+\setCJKsansfont{Sarasa Mono SC}
+\setCJKmonofont{Sarasa Mono SC}
+
+% Route non-Latin ranges (Cyrillic, arrows, spaces/dashes) to the Sarasa font,
+% which has broader coverage than the Latin Nerd-Font face.
+\xeCJKDeclareCharClass{CJK}{"00A0 -> "00A0}
+\xeCJKDeclareCharClass{CJK}{"0400 -> "052F}
+\xeCJKDeclareCharClass{CJK}{"2000 -> "206F}
+\xeCJKDeclareCharClass{CJK}{"2070 -> "209F}
+\xeCJKDeclareCharClass{CJK}{"2100 -> "214F}
+\xeCJKDeclareCharClass{CJK}{"2150 -> "218F}
+\xeCJKDeclareCharClass{CJK}{"2190 -> "21FF}
+
+% Do not stretch short columns to align bottoms -- this alone removes a lot of
+% unwanted whitespace in two-column output.
+\raggedbottom
+
+% Responsive design: let the package choose a readable base size.
+% In two-column mode we measure against the column, not the full page.
+\ifdefined\posttwocolumn
+  \ResponsiveSetup{boxwidth=\columnwidth}
+\fi
+
+% Typography: a compact, minimal scale tuned for double-column work.
+% Base size comes from `responsive`; headings/captions are small but readable.
+% Override here if you want a different feel.
+\newcommand{\postheadingone}[1]{{\LARGE #1}\par}
+\newcommand{\postheadingtwo}[1]{{\large #1}\par}
+\newcommand{\postheadingthree}[1]{{\normalsize\bfseries #1}\par}
+
+% Fitbox defaults: scale images to fit the available column/page width,
+% and shrink them further if they would not fit vertically.
+\fitboxset{
+  maxwidth=0.9\linewidth,
+  maxheight=0.75\textheight,
+  belowboxspace=0pt,
+  minwidth=0.2\fitboxnatwidth,
+  minheight=0.2\fitboxnatheight,
+}
+
+% Shared vertical skip around images/figures.
+\newlength{\postimageskip}
+\setlength{\postimageskip}{0.4\baselineskip}
+
+% Per-image height cap. Inside a group we shrink images so the group never
+% becomes taller than one column.
+\newlength{\postimageheight}
+\newif\ifpostgroupmode
+\postgroupmodefalse
+
+% Print a narrow, centered caption block only when #1 is non-empty.
+% The caption text itself stays left-aligned; only the block is centered.
+\newcommand{\postcaption}[1]{%
+  \if\relax\detokenize{#1}\relax
+  \else
+    \vspace{0.3\baselineskip}%
+    \begin{minipage}{0.8\linewidth}%
+      \raggedright
+      \footnotesize
+      #1%
+    \end{minipage}%
+    \par
+  \fi
+}
+
+% Group of consecutive standalone images: an unbreakable minipage so the
+% images always move together across a column/page boundary.
+\newenvironment{postimagegroup}{%
+  \par
+  \addvspace{\postimageskip}%
+  \noindent\begin{minipage}{\linewidth}%
+  \postgroupmodetrue
+  \centering
+}{%
+  \postgroupmodefalse
+  \end{minipage}%
+  \par
+  \addvspace{\postimageskip}%
+}
+
+% Markdown renderers ---------------------------------------------------------
+% Image renderer receives: #1=alt(caption), #2=escaped src, #3=raw src.
+\markdownSetup{
+  renderers = {
+    image = {
+      \par
+      \addvspace{\postimageskip}
+      \begingroup\centering
+      \ifpostgroupmode
+        \setlength{\postimageheight}{0.4\textheight}%
+      \else
+        \setlength{\postimageheight}{0.75\textheight}%
+      \fi
+      \fitbox[
+        maxwidth=0.9\linewidth,
+        maxheight=\postimageheight,
+        belowboxspace=0pt,
+      ]{%
+        \includegraphics{\postimagedir#3}%
+      }%
+      \par
+      \postcaption{#1}%
+      \endgroup
+      \addvspace{\postimageskip}
+    },
+    link = {\href{#3}{#1}},
+    emphasis = {{\itshape #1}},
+    strongEmphasis = {{\bfseries #1}},
+    headingOne = {\postheadingone{#1}},
+    headingTwo = {\postheadingtwo{#1}},
+    headingThree = {\postheadingthree{#1}},
+    blockQuoteBegin = {\begingroup\itshape},
+    blockQuoteEnd = {\endgroup\par},
+  }
+}
+
+% Markdown can contain TeX (`hybrid`); make the special chars inert so they
+% never leak into math/subscript/comment mode.
+\newcommand{\postmarkdowninput}[1]{%
+  \begingroup
+  \catcode`\&=12\relax
+  \catcode`\$=12\relax
+  \catcode`\%=12\relax
+  \catcode`\#=12\relax
+  \catcode`\_=12\relax
+  \catcode`\^=12\relax
+  \catcode`\~=12\relax
+  \markdownInput{#1}%
+  \endgroup
+}

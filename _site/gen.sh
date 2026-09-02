@@ -102,8 +102,8 @@ fi
 # _output/typs/, which the main BUILD_RULES find loop prunes via -name _output).
 BUILD_RULES=(
 	"typst-demo:1:*-demo.typ:mkdir -p \$(dirname {path})/_output/pdfs && typst compile --root . {path} \$(dirname {path})/_output/pdfs/\$(basename {path} .typ).pdf:assets,typst-demo/codly-template.typ,typst-demo/nineveh-template.typ,typst-demo/polario-frame-template.typ,typst-demo/receipt-template.typ,typst-demo/tooltip-template.typ"
-	"post:99:*.md:just a4 {path}:scripts/gen_a4.py"
-	"post_zh-cn:99:*.md:just a4 {path}:scripts/gen_a4.py"
+	"post:99:*.md:just a4 latex {path}:scripts/gen_a4_latex.py,scripts/gen_a4_latex.tex"
+	"post_zh-cn:99:*.md:just a4 typst {path}:scripts/gen_a4_typst.py"
 	"chat:1:*.md:just a6 {path}:scripts/gen_a6.py"
 	"entry:1:*.md:just a6 {path}:scripts/gen_a6.py"
 	"part:1:*.md:just a6 {path}:scripts/gen_a6.py"

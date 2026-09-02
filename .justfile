@@ -10,15 +10,15 @@ a6 path size="" font="":
         {{ if size != "" { "--size " + size } else { "" } }} \
         {{ if font != "" { "--font \"" + font + "\"" } else { "" } }}
 
-# == post (A4, 2-column)
-a4 path size="" font="":
-    uv run scripts/gen_a4.py "{{path}}" \
-        {{ if size != "" { "--size " + size } else { "" } }} \
-        {{ if font != "" { "--font \"" + font + "\"" } else { "" } }}
+# == post (A4, 2-column) — engine: typst | latex
+a4 engine path size="" font="":
+    uv run scripts/{{ if engine == "typst" { "gen_a4_typst.py" } else if engine == "latex" { "gen_a4_latex.py" } else { error("engine must be typst or latex") } }} "{{path}}" \
+        {{ if engine == "typst" { if size != "" { "--size " + size } else { "" } } else { "" } }} \
+        {{ if engine == "typst" { if font != "" { "--font \"" + font + "\"" } else { "" } } else { "" } }}
 
-# == post (A4, 2-column) (file1 left, file2 right)
+# == post (A4, 2-column, Typst) (file1 left, file2 right)
 a42 path1 path2 size="" font="":
-    uv run scripts/gen_a4.py "{{path1}}" --two-column "{{path2}}" \
+    uv run scripts/gen_a4_typst.py "{{path1}}" --two-column "{{path2}}" \
         {{ if size != "" { "--size " + size } else { "" } }} \
         {{ if font != "" { "--font \"" + font + "\"" } else { "" } }}
 

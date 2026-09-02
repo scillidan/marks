@@ -9,3 +9,10 @@
 *.synctex(busy)
 /*.pdf
 ctan-demo/*.pdf
+/_output/
+/_markdown_*/
+*.luabridge.*
+*.markdown.in
+build*.log
+page*.jpg
+*.tex.swp

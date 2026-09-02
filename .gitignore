@@ -2,6 +2,9 @@ _temp/
 .env
 __pycache__/
 *.pyc
+*.luabridge.*
+*.markdown.in
+_markdown_*/
 info.txt
 assets/scanlines.png
 assets/lut.png
