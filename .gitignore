@@ -3,3 +3,5 @@ _temp/
 __pycache__/
 *.pyc
 info.txt
+assets/scanlines.png
+assets/lut.png
