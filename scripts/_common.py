@@ -12,12 +12,25 @@ def _has_ghostscript():
     return shutil.which("gs") is not None
 
 
+def find_imagemagick_cli() -> str | None:
+    """Return the ImageMagick CLI binary name/path, or None if not found.
+
+    Prefers ``magick`` (ImageMagick 7). On non-Windows systems, falls back to
+    ``convert`` (ImageMagick 6) because some distributions package IM6 only.
+    """
+    if shutil.which("magick"):
+        return "magick"
+    if sys.platform != "win32" and shutil.which("convert"):
+        return "convert"
+    return None
+
+
 def check_dependencies():
     missing = []
     if not shutil.which("typst"):
         missing.append("typst")
-    if not shutil.which("magick") and not _has_ghostscript():
-        missing.append("ImageMagick (magick) or Ghostscript (gs/gswin64c)")
+    if not find_imagemagick_cli() and not _has_ghostscript():
+        missing.append("ImageMagick (magick/convert) or Ghostscript (gs/gswin64c)")
     if missing:
         sys.exit("Missing dependencies:\n  - " + "\n  - ".join(missing))
 

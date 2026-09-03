@@ -36,7 +36,7 @@ jobs:
             scripts/*.py
             .justfile
 
-      - run: sudo apt-get update && sudo apt-get install -y ghostscript imagemagick ffmpeg qpdf texlive-xetex texlive-latex-extra texlive-lang-chinese
+      - run: sudo apt-get update && sudo apt-get install -y ghostscript imagemagick libmagickcore-6.q16-6-extra librsvg2-bin ffmpeg qpdf texlive-xetex texlive-latex-extra texlive-lang-chinese
 
       - uses: ./.github/actions/install-fonts
         with:

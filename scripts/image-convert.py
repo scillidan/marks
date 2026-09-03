@@ -11,7 +11,12 @@ import subprocess
 import sys
 from pathlib import Path
 
-from _common import check_dependencies, convert_to_jpg, strip_quotes
+from _common import (
+    check_dependencies,
+    convert_to_jpg,
+    find_imagemagick_cli,
+    strip_quotes,
+)
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 sys.stderr.reconfigure(encoding="utf-8", errors="replace")
@@ -66,9 +71,12 @@ def compute_target_image_width_px(mode, margin_pt=5, dpi=150):
 
 def resize_to_width(input_path, output_path, width_px):
     """Resize `input_path` to `width_px` pixels wide, preserving aspect ratio."""
+    cli = find_imagemagick_cli()
+    if not cli:
+        sys.exit("✗ ImageMagick (magick/convert) not found in PATH")
     r = subprocess.run(
         [
-            "magick",
+            cli,
             str(input_path),
             "-resize",
             f"{width_px}x",
@@ -148,8 +156,10 @@ def main():
     commands = args.commands
 
     check_dependencies()
-    if not args.no_run and commands.strip() and not shutil.which("magick"):
-        print("Warning: 'magick' not found in PATH; command processing may fail.")
+    if not args.no_run and commands.strip() and not find_imagemagick_cli():
+        print(
+            "Warning: ImageMagick (magick/convert) not found in PATH; command processing may fail."
+        )
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     PDFS_DIR.mkdir(parents=True, exist_ok=True)

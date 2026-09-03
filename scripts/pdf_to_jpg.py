@@ -10,6 +10,8 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+from _common import find_imagemagick_cli
+
 
 @dataclass(frozen=True)
 class ConversionResult:
@@ -73,11 +75,11 @@ def convert_pdf_to_jpg(
         )
         return ConversionResult(r.returncode == 0, r.stderr, "ghostscript")
 
-    magick = shutil.which("magick")
+    magick = find_imagemagick_cli()
     if not magick:
         return ConversionResult(
             False,
-            "Neither Ghostscript (gs/gswin64c/gswin32c) nor ImageMagick (magick) was found.",
+            "Neither Ghostscript (gs/gswin64c/gswin32c) nor ImageMagick (magick/convert) was found.",
         )
 
     cmd = [

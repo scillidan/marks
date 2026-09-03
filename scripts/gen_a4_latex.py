@@ -15,12 +15,15 @@ from pathlib import Path
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
-from _common import convert_to_jpg
+from _common import convert_to_jpg, find_imagemagick_cli
 
 MEDIA_EXTS = {".gif", ".mp4", ".mov", ".webm"}
 AVIF_EXTS = {".avif"}
 WEBP_EXTS = {".webp"}
+SVG_EXTS = {".svg"}
 CONVERT_EXTS = MEDIA_EXTS | AVIF_EXTS | WEBP_EXTS
+# xelatex cannot include SVG directly, so rasterise it alongside other formats.
+LATEX_CONVERT_EXTS = CONVERT_EXTS | SVG_EXTS
 SUPPORTED_EXTS = [".jpg", ".jpeg", ".png", ".gif", ".svg", ".webp", ".avif"]
 
 
@@ -83,18 +86,50 @@ def clean_markdown(md_content):
 
 
 def convert_with_magick(src, dest):
+    cli = find_imagemagick_cli()
+    if not cli:
+        print(
+            f"  ✗ conversion failed for {src.name}: ImageMagick (magick/convert) not found"
+        )
+        return False
     try:
         r = subprocess.run(
-            ["magick", str(src), str(dest)],
+            [cli, str(src), str(dest)],
             capture_output=True,
             text=True,
             encoding="utf-8",
             check=False,
         )
-        if r.returncode != 0:
-            print(f"  ✗ conversion failed for {src.name}: {r.stderr}")
+        if r.returncode == 0:
+            return True
+        # ImageMagick's SVG delegate is sometimes missing on CI images.
+        # Fall back to rsvg-convert (PNG) + ImageMagick (PNG -> JPG) when possible.
+        if src.suffix.lower() == ".svg" and shutil.which("rsvg-convert"):
+            png = dest.with_suffix(".png")
+            r2 = subprocess.run(
+                ["rsvg-convert", "--format=png", "-o", str(png), str(src)],
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                check=False,
+            )
+            if r2.returncode == 0 and png.exists():
+                r3 = subprocess.run(
+                    [cli, str(png), str(dest)],
+                    capture_output=True,
+                    text=True,
+                    encoding="utf-8",
+                    check=False,
+                )
+                png.unlink(missing_ok=True)
+                if r3.returncode == 0:
+                    return True
+                print(f"  ✗ conversion failed for {src.name}: {r3.stderr}")
+                return False
+            print(f"  ✗ conversion failed for {src.name} (rsvg-convert): {r2.stderr}")
             return False
-        return True
+        print(f"  ✗ conversion failed for {src.name}: {r.stderr}")
+        return False
     except Exception as e:
         print(f"  ✗ conversion error for {src.name}: {e}")
         return False
@@ -262,7 +297,7 @@ def process_markdown(md_path, output_dir):
                 continue
 
             src_ext = resolved.suffix.lower()
-            if src_ext in CONVERT_EXTS:
+            if src_ext in LATEX_CONVERT_EXTS:
                 jpg = images_dir / f"{resolved.stem}.jpg"
                 if convert_with_magick(resolved, jpg):
                     cdn_map[base] = jpg.name
@@ -287,7 +322,7 @@ def process_markdown(md_path, output_dir):
             continue
 
         src_ext = src.suffix.lower()
-        if src_ext in CONVERT_EXTS:
+        if src_ext in LATEX_CONVERT_EXTS:
             jpg = images_dir / f"{src.stem}.jpg"
             if convert_with_magick(src, jpg):
                 for full, fname in local_map.items():
