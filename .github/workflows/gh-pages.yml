@@ -44,6 +44,7 @@ jobs:
       - name: Build post PDFs (LaTeX)
         run: bash _site/gen.sh --strict --only post
         env:
+          GEN_EXCLUDE: ${{ vars.GEN_EXCLUDE }}
           POST_SOURCE: ${{ vars.POST_SOURCE }}
 
       - name: Build CTAN cards (LaTeX)
