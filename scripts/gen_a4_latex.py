@@ -92,9 +92,46 @@ def convert_with_magick(src, dest):
             f"  ✗ conversion failed for {src.name}: ImageMagick (magick/convert) not found"
         )
         return False
+
+    src_ext = src.suffix.lower()
+
+    # Animated / multi-frame sources: ensure we emit a single output file.
+    # ImageMagick's default behaviour for GIF/video is to write a numbered
+    # sequence (foo-0.jpg, foo-1.jpg, ...), so xelatex never finds foo.jpg.
+    if src_ext == ".gif":
+        # [0] selects the first frame and forces a single output file.
+        magick_spec = f"{src}[0]"
+    elif src_ext in MEDIA_EXTS:
+        # Video formats convert more reliably with ffmpeg on CI images.
+        if shutil.which("ffmpeg"):
+            r = subprocess.run(
+                [
+                    "ffmpeg",
+                    "-y",
+                    "-i",
+                    str(src),
+                    "-ss",
+                    "00:00:00",
+                    "-vframes",
+                    "1",
+                    str(dest),
+                ],
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                check=False,
+            )
+            if r.returncode == 0 and dest.exists():
+                return True
+            print(f"  ✗ ffmpeg conversion failed for {src.name}: {r.stderr}")
+            return False
+        magick_spec = f"{src}[0]"
+    else:
+        magick_spec = str(src)
+
     try:
         r = subprocess.run(
-            [cli, str(src), str(dest)],
+            [cli, magick_spec, str(dest)],
             capture_output=True,
             text=True,
             encoding="utf-8",
@@ -104,7 +141,7 @@ def convert_with_magick(src, dest):
             return True
         # ImageMagick's SVG delegate is sometimes missing on CI images.
         # Fall back to rsvg-convert (PNG) + ImageMagick (PNG -> JPG) when possible.
-        if src.suffix.lower() == ".svg" and shutil.which("rsvg-convert"):
+        if src_ext == ".svg" and shutil.which("rsvg-convert"):
             png = dest.with_suffix(".png")
             r2 = subprocess.run(
                 ["rsvg-convert", "--format=png", "-o", str(png), str(src)],
