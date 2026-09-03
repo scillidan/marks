@@ -13,7 +13,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from _common import check_dependencies
+import shutil
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 sys.stderr.reconfigure(encoding="utf-8", errors="replace")
@@ -23,7 +23,8 @@ PROJECT_ROOT = SCRIPT_DIR.parent.resolve()
 
 
 def compile_tex(tex_path, fail_on_error=True):
-    check_dependencies()
+    if not shutil.which("xelatex"):
+        sys.exit("Missing dependency: xelatex")
     tex_path = tex_path.resolve()
     ctan_dir = tex_path.parent
     out_dir = ctan_dir / "_output"
