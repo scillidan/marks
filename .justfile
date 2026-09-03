@@ -64,7 +64,7 @@ receipt-rotate path size="" font="" width="":
         {{ if width != "" { "--width " + width } else { "" } }} \
         --rotate
 
-# == favorite-image (polario frame)
+# == image-collect (polario frame)
 polario mode image text-first text-second text-third start resize size:
     uv run scripts/gen_polario.py {{mode}} "{{image}}" "{{text-first}}" "{{text-second}}" "{{text-third}}" "{{start}}" "{{resize}}" "{{size}}"
 

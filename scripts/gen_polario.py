@@ -29,7 +29,7 @@ def get_image_source():
             return path
         print(f"✗ FAVORITE_IMAGE_SOURCE: {env} (not found)")
 
-    local = Path(__file__).parent.parent / "favorite-image" / "assets"
+    local = Path(__file__).parent.parent / "image-collect" / "assets"
     if local.is_dir():
         print(f"✓ Image source (local): {local}")
         return local
@@ -40,7 +40,7 @@ def process_image(images_dir, image_name):
     source = get_image_source()
     if not source:
         sys.exit(
-            "Error: No image source. Set FAVORITE_IMAGE_SOURCE or place images in favorite-image/assets/"
+            "Error: No image source. Set FAVORITE_IMAGE_SOURCE or place images in image-collect/assets/"
         )
     print(f"✓ Image source: {source}")
 
@@ -151,7 +151,7 @@ def main() -> int:
     check_dependencies()
 
     project_root = Path(__file__).parent.parent.resolve()
-    output_dir = project_root / "favorite-image" / "_output"
+    output_dir = project_root / "image-collect" / "_output"
     images_dir = output_dir.parent / "_temp" / "images"
     pdfs_dir = output_dir / "pdfs"
     output_dir.mkdir(exist_ok=True)

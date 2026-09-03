@@ -504,7 +504,7 @@ GROUP_ORDER = [
     ("byya-nineveh", "BYYA Nineveh"),
     ("byya-nineveh-annex", "BYYA Nineveh Annex"),
     ("receipt", "Receipt"),
-    ("favorite-image", "Favorite Image"),
+    ("image-collect", "Image Collect"),
     ("image-convert", "Image Convert"),
     ("typst-demo", "Typst Demo"),
     ("ctan", "CTAN"),
@@ -742,7 +742,7 @@ for pdf_path in pdf_paths:
             source_guess = str(candidate.relative_to(repo_root))
             break
 
-    # For favorite-image entries the PDF filename is already the image filename,
+    # For image-collect entries the PDF filename is already the image filename,
     # so the default title (filename stem) is the image name. No override needed.
 
     # For byya-nineveh entries, use the <h4>-equivalent title from the generated .typ file,
