@@ -22,12 +22,12 @@ def escape_typst(text):
 
 
 def get_image_source():
-    env = os.environ.get("FAVORITE_IMAGE_SOURCE")
+    env = os.environ.get("IMAGE_COLLECT_SOURCE")
     if env:
         path = Path(os.path.expandvars(env))
         if path.is_dir():
             return path
-        print(f"✗ FAVORITE_IMAGE_SOURCE: {env} (not found)")
+        print(f"✗ IMAGE_COLLECT_SOURCE: {env} (not found)")
 
     local = Path(__file__).parent.parent / "image-collect" / "assets"
     if local.is_dir():
@@ -40,7 +40,7 @@ def process_image(images_dir, image_name):
     source = get_image_source()
     if not source:
         sys.exit(
-            "Error: No image source. Set FAVORITE_IMAGE_SOURCE or place images in image-collect/assets/"
+            "Error: No image source. Set IMAGE_COLLECT_SOURCE or place images in image-collect/assets/"
         )
     print(f"✓ Image source: {source}")
 

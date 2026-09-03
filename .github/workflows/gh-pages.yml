@@ -138,7 +138,7 @@ jobs:
         env:
           GEN_EXCLUDE: ${{ vars.GEN_EXCLUDE }}
           POST_SOURCE: ${{ vars.POST_SOURCE }}
-          FAVORITE_IMAGE_SOURCE: ${{ vars.FAVORITE_IMAGE_SOURCE }}
+          IMAGE_COLLECT_SOURCE: ${{ vars.IMAGE_COLLECT_SOURCE }}
           UPSCAYL_MODEL: ${{ vars.UPSCAYL_MODEL }}
 
       # Re-run manifest assembly now that the LaTeX PDFs are present.  gen.sh's
