@@ -30,7 +30,7 @@ fi
 # Options
 BUILD=1
 ONLY=""
-SKIP=""
+SKIP_DIRS=()
 JOBS=""
 STRICT=0
 INCREMENTAL=0
@@ -47,7 +47,7 @@ while [[ $# -gt 0 ]]; do
 		shift 2
 		;;
 	--skip)
-		SKIP="$2"
+		SKIP_DIRS+=("$2")
 		shift 2
 		;;
 	--jobs | -j)
@@ -188,9 +188,12 @@ should_process_dir() {
 	if [[ -n "$ONLY" && "$dir" != "$ONLY" ]]; then
 		return 1
 	fi
-	if [[ -n "$SKIP" && "$dir" == "$SKIP" ]]; then
-		return 1
-	fi
+	local skip
+	for skip in "${SKIP_DIRS[@]}"; do
+		if [[ "$dir" == "$skip" ]]; then
+			return 1
+		fi
+	done
 	return 0
 }
 

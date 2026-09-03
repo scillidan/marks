@@ -13,8 +13,60 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  latex:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v6
+        with:
+          persist-credentials: false
+
+      - uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6  # v2
+
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86  # v5
+        with:
+          # Scripts declare their own inline dependencies via `# /// script`
+          # headers, so key the uv cache on them instead of the default
+          # uv.lock/requirements*.txt (which don't exist in this repo).
+          cache-dependency-glob: |
+            scripts/*.py
+            .justfile
+
+      # LaTeX-specific toolchain: ImageMagick is used to rasterise GIF/WebP/SVG
+      # sources for xelatex; ffmpeg extracts first frames from video files.
+      - run: sudo apt-get update && sudo apt-get install -y ghostscript imagemagick libmagickcore-6.q16-6-extra librsvg2-bin ffmpeg texlive-xetex texlive-latex-extra texlive-lang-chinese
+
+      - uses: ./.github/actions/install-fonts
+        with:
+          manifests: |
+            https://raw.githubusercontent.com/scillidan/scoop-fonts/master/bucket/Sarasa-Mono-SC.json
+            https://raw.githubusercontent.com/matthewjberger/scoop-nerd-fonts/master/bucket/Monaspace-NF-Mono.json
+
+      - name: Build post PDFs (LaTeX)
+        run: bash _site/gen.sh --strict --only post
+        env:
+          POST_SOURCE: ${{ vars.POST_SOURCE }}
+
+      - name: Build CTAN cards (LaTeX)
+        run: bash _site/gen.sh --strict --only ctan
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build-logs-latex
+          path: _temp/build-_site-logs/
+          if-no-files-found: ignore
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: latex-outputs
+          path: |
+            post/_output
+            ctan/_output
+          if-no-files-found: error
+
   deploy:
     runs-on: ubuntu-latest
+    needs: latex
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -29,14 +81,12 @@ jobs:
 
       - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86  # v5
         with:
-          # Scripts declare their own inline dependencies via `# /// script`
-          # headers, so key the uv cache on them instead of the default
-          # uv.lock/requirements*.txt (which don't exist in this repo).
           cache-dependency-glob: |
             scripts/*.py
             .justfile
 
-      - run: sudo apt-get update && sudo apt-get install -y ghostscript imagemagick libmagickcore-6.q16-6-extra librsvg2-bin ffmpeg qpdf texlive-xetex texlive-latex-extra texlive-lang-chinese
+      # Non-LaTeX toolchain: no texlive here; qpdf is kept for image-convert.
+      - run: sudo apt-get update && sudo apt-get install -y ghostscript imagemagick libmagickcore-6.q16-6-extra librsvg2-bin ffmpeg qpdf
 
       - uses: ./.github/actions/install-fonts
         with:
@@ -76,13 +126,26 @@ jobs:
         run: |
           echo '#import "@preview/cmarker:0.1.9"' | typst compile --root . - /dev/null --format pdf
 
-      - name: Build site
-        run: bash _site/gen.sh --strict
+      - name: Download LaTeX outputs
+        uses: actions/download-artifact@v4
+        with:
+          name: latex-outputs
+          path: .
+
+      - name: Build non-LaTeX site
+        run: bash _site/gen.sh --strict --skip post --skip ctan
         env:
           GEN_EXCLUDE: ${{ vars.GEN_EXCLUDE }}
           POST_SOURCE: ${{ vars.POST_SOURCE }}
           FAVORITE_IMAGE_SOURCE: ${{ vars.FAVORITE_IMAGE_SOURCE }}
           UPSCAYL_MODEL: ${{ vars.UPSCAYL_MODEL }}
+
+      # Re-run manifest assembly now that the LaTeX PDFs are present.  gen.sh's
+      # --no-build flag skips all PDF compilation and only assembles _site/.
+      - name: Re-assemble with LaTeX PDFs
+        run: bash _site/gen.sh --no-build
+        env:
+          GEN_EXCLUDE: ${{ vars.GEN_EXCLUDE }}
 
       - uses: actions/upload-artifact@v4
         if: always()
