@@ -302,9 +302,11 @@ def process_figures(md_content):
       the caption (the template renders it as a narrow caption block).
     * Standalone images get their alt cleared, so the template never prints
       descriptive alt text as a caption.
-    * Consecutive standalone images are wrapped in a ``postimagegroup``
-      minipage so they stay together and never split across a column/page
-      (which is what causes the "image stranded at a column bottom" gap).
+    * Consecutive standalone images stay as separate images: each is sized
+      individually by ``fitbox`` against the true remaining column space.
+      Wrapping them in an unbreakable ``postimagegroup`` minipage instead
+      created all-or-nothing blocks that jumped to the next column when they
+      did not fit the column remainder, leaving large blank bands.
     """
     img_re = re.compile(r"^!\[[^\]]*\]\(([^\s\)\\]+)\)[ \t]*$")
 
@@ -315,25 +317,8 @@ def process_figures(md_content):
     def flush_images():
         if not pending:
             return
-        if len(pending) == 1:
-            out.append(f"![]({pending[0]})")
-        else:
-            # Greedily pair consecutive standalone images into unbreakable groups.
-            i = 0
-            while i < len(pending):
-                if i + 1 < len(pending):
-                    out.append("```{=tex}")
-                    out.append("\\begin{postimagegroup}")
-                    out.append("```")
-                    out.append(f"![]({pending[i]})")
-                    out.append(f"![]({pending[i + 1]})")
-                    out.append("```{=tex}")
-                    out.append("\\end{postimagegroup}")
-                    out.append("```")
-                    i += 2
-                else:
-                    out.append(f"![]({pending[i]})")
-                    i += 1
+        for f in pending:
+            out.append(f"![]({f})")
         pending.clear()
 
     for block in blocks:

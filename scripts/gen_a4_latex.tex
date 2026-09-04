@@ -57,12 +57,14 @@
 
 % Fitbox defaults: scale images to fit the available column/page width,
 % and shrink them further if they would not fit vertically.
+% The minimum constraints are relative to the column so they never exceed the
+% max width/height for high-resolution images (whose natural size is huge).
 \fitboxset{
   maxwidth=0.9\linewidth,
   maxheight=0.75\textheight,
   belowboxspace=0pt,
-  minwidth=0.2\fitboxnatwidth,
-  minheight=0.2\fitboxnatheight,
+  minwidth=0.2\linewidth,
+  minheight=0.2\linewidth,
 }
 
 % Shared vertical skip around images/figures.
@@ -74,6 +76,11 @@
 \newlength{\postimageheight}
 \newif\ifpostgroupmode
 \postgroupmodefalse
+
+% Space to reserve below a fitbox image for its caption, measured from the
+% caption text so fitbox can shrink the image to leave room for both.
+\newlength{\postcaptionheight}
+\newsavebox{\postcaptionbox}
 
 % Print a narrow, centered caption block only when #1 is non-empty.
 % The caption text itself stays left-aligned; only the block is centered.
@@ -118,10 +125,23 @@
       \else
         \setlength{\postimageheight}{0.75\textheight}%
       \fi
+      \if\relax\detokenize{#1}\relax
+        \setlength{\postcaptionheight}{0pt}%
+      \else
+        \sbox{\postcaptionbox}{%
+          \begin{minipage}{0.8\linewidth}%
+            \raggedright
+            \footnotesize
+            #1%
+          \end{minipage}%
+        }%
+        \setlength{\postcaptionheight}{\dimexpr\ht\postcaptionbox
+          +\dp\postcaptionbox+0.3\baselineskip\relax}%
+      \fi
       \fitbox[
         maxwidth=0.9\linewidth,
         maxheight=\postimageheight,
-        belowboxspace=0pt,
+        belowboxspace=\postcaptionheight,
       ]{%
         \includegraphics{\postimagedir#3}%
       }%
