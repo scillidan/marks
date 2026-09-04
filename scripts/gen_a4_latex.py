@@ -322,10 +322,14 @@ def process_figures(md_content):
             i = 0
             while i < len(pending):
                 if i + 1 < len(pending):
+                    out.append("```{=tex}")
                     out.append("\\begin{postimagegroup}")
+                    out.append("```")
                     out.append(f"![]({pending[i]})")
                     out.append(f"![]({pending[i + 1]})")
+                    out.append("```{=tex}")
                     out.append("\\end{postimagegroup}")
+                    out.append("```")
                     i += 2
                 else:
                     out.append(f"![]({pending[i]})")
