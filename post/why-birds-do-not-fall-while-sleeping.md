@@ -42,7 +42,7 @@ The scientists also grasped that the quality of the cables–and hence of the te
 
 “The advantage bird’s derive from the tensegrity in their feet is based on the mechanism’s passive nature. The bird subsequently does not have to think or concentrate to remain standing. Everything is based on the system’s elasticity. This is a kind of embodied intelligence where the body alone solves the problem, with no intervention by the brain, thereby doing so without consuming energy,” Chevallereau adds.
 
-![Œuvres ©Hirshhorn Museum and Sculpture Garden, Smithsonian Institution, don de Joseph H. Hirshhorn, 1974 / ©Collection Kröller-Müller Museum - Photos Onderwijsgek et Saku Takakusaki CC BY-SA 4.0 via Wikimedia commons ](assets/why-birds-do-not-fall-while-sleeping_03.jpg)  
+![Œuvres ©Hirshhorn Museum and Sculpture Garden, Smithsonian Institution, don de Joseph H. Hirshhorn, 1974 / ©Collection Kröller-Müller Museum - Photos Onderwijsgek et Saku Takakusaki CC BY-SA 4.0 via Wikimedia commons ](assets/why-birds-do-not-fall-while-sleeping_04.jpg)  
 Application of the principle of tensegrity by the artist Kenneth Snelson for the aluminium and stainless steel Needle Towers: at left, seen from above, the one built in 1968 in the Hirshhorn Museum garden (Washington, DC, United States); at right, Needle Tower II, assembled in 1969 in the garden of the Kröller-Müller Museum (Otterlo, the Netherlands).  
 Image © Hirshhorn Museum and Sculpture Garden, Smithsonian Institution, don de Joseph H. Hirshhorn, 1974 / Collection Kröller-Müller Museum - Photos Onderwijsgek et Saku Takakusaki CC BY-SA 4.0 via Wikimedia commons
 

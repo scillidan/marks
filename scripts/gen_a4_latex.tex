@@ -12,7 +12,7 @@
 \usepackage{responsive}
 \usepackage{fitbox}
 \usepackage{graphicx}
-\usepackage[underscores=false, fencedCode=true]{markdown}
+\usepackage[hybrid=true, underscores=true, fencedCode=true, notes=true, texMathDollars=false]{markdown}
 \usepackage{hyperref}
 \usepackage{microtype}
 \usepackage{ragged2e}
@@ -33,6 +33,10 @@
 \xeCJKDeclareCharClass{CJK}{"2100 -> "214F}
 \xeCJKDeclareCharClass{CJK}{"2150 -> "218F}
 \xeCJKDeclareCharClass{CJK}{"2190 -> "21FF}
+
+% Curly quotes (U+2018/2019/201C/201D) must be Western punctuation, not CJK,
+% otherwise xeCJK inserts extra space around apostrophes such as in "It\'s".
+\xeCJKDeclareCharClass{Default}{"2018, "2019, "201C, "201D}
 
 % Do not stretch short columns to align bottoms -- this alone removes a lot of
 % unwanted whitespace in two-column output.
@@ -125,6 +129,7 @@
       \postcaption{#1}%
       \endgroup
       \addvspace{\postimageskip}
+      \leavevmode
     },
     link = {\href{#3}{#1}},
     emphasis = {{\itshape #1}},
@@ -134,6 +139,7 @@
     headingThree = {\postheadingthree{#1}},
     blockQuoteBegin = {\begingroup\itshape},
     blockQuoteEnd = {\endgroup\par},
+    note = {\footnote{#1}},
   }
 }
 

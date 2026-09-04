@@ -209,6 +209,92 @@ def protect_pipe_tables(md_content):
     return "\n".join(out)
 
 
+def unwrap_md_code_blocks(md_content):
+    r"""Strip ````md` fenced code blocks and render their contents as markdown.
+
+    Some articles use ````md` fences for styled callout blocks. The markdown
+    package would otherwise typeset the inner content as a verbatim code block
+    that does not wrap, causing overfull \\hbox lines that spill across columns.
+    """
+    fence_re = re.compile(r"^(```+)md[ \t]*\n(.*?)\n\1[ \t]*$", re.S | re.M)
+    return fence_re.sub(lambda m: m.group(2), md_content)
+
+
+def escape_underscores_in_urls(md_content):
+    """Escape underscores in markdown image/link URLs.
+
+    The markdown package is loaded with ``underscores=true`` so that ``_*_``
+    emphasis works. That also makes underscores inside URLs emphasis markers,
+    which breaks filenames such as ``image_01.jpg``. Escaping them keeps the
+    URL intact while allowing emphasis syntax elsewhere.
+    """
+
+    def esc(url):
+        return url.replace("_", r"\_")
+
+    # Links that wrap an image: [![alt](inner)](outer)
+    def link_with_image_repl(m):
+        inner_alt, inner_url, outer_url = m.group(1), m.group(2), m.group(3)
+        return f"[![{inner_alt}]({esc(inner_url)})]({esc(outer_url)})"
+
+    md_content = re.sub(
+        r"\[!\[([^\]]*)\]\(([^\s\)]+)\)\]\(([^\s\)]+)\)",
+        link_with_image_repl,
+        md_content,
+    )
+
+    # Standalone images and regular links. Skip URLs that already contain an
+    # escaped underscore so that nested image/link combinations are not double
+    # escaped.
+    def repl(m):
+        url = m.group(2)
+        if r"\_" in url:
+            return m.group(0)
+        return m.group(1) + esc(url) + m.group(3)
+
+    md_content = re.sub(r"(!?\[[^\]]*\]\()([^\s\)]+)(\))", repl, md_content)
+    return md_content
+
+
+def separate_footnote_definitions(md_content):
+    """Ensure consecutive footnote definitions are separated by blank lines.
+
+    The markdown package only recognises footnote definitions that are
+    separated by at least one blank line. Many source files list them
+    back-to-back, which causes "Undefined note reference" warnings.
+    """
+    return re.sub(
+        r"(\[\^[^\]]+\]:.*)\n(?=\[\^[^\]]+\]:)",
+        r"\1\n\n",
+        md_content,
+    )
+
+
+def normalize_whitespace(md_content):
+    """Clean up stray whitespace.
+
+    * Remove trailing spaces that markdown interprets as hard line breaks.
+    * Collapse runs of multiple spaces to a single space outside code fences.
+    """
+    # Preserve fenced code blocks while normalizing the rest.
+    fence_re = re.compile(r"^(```+)[^\n]*\n.*?\n\1[ \t]*$", re.S | re.M)
+    parts = []
+    last = 0
+    for m in fence_re.finditer(md_content):
+        parts.append(md_content[last : m.start()])
+        parts.append(m.group(0))
+        last = m.end()
+    parts.append(md_content[last:])
+
+    out = []
+    for i, part in enumerate(parts):
+        if i % 2 == 0:
+            part = re.sub(r"[ \t]+$", "", part, flags=re.M)
+            part = re.sub(r"([^\s])  +", r"\1 ", part)
+        out.append(part)
+    return "".join(out)
+
+
 def process_figures(md_content):
     """Normalise image blocks.
 
@@ -415,7 +501,12 @@ def process_markdown(md_path, output_dir):
 
     md_content = any_img_re.sub(rewrite_local, md_content)
 
+    md_content = unwrap_md_code_blocks(md_content)
     md_content = process_figures(md_content)
+    md_content = escape_underscores_in_urls(md_content)
+    md_content = separate_footnote_definitions(md_content)
+    md_content = normalize_whitespace(md_content)
+    md_content = re.sub(r"\n{3,}", "\n\n", md_content)
 
     meta_path = output_dir / "meta.tex"
     title_from_h1 = False
