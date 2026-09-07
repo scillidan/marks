@@ -13,9 +13,14 @@
 \usepackage{fitbox}
 \usepackage{graphicx}
 \usepackage{xcolor}
-\usepackage[keep-defaults, Tol]{colorblind}
 \usepackage{listings}
 \usepackage{endnotes}
+
+% Tol Bright colors from latex-demo/code-demo.tex, defined directly so the
+% colorblind package (not in TeX Live 2023 base) is not required.
+\definecolor{T-Q-B0}{RGB}{187,187,187}
+\definecolor{T-Q-B3}{RGB}{34,136,51}
+\definecolor{T-Q-B5}{RGB}{238,102,119}
 \usepackage[underscores=true, fencedCode=true, notes=true, texMathDollars=false, rawAttribute=true]{markdown}
 \usepackage{hyperref}
 \usepackage{microtype}

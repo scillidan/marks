@@ -14,6 +14,11 @@ a6 path size="" font="":
 a4 path:
     uv run scripts/gen_a4_latex.py "{{path}}"
 
+# == post bilingual pair (A4, synchronized two-column paracol)
+# First file: source (e.g. post/foo.md), second file: translation (e.g. post/foo.zh-cn.md)
+a4dual en zh:
+    uv run scripts/gen_a4_dual_latex.py "{{en}}" "{{zh}}"
+
 # == BYYA-nineveh (from .md)
 nineveh-md subdir source="" force="":
     uv run scripts/gen_byya_nineveh_md.py "{{subdir}}" \
