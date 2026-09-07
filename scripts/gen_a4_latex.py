@@ -577,7 +577,7 @@ def generate_wrapper(md_path, latex_dir, project_root):
 
 \\postmarkdowninput{{body.md}}
 
-\\theendnotes
+\\postprintendnotes
 
 \\end{{document}}
 """

@@ -14,7 +14,6 @@
 \usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage{listings}
-\usepackage{endnotes}
 
 % Tol Bright colors from latex-demo/code-demo.tex, defined directly so the
 % colorblind package (not in TeX Live 2023 base) is not required.
@@ -89,6 +88,29 @@
   \lstinputlisting[style=postcode]{#1}%
 }
 
+% Notes are appended to \postnotes@acc in the SAME compile run and printed at
+% the end by \postprintendnotes. This avoids the `endnotes` package, which ships
+% markdown-rendered note content (links, %, #, ...) through an aux file whose
+% line breaks / catcode changes break URLs. \long is required because note
+% bodies may span multiple paragraphs (\par).
+\newcounter{postendnotecounter}
+\makeatletter
+\def\postnotes@acc{}
+\long\def\postendnote#1{%
+  \stepcounter{postendnotecounter}%
+  \textsuperscript{\thepostendnotecounter}%
+  \expandafter\g@addto@macro\expandafter\postnotes@acc{%
+    \par\noindent{\normalfont\bfseries\thepostendnotecounter.}\ #1}%
+}
+\newcommand{\postprintendnotes}{%
+  \ifnum\value{postendnotecounter}>0
+    \section*{Notes}%
+    \par
+    \postnotes@acc
+  \fi
+}
+\makeatother
+
 % Typography: a compact, minimal scale tuned for double-column work.
 % Base size comes from `responsive`; headings/captions are small but readable.
 % Override here if you want a different feel.
@@ -155,6 +177,38 @@
 
 % Markdown renderers ---------------------------------------------------------
 % Image renderer receives: #1=alt(caption), #2=escaped src, #3=raw src.
+%
+% Links are built from the *raw* URL (#3), with every TeX-special character
+% escaped to the control sequence hyperref understands (\# \% \_ ...). Doing
+% this at render time matters: footnote content travels through endnote aux
+% files, where '#' (old hyperref: "Illegal parameter number in \Hy@tempa") and
+% '%' would otherwise be re-interpreted with the wrong catcode and break.
+% Image paths below keep #3 because \includegraphics needs the real filename.
+\ExplSyntaxOn
+\tl_new:N \l_posthref_url_tl
+\cs_new_protected:Npn \posthref #1 #2 {
+  % Work on a detokenized copy so '#'/special tokens keep their catcode
+  % regardless of whether the URL came from the markdown input (catcode 12),
+  % an endnote aux file (catcode 6), or plain text.
+  \tl_clear:N \l_posthref_url_tl
+  \tl_map_inline:Nn { \tl_to_str:n { #2 } } {
+    \str_case:nnF { ##1 } {
+      { \c_hash_str }       { \tl_put_right:Nn \l_posthref_url_tl { \# } }
+      { \c_percent_str }    { \tl_put_right:Nn \l_posthref_url_tl { \% } }
+      { \c_ampersand_str }  { \tl_put_right:Nn \l_posthref_url_tl { \& } }
+      { \c_underscore_str } { \tl_put_right:Nn \l_posthref_url_tl { \_ } }
+      { \c_left_brace_str } { \tl_put_right:Nn \l_posthref_url_tl { \{ } }
+      { \c_right_brace_str }{ \tl_put_right:Nn \l_posthref_url_tl { \} } }
+      { ~ } { \tl_put_right:Nn \l_posthref_url_tl { \textasciitilde {} } }
+      { \c_circumflex_str } { \tl_put_right:Nn \l_posthref_url_tl { \^{} } }
+    } {
+      \tl_put_right:Nn \l_posthref_url_tl { ##1 }
+    }
+  }
+  \href { \l_posthref_url_tl } { #1 }
+}
+\ExplSyntaxOff
+
 \markdownSetup{
   renderers = {
     image = {
@@ -195,7 +249,7 @@
       \addvspace{\postimageskip}
       \leavevmode
     },
-    link = {\href{#3}{#1}},
+    link = {\posthref{#1}{#3}},
     emphasis = {{\itshape #1}},
     strongEmphasis = {{\bfseries #1}},
     headingOne = {\postheadingone{#1}},
@@ -205,7 +259,7 @@
     blockQuoteEnd = {\endgroup\par},
     inputFencedCode = {\postinputfencedcode{#1}{#2}},
     codeSpan = {\postcodespan{#1}},
-    note = {\endnote{#1}},
+    note = {\postendnote{#1}},
   }
 }
 

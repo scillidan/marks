@@ -163,7 +163,7 @@ def generate_wrapper(md_en_path, md_zh_path, latex_dir, project_root):
 
 \\input{{body-interleaved.tex}}
 
-\\theendnotes
+\\postprintendnotes
 
 \\end{{document}}
 """
