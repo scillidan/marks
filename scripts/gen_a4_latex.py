@@ -577,6 +577,8 @@ def generate_wrapper(md_path, latex_dir, project_root):
 
 \\postmarkdowninput{{body.md}}
 
+\\theendnotes
+
 \\end{{document}}
 """
     wrapper_path = latex_dir / f"{stem}.tex"

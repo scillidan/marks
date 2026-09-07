@@ -12,6 +12,10 @@
 \usepackage{responsive}
 \usepackage{fitbox}
 \usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage[keep-defaults, Tol]{colorblind}
+\usepackage{listings}
+\usepackage{endnotes}
 \usepackage[underscores=true, fencedCode=true, notes=true, texMathDollars=false, rawAttribute=true]{markdown}
 \usepackage{hyperref}
 \usepackage{microtype}
@@ -47,6 +51,35 @@
 \ifdefined\posttwocolumn
   \ResponsiveSetup{boxwidth=\columnwidth, characters=50}
 \fi
+
+% Code blocks: listings frame + Tol Bright colors from latex-demo/code-demo.tex.
+\lstdefinestyle{postcode}{
+  language=[LaTeX]TeX,
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\color{T-Q-B3},
+  commentstyle=\color{T-Q-B0},
+  stringstyle=\color{T-Q-B5},
+  frame=single,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=2,
+  aboveskip=0pt,
+  belowskip=0pt,
+  xleftmargin=1em,
+  xrightmargin=1em,
+  postbreak=\mbox{\textcolor{T-Q-B0}{$\hookrightarrow$}\space},
+}
+\lstset{style=postcode}
+
+% Inline code stays close to the listings look.
+\newcommand{\postcodespan}[1]{%
+  \textcolor{black}{\texttt{#1}}%
+}
+
+% Fenced code blocks are rendered with listings.
+\newcommand{\postinputfencedcode}[3]{%
+  \lstinputlisting[style=postcode]{#1}%
+}
 
 % Typography: a compact, minimal scale tuned for double-column work.
 % Base size comes from `responsive`; headings/captions are small but readable.
@@ -119,7 +152,9 @@
     image = {
       \par
       \addvspace{\postimageskip}
-      \begingroup\centering
+      % Keep the image and its caption on the same page/column.
+      \noindent\begin{minipage}{\linewidth}
+      \centering
       \ifpostgroupmode
         \setlength{\postimageheight}{0.4\textheight}%
       \else
@@ -147,7 +182,8 @@
       }%
       \par
       \postcaption{#1}%
-      \endgroup
+      \end{minipage}%
+      \par
       \addvspace{\postimageskip}
       \leavevmode
     },
@@ -159,7 +195,9 @@
     headingThree = {\postheadingthree{#1}},
     blockQuoteBegin = {\begingroup\itshape},
     blockQuoteEnd = {\endgroup\par},
-    note = {\footnote{#1}},
+    inputFencedCode = {\postinputfencedcode{#1}{#2}{#3}},
+    codeSpan = {\postcodespan{#1}},
+    note = {\endnote{#1}},
   }
 }
 
