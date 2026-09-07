@@ -42,7 +42,9 @@ jobs:
             https://raw.githubusercontent.com/matthewjberger/scoop-nerd-fonts/master/bucket/Monaspace-NF-Mono.json
 
       - name: Build post PDFs (LaTeX)
-        run: bash _site/gen.sh --strict --only post
+        run: |
+          bash _site/gen.sh --strict --only post
+          bash _site/gen.sh --strict --only post_zh-cn
         env:
           GEN_EXCLUDE: ${{ vars.GEN_EXCLUDE }}
           POST_SOURCE: ${{ vars.POST_SOURCE }}
@@ -62,6 +64,7 @@ jobs:
           name: latex-outputs
           path: |
             post/_output
+            post_zh-cn/_output
             ctan/_output
           if-no-files-found: error
 
@@ -134,7 +137,7 @@ jobs:
           path: .
 
       - name: Build non-LaTeX site
-        run: bash _site/gen.sh --strict --skip post --skip ctan
+        run: bash _site/gen.sh --strict --skip post --skip post_zh-cn --skip ctan
         env:
           GEN_EXCLUDE: ${{ vars.GEN_EXCLUDE }}
           POST_SOURCE: ${{ vars.POST_SOURCE }}
