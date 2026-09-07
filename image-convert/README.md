@@ -1,8 +1,10 @@
 ```sh
+just image-convert landscape light "imagemagick_noise_01" "assets/20200518_12_34_59.jpg" "magick $1 +level 20%,80% -sigmoidal-contrast 6,50% -attenuate 0.8  +noise Gaussian $2"
+just image-convert landscape light "imagemagick_noise_02" "assets/20200518_12_34_59.jpg" "magick $1 ( +clone -fill gray50 -colorize 100 -attenuate 1.2 +noise Gaussian -blur 0x0.3 -colorspace Gray ) -compose overlay -composite $2"
 just image-convert portrait light "imagemagick_charcoal" "assets/Edward John Poynter_Pea Blossoms, 1890.jpg" "magick $1 -charcoal 2 $2"
 just image-convert portrait light "imagemagick_paint" "assets/Edward John Poynter_Pea Blossoms, 1890.jpg" "magick $1 -paint 3 $2"
 just image-convert portrait light "imagemagick_sketch" "assets/Edward John Poynter_Pea Blossoms, 1890.jpg" "magick $1 -colorspace gray -sketch 0x10+120 $2"
-just image-convert portrait light "imagemagick_annotate" "assets/Edward John Poynter_Pea Blossoms, 1890.jpg" "magick $1 -undercolor #00000050 -fill #FFFFFF -gravity SouthWest -font ""C:/Users/User/Scoop/apps/Sarasa-Term-SC-Nerd/current/SarasaTermSCNerd-Regular.ttf"" -pointsize 20 -interline-spacing 2 -annotate +5+5 \"Pea Blossoms (1890),\n  Edward John Poynter\" $2"
+just image-convert portrait light "imagemagick_annotate" "assets/Edward John Poynter_Pea Blossoms, 1890.jpg" "magick $1 -undercolor #00000050 -fill #FFFFFF -gravity SouthWest -font ""C:/Users/User/Scoop/apps/Sarasa-Term-SC-Nerd/current/SarasaTermSCNerd-Regular.ttf"" -pointsize 20 -interline-spacing 2 -annotate +5+5 ""Pea Blossoms (1890),\n  Edward John Poynter"" $2"
 just image-convert landscape light "imagemagick_threshold" "assets/20200518_12_34_59.jpg" "magick $1 -threshold 60% -despeckle -transparent white $2"
 just image-convert landscape light "imagemagick_range-threshold" "assets/20200518_12_34_59.jpg" "magick $1 -range-threshold 20,50,80% $2"
 just image-convert portrait light "imagemagick_ordered-dither" "assets/Edward John Poynter_Pea Blossoms, 1890.jpg" "magick $1 -ordered-dither h6x6o -colors 8 $2"
