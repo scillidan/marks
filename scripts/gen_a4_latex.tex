@@ -82,7 +82,10 @@
 }
 
 % Fenced code blocks are rendered with listings.
-\newcommand{\postinputfencedcode}[3]{%
+% Only #1 (the temp file written by the markdown package) is consumed. Older
+% markdown releases pass 2 args to this renderer, newer ones pass 3; never
+% reference #3 here or compilation breaks on TeX Live 2023.
+\newcommand{\postinputfencedcode}[2]{%
   \lstinputlisting[style=postcode]{#1}%
 }
 
@@ -200,7 +203,7 @@
     headingThree = {\postheadingthree{#1}},
     blockQuoteBegin = {\begingroup\itshape},
     blockQuoteEnd = {\endgroup\par},
-    inputFencedCode = {\postinputfencedcode{#1}{#2}{#3}},
+    inputFencedCode = {\postinputfencedcode{#1}{#2}},
     codeSpan = {\postcodespan{#1}},
     note = {\endnote{#1}},
   }
