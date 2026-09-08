@@ -46,6 +46,13 @@ def get_image_source(content_dir):
 
 
 def extract_metadata(md_content):
+    """Parse the leading ``` metadata block if present.
+
+    The metadata is extracted and returned, but the block itself is left in
+    the markdown body so it is rendered as a visible code block (it is part
+    of the article content). This keeps markdown-to-LaTeX handling uniform:
+    all fenced code blocks, including the top metadata block, are displayed.
+    """
     lines = md_content.splitlines()
     meta = {}
     if lines and lines[0].strip().startswith("```"):
@@ -60,7 +67,6 @@ def extract_metadata(md_content):
                 if m:
                     key = m.group(1).strip().lower().replace(" ", "")
                     meta[key] = m.group(2).strip()
-            md_content = "\n".join(lines[end + 1 :])
     return meta, md_content
 
 
@@ -530,7 +536,8 @@ def process_markdown(md_path, output_dir):
 
     meta_lines = ["% Auto-generated post metadata"]
     for key, val in meta.items():
-        cmd = "post" + key.capitalize()
+        # Wrapper checks \posttitle, \postauthor, \postdate, etc. (all lowercase).
+        cmd = "post" + key.lower()
         meta_lines.append(f"\\def\\{cmd}{{{tex_escape(val)}}}")
     meta_path.write_text("\n".join(meta_lines), encoding="utf-8")
     print(f"Created: {meta_path}")

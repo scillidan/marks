@@ -67,8 +67,23 @@
   breaklines=true,
   showstringspaces=false,
   tabsize=2,
-  aboveskip=0pt,
-  belowskip=0pt,
+  aboveskip=0.6\baselineskip,
+  belowskip=0.6\baselineskip,
+  xleftmargin=1em,
+  xrightmargin=1em,
+  postbreak=\mbox{\textcolor{T-Q-B0}{$\hookrightarrow$}\space},
+}
+% Plain variant for fenced blocks with no/unknown language: same frame and
+% spacing, but no syntax highlighting (keeps metadata blocks and plain
+% snippets readable without LaTeX-keyword coloring).
+\lstdefinestyle{postcodeplain}{
+  basicstyle=\ttfamily\footnotesize,
+  frame=single,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=2,
+  aboveskip=0.6\baselineskip,
+  belowskip=0.6\baselineskip,
   xleftmargin=1em,
   xrightmargin=1em,
   postbreak=\mbox{\textcolor{T-Q-B0}{$\hookrightarrow$}\space},
@@ -81,12 +96,68 @@
 }
 
 % Fenced code blocks are rendered with listings.
-% Only #1 (the temp file written by the markdown package) is consumed. Older
-% markdown releases pass 2 args to this renderer, newer ones pass 3; never
-% reference #3 here or compilation breaks on TeX Live 2023.
-\newcommand{\postinputfencedcode}[2]{%
-  \lstinputlisting[style=postcode]{#1}%
+% The markdown package passes #1 (temp file), #2 (language), #3 (language).
+% Only the first language argument is used; the second is accepted so the
+% renderer works with both older and newer markdown package releases.
+\ExplSyntaxOn
+\prop_new:N \g_post_code_languages_prop
+\prop_gset_from_keyval:Nn \g_post_code_languages_prop {
+  bash       = bash,
+  sh         = bash,
+  shell      = bash,
+  zsh        = bash,
+  python     = python,
+  py         = python,
+  javascript = javascript,
+  js         = javascript,
+  typescript = typescript,
+  ts         = typescript,
+  html       = html,
+  css        = css,
+  yaml       = yaml,
+  yml        = yaml,
+  json       = json,
+  rust       = rust,
+  go         = go,
+  c          = c,
+  cpp        = c++,
+  cxx        = c++,
+  cc         = c++,
+  java       = java,
+  kotlin     = kotlin,
+  swift      = swift,
+  ruby       = ruby,
+  rb         = ruby,
+  perl       = perl,
+  php        = php,
+  sql        = SQL,
+  ini        = ini,
+  toml       = ini,
+  diff       = diff,
+  tex        = [LaTeX]TeX,
+  latex      = [LaTeX]TeX,
+  md         = [LaTeX]TeX,
+  text       = {},
+  txt        = {},
 }
+\cs_new_protected:Npn \postinputfencedcode #1 #2 {
+  \group_begin:
+  \tl_set:Nx \l_post_lang_tl { \str_lowercase:n {#2} }
+  \prop_if_in:NVTF \g_post_code_languages_prop \l_post_lang_tl {
+    \tl_set:Nx \l_post_listings_lang_tl
+      { \prop_item:NV \g_post_code_languages_prop \l_post_lang_tl }
+  } {
+    % Unknown language: default to plain listings (no syntax highlighting).
+    \tl_clear:N \l_post_listings_lang_tl
+  }
+  \tl_if_empty:NTF \l_post_listings_lang_tl {
+    \lstinputlisting[style=postcodeplain]{#1}
+  } {
+    \lstinputlisting[style=postcode,language=\l_post_listings_lang_tl]{#1}
+  }
+  \group_end:
+}
+\ExplSyntaxOff
 
 % Notes are appended to \postnotes@acc in the SAME compile run and printed at
 % the end by \postprintendnotes. This avoids the `endnotes` package, which ships
@@ -99,8 +170,14 @@
 \long\def\postendnote#1{%
   \stepcounter{postendnotecounter}%
   \textsuperscript{\thepostendnotecounter}%
-  \expandafter\g@addto@macro\expandafter\postnotes@acc{%
-    \par\noindent{\normalfont\bfseries\thepostendnotecounter.}\ #1}%
+  % Bake the current number into the accumulator as plain digits; otherwise
+  % \thepostendnotecounter would be expanded later, when all notes share the
+  % final counter value.
+  \edef\@postnotenum{\thepostendnotecounter}%
+  \expandafter\postendnote@add\expandafter{\@postnotenum}{#1}%
+}
+\long\def\postendnote@add#1#2{%
+  \g@addto@macro\postnotes@acc{\par\noindent{\normalfont\bfseries #1.}\ #2}%
 }
 \newcommand{\postprintendnotes}{%
   \ifnum\value{postendnotecounter}>0
