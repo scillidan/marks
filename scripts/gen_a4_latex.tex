@@ -15,7 +15,6 @@
 \usepackage{xcolor}
 \usepackage{listings}
 \usepackage{xurl}
-\usepackage{enumitem}
 \usepackage{relsize}
 
 % Tol Bright colors from latex-demo/code-demo.tex, defined directly so the
@@ -23,7 +22,13 @@
 \definecolor{T-Q-B0}{RGB}{187,187,187}
 \definecolor{T-Q-B3}{RGB}{34,136,51}
 \definecolor{T-Q-B5}{RGB}{238,102,119}
+% Load markdown *before* enumitem. Loading enumitem before markdown triggers a
+% known conflict in older markdown package releases: the package patches list
+% environments at \begin{document} and leaves \enit@after undefined, causing
+% "! Undefined control sequence. \enit@enditemize ->\enit@after ..." when a
+% markdown list ends. See Witiko/markdown#560.
 \usepackage[underscores=true, fencedCode=true, notes=true, texMathDollars=false, rawAttribute=true]{markdown}
+\usepackage{enumitem}
 \usepackage{hyperref}
 \usepackage{microtype}
 \usepackage{ragged2e}
