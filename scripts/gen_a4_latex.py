@@ -52,6 +52,10 @@ def extract_metadata(md_content):
     the markdown body so it is rendered as a visible code block (it is part
     of the article content). This keeps markdown-to-LaTeX handling uniform:
     all fenced code blocks, including the top metadata block, are displayed.
+
+    Long Source: URLs inside the block are wrapped with listings escape
+    markers so they remain a single clickable hyperlink in the PDF even when
+    the code block is visually line-broken.
     """
     lines = md_content.splitlines()
     meta = {}
@@ -67,6 +71,17 @@ def extract_metadata(md_content):
                 if m:
                     key = m.group(1).strip().lower().replace(" ", "")
                     meta[key] = m.group(2).strip()
+            # Wrap Source: URLs so they remain one clickable link in listings.
+            source_url_re = re.compile(
+                r"^(Source\s*:\s*)(https?://\S+)(.*)$", re.IGNORECASE
+            )
+            new_lines = []
+            for line in lines[: end + 1]:
+                m = source_url_re.match(line)
+                if m:
+                    line = f"{m.group(1)}(*@\\url{{{m.group(2)}}}@*){m.group(3)}"
+                new_lines.append(line)
+            md_content = "\n".join(new_lines + lines[end + 1 :])
     return meta, md_content
 
 
@@ -504,17 +519,13 @@ def process_markdown(md_path, output_dir):
     md_content = re.sub(r"\n{3,}", "\n\n", md_content)
 
     meta_path = output_dir / "meta.tex"
-    title_from_h1 = False
+    # Keep the first H1 in the markdown body; the wrapper no longer prints a
+    # separate title block. Titles are rendered by the markdown renderer like
+    # any other heading, keeping markdown-to-LaTeX handling uniform.
     if "title" not in meta:
         m = re.search(r"^#\s+(.+)$", md_content, re.M)
         if m:
             meta["title"] = m.group(1).strip()
-            title_from_h1 = True
-
-    # If the title came from the first H1, remove that H1 from the body
-    # so the wrapper can print it once as the article header.
-    if title_from_h1:
-        md_content = re.sub(r"^#\s+.+$\n?", "", md_content, count=1, flags=re.M)
 
     body_path = output_dir / "body.md"
     body_path.write_text(md_content, encoding="utf-8")
@@ -549,44 +560,31 @@ def generate_wrapper(md_path, latex_dir, project_root):
     """Write the per-article LaTeX wrapper that pulls in the shared template."""
     stem = md_path.stem
     rel_root = os.path.relpath(project_root, latex_dir).replace("\\", "/")
-    wrapper = f"""% !TeX program = xelatex
+    wrapper = rf"""% !TeX program = xelatex
 % Auto-generated LaTeX wrapper for {md_path.name} -- do not edit.
 % Regenerate with: python scripts/gen_a4_latex.py {md_path.as_posix()}
 % The wrapper is compiled from inside this directory (see generator).
 
-\\documentclass[twocolumn]{{article}}
-\\usepackage[a4paper, margin=1.2cm]{{geometry}}
+\documentclass[twocolumn]{{article}}
+\usepackage[a4paper, margin=1.2cm]{{geometry}}
 
-\\def\\poststem{{{stem}}}
-\\def\\postlayout{{a4}}
-\\def\\posttwocolumn{{1}}
+\def\poststem{{{stem}}}
+\def\postlayout{{a4}}
+\def\posttwocolumn{{1}}
 
-\\input{{{rel_root}/scripts/gen_a4_latex}}
+\input{{{rel_root}/scripts/gen_a4_latex}}
 
-\\def\\postimagedir{{images/}}
+\def\postimagedir{{images/}}
 
-\\begin{{document}}
+\begin{{document}}
 
-\\input{{meta.tex}}
+\input{{meta.tex}}
 
-\\ifdefined\\posttitle
-  \\begin{{center}}
-    {{\\LARGE\\posttitle}}\\par
-    \\ifdefined\\postauthor
-      {{\\small by \\postauthor\\par}}
-    \\fi
-    \\ifdefined\\postdate
-      {{\\small\\postdate\\par}}
-    \\fi
-  \\end{{center}}
-  \\vspace{{0.5em}}
-\\fi
+\postmarkdowninput{{body.md}}
 
-\\postmarkdowninput{{body.md}}
+\postprintendnotes
 
-\\postprintendnotes
-
-\\end{{document}}
+\end{{document}}
 """
     wrapper_path = latex_dir / f"{stem}.tex"
     wrapper_path.write_text(wrapper, encoding="utf-8")

@@ -124,48 +124,35 @@ def generate_wrapper(md_en_path, md_zh_path, latex_dir, project_root):
     out_stem = f"{en_stem}_{zh_lang}" if zh_lang else f"{en_stem}-dual"
 
     rel_root = os.path.relpath(project_root, latex_dir).replace("\\", "/")
-    wrapper = f"""% !TeX program = xelatex
+    wrapper = rf"""% !TeX program = xelatex
 % Auto-generated bilingual LaTeX wrapper for {md_en_path.name} / {md_zh_path.name}.
 % Regenerate with: python scripts/gen_a4_dual_latex.py {md_en_path.as_posix()} {md_zh_path.as_posix()}
 
-\\documentclass{{article}}
-\\usepackage[a4paper, margin=1.2cm]{{geometry}}
-\\usepackage{{paracol}}
+\documentclass{{article}}
+\usepackage[a4paper, margin=1.2cm]{{geometry}}
+\usepackage{{paracol}}
 
-\\def\\poststem{{{out_stem}}}
-\\def\\postlayout{{a4}}
+\def\poststem{{{out_stem}}}
+\def\postlayout{{a4}}
 
-\\input{{{rel_root}/scripts/gen_a4_latex}}
+\input{{{rel_root}/scripts/gen_a4_latex}}
 
-\\def\\postimagedir{{images/}}
+\def\postimagedir{{images/}}
 
 % The article class is single-column here (paracol makes the two columns), so
 % teach `responsive` to measure against half the text width -- otherwise it
 % picks a ~13pt face meant for a full-width page and list items overflow.
-\\ResponsiveSetup{{boxwidth=0.46\\textwidth, characters=50}}
+\ResponsiveSetup{{boxwidth=0.46\textwidth, characters=50}}
 
-\\begin{{document}}
+\begin{{document}}
 
-\\input{{meta.tex}}
+\input{{meta.tex}}
 
-\\ifdefined\\posttitle
-  \\begin{{center}}
-    {{\\LARGE\\posttitle}}\\par
-    \\ifdefined\\postauthor
-      {{\\small by \\postauthor\\par}}
-    \\fi
-    \\ifdefined\\postdate
-      {{\\small\\postdate\\par}}
-    \\fi
-  \\end{{center}}
-  \\vspace{{0.5em}}
-\\fi
+\input{{body-interleaved.tex}}
 
-\\input{{body-interleaved.tex}}
+\postprintendnotes
 
-\\postprintendnotes
-
-\\end{{document}}
+\end{{document}}
 """
     wrapper_path = latex_dir / f"{out_stem}.tex"
     wrapper_path.write_text(wrapper, encoding="utf-8")

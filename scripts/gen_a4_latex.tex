@@ -14,6 +14,9 @@
 \usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage{listings}
+\usepackage{xurl}
+\usepackage{enumitem}
+\usepackage{relsize}
 
 % Tol Bright colors from latex-demo/code-demo.tex, defined directly so the
 % colorblind package (not in TeX Live 2023 base) is not required.
@@ -46,6 +49,18 @@
 % otherwise xeCJK inserts extra space around apostrophes such as in "It\'s".
 \xeCJKDeclareCharClass{Default}{"2018, "2019, "201C, "201D}
 
+% Disable xeCJK's automatic CJK/Latin glue so English words, symbols and code
+% stay tight against CJK text, matching plain LaTeX spacing behavior.
+\xeCJKsetup{CJKecglue={}}
+
+% Shared narrow block width for images, blockquotes, code blocks, etc.
+% Indented by ~4 monospace spaces (2em) on each side. Defined as a macro so
+% it is re-evaluated against the current \linewidth inside each environment
+% (single column, two-column, or paracol column).
+\newlength{\postindent}
+\setlength{\postindent}{2em}
+\newcommand{\postnarrowwidth}{\dimexpr\linewidth-2\postindent\relax}
+
 % Do not stretch short columns to align bottoms -- this alone removes a lot of
 % unwanted whitespace in two-column output.
 \raggedbottom
@@ -57,6 +72,8 @@
 \fi
 
 % Code blocks: listings frame + Tol Bright colors from latex-demo/code-demo.tex.
+% Vertical spacing is handled by the wrapper environment, so keep aboveskip/
+% belowskip at 0pt inside listings.
 \lstdefinestyle{postcode}{
   language=[LaTeX]TeX,
   basicstyle=\ttfamily\footnotesize,
@@ -67,26 +84,29 @@
   breaklines=true,
   showstringspaces=false,
   tabsize=2,
-  aboveskip=0.6\baselineskip,
-  belowskip=0.6\baselineskip,
-  xleftmargin=1em,
-  xrightmargin=1em,
+  aboveskip=0pt,
+  belowskip=0pt,
+  xleftmargin=\postindent,
+  xrightmargin=\postindent,
   postbreak=\mbox{\textcolor{T-Q-B0}{$\hookrightarrow$}\space},
 }
 % Plain variant for fenced blocks with no/unknown language: same frame and
 % spacing, but no syntax highlighting (keeps metadata blocks and plain
 % snippets readable without LaTeX-keyword coloring).
+% Escape inside is enabled so long Source: URLs can be wrapped in \url{}
+% and remain a single clickable hyperlink even when visually broken.
 \lstdefinestyle{postcodeplain}{
   basicstyle=\ttfamily\footnotesize,
   frame=single,
   breaklines=true,
   showstringspaces=false,
   tabsize=2,
-  aboveskip=0.6\baselineskip,
-  belowskip=0.6\baselineskip,
-  xleftmargin=1em,
-  xrightmargin=1em,
+  aboveskip=0pt,
+  belowskip=0pt,
+  xleftmargin=\postindent,
+  xrightmargin=\postindent,
   postbreak=\mbox{\textcolor{T-Q-B0}{$\hookrightarrow$}\space},
+  escapeinside={(*@}{@*)},
 }
 \lstset{style=postcode}
 
@@ -150,11 +170,21 @@
     % Unknown language: default to plain listings (no syntax highlighting).
     \tl_clear:N \l_post_listings_lang_tl
   }
+  % Width-restricted, centered code block. Spacing is added outside the
+  % minipage so it matches the surrounding paragraph rhythm.
+  \par
+  \addvspace{0.6\baselineskip}
+  \noindent\hfill
+  \begin{minipage}{\postnarrowwidth}
   \tl_if_empty:NTF \l_post_listings_lang_tl {
     \lstinputlisting[style=postcodeplain]{#1}
   } {
     \lstinputlisting[style=postcode,language=\l_post_listings_lang_tl]{#1}
   }
+  \end{minipage}%
+  \hfill\null
+  \par
+  \addvspace{0.6\baselineskip}
   \group_end:
 }
 \ExplSyntaxOff
@@ -181,29 +211,41 @@
 }
 \newcommand{\postprintendnotes}{%
   \ifnum\value{postendnotecounter}>0
-    \section*{Notes}%
-    \par
+    % Separate endnotes from the body with a slightly wider gap, like the
+    % space between a heading and the following text, instead of a "Notes"
+    % section title.
+    \par\addvspace{1.2\baselineskip}%
     \postnotes@acc
   \fi
 }
 \makeatother
 
-% Typography: a compact, minimal scale tuned for double-column work.
-% Base size comes from `responsive`; headings/captions are small but readable.
-% Override here if you want a different feel.
-\newcommand{\postheadingone}[1]{{\LARGE #1}\par}
-\newcommand{\postheadingtwo}[1]{{\large #1}\par}
-\newcommand{\postheadingthree}[1]{{\normalsize\bfseries #1}\par}
+% Typography: headings are regular weight, left-aligned, and distinguished
+% by size and vertical spacing only. Sizes scale relative to the responsive
+% base font so they remain balanced across layouts.
+\newcommand{\postheadingone}[1]{%
+  \par\addvspace{0.8\baselineskip}%
+  {\relscale{1.4}#1}\par
+  \addvspace{0.4\baselineskip}%
+}
+\newcommand{\postheadingtwo}[1]{%
+  \par\addvspace{0.6\baselineskip}%
+  {\relscale{1.2}#1}\par
+  \addvspace{0.3\baselineskip}%
+}
+\newcommand{\postheadingthree}[1]{%
+  \par\addvspace{0.4\baselineskip}%
+  {\relscale{1.1}#1}\par
+  \addvspace{0.2\baselineskip}%
+}
 
-% Fitbox defaults: scale images to fit the available column/page width,
-% and shrink them further if they would not fit vertically.
-% The minimum constraints are relative to the column so they never exceed the
-% max width/height for high-resolution images (whose natural size is huge).
+% Fitbox defaults: scale images to fit the narrow block width, and shrink
+% them further if they would not fit vertically.
 \fitboxset{
-  maxwidth=0.9\linewidth,
+  maxwidth=\postnarrowwidth,
   maxheight=0.75\textheight,
   belowboxspace=0pt,
-  minwidth=0.2\linewidth,
+  minwidth=0.2\postnarrowwidth,
   minheight=0.2\linewidth,
 }
 
@@ -222,15 +264,17 @@
 \newlength{\postcaptionheight}
 \newsavebox{\postcaptionbox}
 
-% Print a narrow, centered caption block only when #1 is non-empty.
-% The caption text itself stays left-aligned; only the block is centered.
+% Print a caption block only when #1 is non-empty.
+% The caption text is left-aligned and constrained to the same narrow width
+% as the image/code/quote blocks. The top gap matches the text-to-image gap;
+% the bottom gap is handled by the surrounding image environment.
 \newcommand{\postcaption}[1]{%
   \if\relax\detokenize{#1}\relax
   \else
-    \vspace{0.3\baselineskip}%
-    \begin{minipage}{0.8\linewidth}%
+    \vspace{\postimageskip}%
+    \begin{minipage}{\postnarrowwidth}%
       \raggedright
-      \footnotesize
+      \small
       #1%
     \end{minipage}%
     \par
@@ -253,6 +297,22 @@
 }
 
 % Markdown renderers ---------------------------------------------------------
+% Blockquote: width-restricted, centered, left-aligned text, no extra indent.
+\newcommand{\postblockquotebegin}{%
+  \par\addvspace{0.6\baselineskip}%
+  \noindent\hfill
+  \begin{minipage}{\postnarrowwidth}%
+  \raggedright\itshape
+}
+\newcommand{\postblockquoteend}{%
+  \end{minipage}%
+  \hfill\null\par
+  \addvspace{0.6\baselineskip}%
+}
+
+% Tighten list vertical spacing to match the code-block rhythm.
+\setlist[itemize,enumerate]{leftmargin=2em,topsep=0.6\baselineskip,itemsep=0pt,parsep=0pt}
+
 % Image renderer receives: #1=alt(caption), #2=escaped src, #3=raw src.
 %
 % Links are built from the *raw* URL (#3), with every TeX-special character
@@ -291,8 +351,10 @@
     image = {
       \par
       \addvspace{\postimageskip}
-      % Keep the image and its caption on the same page/column.
-      \noindent\begin{minipage}{\linewidth}
+      % Keep the image and its caption on the same page/column, constrained
+      % to the same narrow width as code blocks and blockquotes.
+      \noindent\hfill
+      \begin{minipage}{\postnarrowwidth}
       \centering
       \ifpostgroupmode
         \setlength{\postimageheight}{0.4\textheight}%
@@ -303,17 +365,17 @@
         \setlength{\postcaptionheight}{0pt}%
       \else
         \sbox{\postcaptionbox}{%
-          \begin{minipage}{0.8\linewidth}%
+          \begin{minipage}{\postnarrowwidth}%
             \raggedright
-            \footnotesize
+            \small
             #1%
           \end{minipage}%
         }%
         \setlength{\postcaptionheight}{\dimexpr\ht\postcaptionbox
-          +\dp\postcaptionbox+0.3\baselineskip\relax}%
+          +\dp\postcaptionbox+\postimageskip\relax}%
       \fi
       \fitbox[
-        maxwidth=0.9\linewidth,
+        maxwidth=\postnarrowwidth,
         maxheight=\postimageheight,
         belowboxspace=\postcaptionheight,
       ]{%
@@ -322,8 +384,9 @@
       \par
       \postcaption{#1}%
       \end{minipage}%
+      \hfill\null
       \par
-      \addvspace{\postimageskip}
+      \addvspace{0.6\baselineskip}
       \leavevmode
     },
     link = {\posthref{#1}{#3}},
@@ -332,8 +395,8 @@
     headingOne = {\postheadingone{#1}},
     headingTwo = {\postheadingtwo{#1}},
     headingThree = {\postheadingthree{#1}},
-    blockQuoteBegin = {\begingroup\itshape},
-    blockQuoteEnd = {\endgroup\par},
+    blockQuoteBegin = {\postblockquotebegin},
+    blockQuoteEnd = {\postblockquoteend},
     inputFencedCode = {\postinputfencedcode{#1}{#2}},
     codeSpan = {\postcodespan{#1}},
     note = {\postendnote{#1}},
