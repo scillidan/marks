@@ -31,7 +31,17 @@
 \usepackage{enumitem}
 \usepackage{hyperref}
 \usepackage{microtype}
+\microtypesetup{protrusion=true,tracking=true}
 \usepackage{ragged2e}
+
+% The body font is monospace, whose inter-word glue has almost no natural
+% stretch, so fully-justified lines otherwise end up with big gaps or overfull
+% boxes. \emergencystretch lets TeX open up extra stretch to smooth line
+% lengths, and the tolerance/badness limits keep "overfull" lines from turning
+% into errors. Pair this with the CJK hanging punctuation above.
+\emergencystretch=1.5em\relax
+\tolerance=1200\relax
+\hbadness=1400\relax
 
 % Fonts: use Sarasa Mono SC everywhere. xeCJK is still loaded so CJK line
 % breaking, punctuation spacing, and character-class routing continue to work,
@@ -59,10 +69,20 @@
 % Disable the automatic CJK/Latin glue entirely.
 \xeCJKsetup{CJKecglue={}}
 
+% Improve paragraph justification for CJK text: allow punctuation to hang
+% slightly into the margins and permit small inter-character stretching so
+% line lengths are less ragged.
+\xeCJKDeclarePunctStyle{postpunct}{
+  enabled-hanging    = true,
+  optimize-kerning   = true
+}
+\xeCJKsetup{PunctStyle=postpunct}
+
 % Shared narrow block width for images, blockquotes, code blocks, etc.
-% Indented by ~4 monospace spaces (2em) on each side. Defined as a macro so
-% it is re-evaluated against the current \linewidth inside each environment
-% (single column, two-column, or paracol column).
+% Indented by 4 half-width monospace spaces (= 2em = two CJK full-width
+% characters) on each side. Defined as a macro so it is re-evaluated against
+% the current \linewidth inside each environment (single column, two-column,
+% or paracol column).
 \newlength{\postindent}
 \setlength{\postindent}{2em}
 \newcommand{\postnarrowwidth}{\dimexpr\linewidth-2\postindent\relax}
@@ -92,8 +112,6 @@
   tabsize=2,
   aboveskip=0pt,
   belowskip=0pt,
-  xleftmargin=\postindent,
-  xrightmargin=\postindent,
   postbreak=\mbox{\textcolor{T-Q-B0}{$\hookrightarrow$}\space},
 }
 % Plain variant for fenced blocks with no/unknown language: same frame and
@@ -109,8 +127,6 @@
   tabsize=2,
   aboveskip=0pt,
   belowskip=0pt,
-  xleftmargin=\postindent,
-  xrightmargin=\postindent,
   postbreak=\mbox{\textcolor{T-Q-B0}{$\hookrightarrow$}\space},
   escapeinside={(*@}{@*)},
 }
@@ -179,7 +195,7 @@
   % Width-restricted, centered code block. Spacing is added outside the
   % minipage so it matches the surrounding paragraph rhythm.
   \par
-  \addvspace{0.6\baselineskip}
+  \addvspace{\postblockskip}
   \noindent\hfill
   \begin{minipage}{\postnarrowwidth}
   \tl_if_empty:NTF \l_post_listings_lang_tl {
@@ -190,7 +206,7 @@
   \end{minipage}%
   \hfill\null
   \par
-  \addvspace{0.6\baselineskip}
+  \addvspace{\postblockskip}
   \group_end:
 }
 \ExplSyntaxOff
@@ -228,21 +244,22 @@
 
 % Typography: headings are regular weight, left-aligned, and distinguished
 % by size and vertical spacing only. Sizes scale relative to the responsive
-% base font so they remain balanced across layouts.
+% base font so they remain balanced across layouts. Top gap is slightly
+% larger than bottom gap so the heading visually belongs to the text below.
 \newcommand{\postheadingone}[1]{%
-  \par\addvspace{0.8\baselineskip}%
+  \par\addvspace{1.0\baselineskip}%
   {\relscale{1.4}#1}\par
-  \addvspace{0.4\baselineskip}%
-}
-\newcommand{\postheadingtwo}[1]{%
-  \par\addvspace{0.6\baselineskip}%
-  {\relscale{1.2}#1}\par
   \addvspace{0.3\baselineskip}%
 }
-\newcommand{\postheadingthree}[1]{%
-  \par\addvspace{0.4\baselineskip}%
-  {\relscale{1.1}#1}\par
+\newcommand{\postheadingtwo}[1]{%
+  \par\addvspace{0.8\baselineskip}%
+  {\relscale{1.2}#1}\par
   \addvspace{0.2\baselineskip}%
+}
+\newcommand{\postheadingthree}[1]{%
+  \par\addvspace{0.6\baselineskip}%
+  {\relscale{1.1}#1}\par
+  \addvspace{0.15\baselineskip}%
 }
 
 % Fitbox defaults: scale images to fit the narrow block width, and shrink
@@ -255,9 +272,11 @@
   minheight=0.2\linewidth,
 }
 
-% Shared vertical skip around images/figures.
-\newlength{\postimageskip}
-\setlength{\postimageskip}{0.4\baselineskip}
+% Shared vertical skip around block-level elements (images, captions, code
+% blocks, blockquotes, image groups, lists). Using one length keeps the
+% vertical rhythm consistent.
+\newlength{\postblockskip}
+\setlength{\postblockskip}{0.4\baselineskip}
 
 % Per-image height cap. Inside a group we shrink images so the group never
 % becomes taller than one column.
@@ -277,7 +296,7 @@
 \newcommand{\postcaption}[1]{%
   \if\relax\detokenize{#1}\relax
   \else
-    \vspace{\postimageskip}%
+    \vspace{\postblockskip}%
     \begin{minipage}{\postnarrowwidth}%
       \raggedright
       \small
@@ -291,7 +310,7 @@
 % images always move together across a column/page boundary.
 \newenvironment{postimagegroup}{%
   \par
-  \addvspace{\postimageskip}%
+  \addvspace{\postblockskip}%
   \noindent\begin{minipage}{\linewidth}%
   \postgroupmodetrue
   \centering
@@ -299,13 +318,13 @@
   \postgroupmodefalse
   \end{minipage}%
   \par
-  \addvspace{\postimageskip}%
+  \addvspace{\postblockskip}%
 }
 
 % Markdown renderers ---------------------------------------------------------
 % Blockquote: width-restricted, centered, left-aligned text, no extra indent.
 \newcommand{\postblockquotebegin}{%
-  \par\addvspace{0.6\baselineskip}%
+  \par\addvspace{\postblockskip}%
   \noindent\hfill
   \begin{minipage}{\postnarrowwidth}%
   \raggedright\itshape
@@ -313,11 +332,12 @@
 \newcommand{\postblockquoteend}{%
   \end{minipage}%
   \hfill\null\par
-  \addvspace{0.6\baselineskip}%
+  \addvspace{\postblockskip}%
 }
 
-% Tighten list vertical spacing to match the code-block rhythm.
-\setlist[itemize,enumerate]{leftmargin=2em,topsep=0.6\baselineskip,itemsep=0pt,parsep=0pt}
+% Lists: same narrow indentation as other blocks, spacing matches the shared
+% block rhythm.
+\setlist[itemize,enumerate]{leftmargin=2em,topsep=\postblockskip,itemsep=0pt,parsep=0pt}
 
 % Image renderer receives: #1=alt(caption), #2=escaped src, #3=raw src.
 %
@@ -356,7 +376,7 @@
   renderers = {
     image = {
       \par
-      \addvspace{\postimageskip}
+      \addvspace{\postblockskip}
       % Keep the image and its caption on the same page/column, constrained
       % to the same narrow width as code blocks and blockquotes.
       \noindent\hfill
@@ -378,7 +398,7 @@
           \end{minipage}%
         }%
         \setlength{\postcaptionheight}{\dimexpr\ht\postcaptionbox
-          +\dp\postcaptionbox+\postimageskip\relax}%
+          +\dp\postcaptionbox+\postblockskip\relax}%
       \fi
       \fitbox[
         maxwidth=\postnarrowwidth,
@@ -392,7 +412,7 @@
       \end{minipage}%
       \hfill\null
       \par
-      \addvspace{0.6\baselineskip}
+      \addvspace{\postblockskip}
       \leavevmode
     },
     link = {\posthref{#1}{#3}},
