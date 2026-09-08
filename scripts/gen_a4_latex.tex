@@ -8,6 +8,7 @@
 \ifdefined\postimagedir\else\def\postimagedir{}\fi
 
 \usepackage{fontspec}
+\usepackage{xeCJK}
 \usepackage{responsive}
 \usepackage{fitbox}
 \usepackage{graphicx}
@@ -27,14 +28,31 @@
 \usepackage{microtype}
 \usepackage{ragged2e}
 
-% Fonts: a single monospace font that covers Latin, CJK, Cyrillic, arrows,
-% and most symbols used in the posts. This removes the need for xeCJK's
-% automatic CJK/Latin font switching while keeping all glyphs available.
+% Fonts: use Sarasa Mono SC everywhere. xeCJK is still loaded so CJK line
+% breaking, punctuation spacing, and character-class routing continue to work,
+% but the Latin and CJK fonts are identical so there is no visual switching.
 \setmainfont{Sarasa Mono SC}
 \setmonofont{Sarasa Mono SC}
+\setCJKmainfont{Sarasa Mono SC}
+\setCJKsansfont{Sarasa Mono SC}
+\setCJKmonofont{Sarasa Mono SC}
 
-% No CJK-specific line breaking helper is loaded (xeCJK removed). XeTeX will
-% rely on its default line breaker; long CJK runs may produce overfull boxes.
+% Route non-Latin ranges (Cyrillic, arrows, spaces/dashes) through the same
+% CJK line-breaking rules as CJK characters.
+\xeCJKDeclareCharClass{CJK}{"00A0 -> "00A0}
+\xeCJKDeclareCharClass{CJK}{"0400 -> "052F}
+\xeCJKDeclareCharClass{CJK}{"2000 -> "206F}
+\xeCJKDeclareCharClass{CJK}{"2070 -> "209F}
+\xeCJKDeclareCharClass{CJK}{"2100 -> "214F}
+\xeCJKDeclareCharClass{CJK}{"2150 -> "218F}
+\xeCJKDeclareCharClass{CJK}{"2190 -> "21FF}
+
+% Curly quotes must stay Western punctuation so apostrophes in English do not
+% pick up CJK spacing rules.
+\xeCJKDeclareCharClass{Default}{"2018, "2019, "201C, "201D}
+
+% Disable the automatic CJK/Latin glue entirely.
+\xeCJKsetup{CJKecglue={}}
 
 % Shared narrow block width for images, blockquotes, code blocks, etc.
 % Indented by ~4 monospace spaces (2em) on each side. Defined as a macro so
