@@ -170,9 +170,47 @@
   \postblock{\fbox{\usebox{\postmetadatabox}}}%
 }
 
-% Inline code stays close to the listings look.
+% Inline code stays close to the listings look. Long literal tokens (paths,
+% URLs, package names) contain no TeX line-break opportunities, so an inline
+% code span wider than the column overflows. \postbreakables re-typesets the
+% span while planting a near-forbidden break (\penalty 9990) after the
+% punctuation characters that read as natural token boundaries; TeX only ever
+% takes such a break to avoid an otherwise-overfull line, so normal short
+% spans are untouched.
+\ExplSyntaxOn
+\int_new:N \l_postbreakpenalty_int
+\int_set:Nn \l_postbreakpenalty_int { 9990 }
+% Break opportunities are planted only after characters that read as natural
+% token boundaries for paths/URLs. The keys are single character tokens;
+% % # ~ are deliberately omitted (comment / special chars would break the
+% macro definition). TeX only takes these near-forbidden penalties to avoid
+% an otherwise-overfull line, so ordinary short tokens are never split.
+% Plain (colon-less) names so the macros stay callable outside expl3 syntax.
+\cs_new_protected:Npn \postbreakchar #1 {
+  \str_case:nnF { #1 } {
+    {/} { #1 \penalty \l_postbreakpenalty_int }
+    {.} { #1 \penalty \l_postbreakpenalty_int }
+    {-} { #1 \penalty \l_postbreakpenalty_int }
+    {_} { #1 \penalty \l_postbreakpenalty_int }
+    {:} { #1 \penalty \l_postbreakpenalty_int }
+    {?} { #1 \penalty \l_postbreakpenalty_int }
+    {&} { #1 \penalty \l_postbreakpenalty_int }
+    {=} { #1 \penalty \l_postbreakpenalty_int }
+    {+} { #1 \penalty \l_postbreakpenalty_int }
+  } { #1 }
+}
+% Re-emit every token of #1, planting the break opportunity after the
+% punctuation above. Control sequences (e.g. markdown's backslash renderer)
+% pass through unchanged so they still expand to their glyph.
+\cs_new_protected:Npn \postbreakables #1 {
+  \tl_map_inline:Nn { #1 } { \postbreakchar { ##1 } }
+}
+\ExplSyntaxOff
+% A literal backslash from markdown arrives as a control sequence, so the
+% char mapper cannot see it; give it the same "break only if forced" treat-
+% ment by overriding the backslash renderer (see \markdownSetup below).
 \newcommand{\postcodespan}[1]{%
-  \textcolor{black}{\texttt{#1}}%
+  \textcolor{black}{\texttt{\postbreakables{#1}}}%
 }
 
 % Fenced code blocks are rendered with listings.
@@ -289,9 +327,12 @@
 }
 \makeatother
 
-% Typography: headings are regular weight, left-aligned, and distinguished
-% by size and vertical spacing only. Sizes scale relative to the responsive
-% base font so they remain balanced across layouts. The top gap is one line
+% Typography: H1-H3 are bold; H4-H6 (which markdown would otherwise turn
+% into run-in \paragraph/\subparagraph heads that collide with the body
+% text) are rendered as the same kind of left-aligned block headings at the
+% base size, regular weight. Every heading is distinguished by size and
+% vertical spacing only. Sizes scale relative to the responsive base font so
+% they remain balanced across layouts. The top gap is one line
 % of the heading's OWN leading (switch to the scaled font first, then
 % \baselineskip reflects the heading size), so a bigger heading gets a
 % proportionally bigger break above it; the bottom gap stays a small
@@ -299,6 +340,7 @@
 \newcommand{\postheadingone}[1]{%
   \par\begingroup
   \relscale{1.4}%
+  \bfseries
   \addvspace{\baselineskip}%
   \noindent#1\par
   \addvspace{0.3\baselineskip}%
@@ -307,6 +349,7 @@
 \newcommand{\postheadingtwo}[1]{%
   \par\begingroup
   \relscale{1.2}%
+  \bfseries
   \addvspace{\baselineskip}%
   \noindent#1\par
   \addvspace{0.25\baselineskip}%
@@ -315,11 +358,23 @@
 \newcommand{\postheadingthree}[1]{%
   \par\begingroup
   \relscale{1.1}%
+  \bfseries
   \addvspace{\baselineskip}%
   \noindent#1\par
   \addvspace{0.2\baselineskip}%
   \endgroup
 }
+% H4-H6: same display-heading rhythm at the base size, regular weight.
+\newcommand{\postheadinglow}[1]{%
+  \par\begingroup
+  \addvspace{\baselineskip}%
+  \noindent#1\par
+  \addvspace{0.15\baselineskip}%
+  \endgroup
+}
+\let\postheadingfour\postheadinglow
+\let\postheadingfive\postheadinglow
+\let\postheadingsix\postheadinglow
 
 % Fitbox defaults: scale images to fit the narrow block width, and shrink
 % them further if they would not fit vertically.
@@ -504,10 +559,17 @@
     },
     link = {\posthref{#1}{#3}},
     emphasis = {{\itshape #1}},
-    strongEmphasis = {{\bfseries #1}},
+    strongEmphasis = {{\bfseries \postbreakables{#1}}},
+    % markdown delivers a literal backslash as the `backslash` renderer
+    % (expanding to \textbackslash); append a near-forbidden penalty so a
+    % Windows path can break after its separators only as a last resort.
+    backslash = {\textbackslash{}\penalty9990},
     headingOne = {\postheadingone{#1}},
     headingTwo = {\postheadingtwo{#1}},
     headingThree = {\postheadingthree{#1}},
+    headingFour = {\postheadingfour{#1}},
+    headingFive = {\postheadingfive{#1}},
+    headingSix = {\postheadingsix{#1}},
     blockQuoteBegin = {\postblockquotebegin},
     blockQuoteEnd = {\postblockquoteend},
     inputFencedCode = {\postinputfencedcode{#1}{#2}},
