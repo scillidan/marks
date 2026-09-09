@@ -250,11 +250,12 @@ def main():
     for i in range(1, n + 1):
         en_tex = (en_tex_dir / f"b{i:03d}.tex").read_text(encoding="utf-8").strip()
         zh_tex = (zh_tex_dir / f"b{i:03d}.tex").read_text(encoding="utf-8").strip()
+        # NB: no `%` comment lines here. The metadata raw block is included
+        # via \markdownEscape, which leaves `%` at catcode 12 afterwards, so
+        # any later `%` would print as literal text instead of a comment.
         lines.append("\\begin{paracol}{2}")
-        lines.append("% ---- left (en) ----")
         lines.append(en_tex)
         lines.append("\\par\\switchcolumn")
-        lines.append("% ---- right (zh) ----")
         lines.append(zh_tex)
         lines.append("\\par")
         lines.append("\\end{paracol}")

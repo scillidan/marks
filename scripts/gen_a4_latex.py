@@ -45,17 +45,48 @@ def get_image_source(content_dir):
     return None
 
 
+def tex_escape(text):
+    return (
+        text.replace("\\", "\\textbackslash{}")
+        .replace("{", "\\{")
+        .replace("}", "\\}")
+        .replace("$", "\\$")
+        .replace("&", "\\&")
+        .replace("#", "\\#")
+        .replace("^", "\\^{}")
+        .replace("_", "\\_")
+        .replace("%", "\\%")
+        .replace("~", "\\textasciitilde{}")
+    )
+
+
+def render_metadata_line(line):
+    r"""Escape one metadata line for the postmetadata environment.
+
+    URLs become \url{...} (clickable, breakable anywhere via xurl) no matter
+    which key they follow; everything else is TeX-escaped. Applied after
+    html.unescape so entity-encoded characters are handled like the body.
+    """
+    line = html.unescape(line)
+    url_re = re.compile(r"https?://\S+")
+    segs = []
+    pos = 0
+    for m in url_re.finditer(line):
+        segs.append(tex_escape(line[pos : m.start()]))
+        segs.append(f"\\url{{{m.group(0)}}}")
+        pos = m.end()
+    segs.append(tex_escape(line[pos:]))
+    return "".join(segs)
+
+
 def extract_metadata(md_content):
     """Parse the leading ``` metadata block if present.
 
-    The metadata is extracted and returned, but the block itself is left in
-    the markdown body so it is rendered as a visible code block (it is part
-    of the article content). This keeps markdown-to-LaTeX handling uniform:
-    all fenced code blocks, including the top metadata block, are displayed.
-
-    Long Source: URLs inside the block are wrapped with listings escape
-    markers so they remain a single clickable hyperlink in the PDF even when
-    the code block is visually line-broken.
+    The metadata is extracted and returned, and the block itself is replaced
+    with a ```{=tex} raw block holding a `postmetadata` environment: a framed
+    box that typesets the lines in text mode, so URLs are real hyperlinks
+    that wrap cleanly instead of relying on fragile listings escape markers
+    (which cracked the listings frame on wrapped URL lines).
     """
     lines = md_content.splitlines()
     meta = {}
@@ -66,22 +97,20 @@ def extract_metadata(md_content):
                 end = i
                 break
         if end is not None:
-            for line in lines[1:end]:
+            meta_lines = lines[1:end]
+            for line in meta_lines:
                 m = re.match(r"^([A-Za-z][A-Za-z0-9_ ]*)\s*:\s*(.*)$", line)
                 if m:
                     key = m.group(1).strip().lower().replace(" ", "")
                     meta[key] = m.group(2).strip()
-            # Wrap Source: URLs so they remain one clickable link in listings.
-            source_url_re = re.compile(
-                r"^(Source\s*:\s*)(https?://\S+)(.*)$", re.IGNORECASE
-            )
-            new_lines = []
-            for line in lines[: end + 1]:
-                m = source_url_re.match(line)
-                if m:
-                    line = f"{m.group(1)}(*@\\url{{{m.group(2)}}}@*){m.group(3)}"
-                new_lines.append(line)
-            md_content = "\n".join(new_lines + lines[end + 1 :])
+            raw = ["```{=tex}", "\\begin{postmetadata}"]
+            for idx, line in enumerate(meta_lines):
+                rendered = render_metadata_line(line) or "\\mbox{}"
+                if idx < len(meta_lines) - 1:
+                    rendered += "\\\\"
+                raw.append(rendered)
+            raw += ["\\end{postmetadata}", "```"]
+            md_content = "\n".join(raw + lines[end + 1 :])
     return meta, md_content
 
 
@@ -530,20 +559,6 @@ def process_markdown(md_path, output_dir):
     body_path = output_dir / "body.md"
     body_path.write_text(md_content, encoding="utf-8")
     print(f"Created: {body_path}")
-
-    def tex_escape(text):
-        return (
-            text.replace("\\", "\\textbackslash{}")
-            .replace("{", "\\{")
-            .replace("}", "\\}")
-            .replace("$", "\\$")
-            .replace("&", "\\&")
-            .replace("#", "\\#")
-            .replace("^", "\\^{}")
-            .replace("_", "\\_")
-            .replace("%", "\\%")
-            .replace("~", "\\textasciitilde{}")
-        )
 
     meta_lines = ["% Auto-generated post metadata"]
     for key, val in meta.items():

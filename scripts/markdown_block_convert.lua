@@ -26,6 +26,9 @@ local convert = markdown.new({
   notes = true,
   underscores = true,
   texMathDollars = false,
+  -- Needed for the ```{=tex} raw block that gen_a4_latex.extract_metadata
+  -- emits for the leading metadata block.
+  rawAttribute = true,
 })
 
 os.execute('mkdir "' .. outdir .. '" 2>nul')

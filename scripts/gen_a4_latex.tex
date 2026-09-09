@@ -44,6 +44,11 @@
 \tolerance=1200\relax
 \hbadness=1400\relax
 
+% Paragraph first-line indent: two full-width CJK characters (= 4 half-width
+% spaces) on the monospace grid. The responsive package forces \parindent to
+% 1em/1.5em in its own \AtBeginDocument hook, so this must run after it.
+\AtBeginDocument{\setlength{\parindent}{2em}}
+
 % Fonts: use Sarasa Mono SC everywhere. xeCJK is still loaded so CJK line
 % breaking, punctuation spacing, and character-class routing continue to work,
 % but the Latin and CJK fonts are identical so there is no visual switching.
@@ -88,6 +93,11 @@
 \setlength{\postindent}{2em}
 \newcommand{\postnarrowwidth}{\dimexpr\linewidth-2\postindent\relax}
 
+% Narrower indent (1em = 2 half-width spaces) for blockquotes and endnotes.
+\newlength{\postquoteindent}
+\setlength{\postquoteindent}{1em}
+\newcommand{\postquotewidth}{\dimexpr\linewidth-2\postquoteindent\relax}
+
 % Do not stretch short columns to align bottoms -- this alone removes a lot of
 % unwanted whitespace in two-column output.
 \raggedbottom
@@ -98,16 +108,18 @@
   \ResponsiveSetup{boxwidth=\columnwidth, characters=50}
 \fi
 
-% Code blocks: listings frame + Tol Bright colors from latex-demo/code-demo.tex.
-% Vertical spacing is handled by the wrapper environment, so keep aboveskip/
-% belowskip at 0pt inside listings.
+% Code blocks: Tol Bright colors from latex-demo/code-demo.tex. The visible
+% frame is drawn by an \fbox in \postinputfencedcode, not by listings: an
+% \fbox never cracks on wrapped lines, and its box has exact dimensions so
+% \postblock can measure the space above from the frame's top edge.
+% Vertical spacing is handled by the wrapper, so keep aboveskip/belowskip
+% at 0pt inside listings.
 \lstdefinestyle{postcode}{
   language=[LaTeX]TeX,
   basicstyle=\ttfamily\footnotesize,
   keywordstyle=\color{T-Q-B3},
   commentstyle=\color{T-Q-B0},
   stringstyle=\color{T-Q-B5},
-  frame=single,
   breaklines=true,
   showstringspaces=false,
   tabsize=2,
@@ -115,14 +127,13 @@
   belowskip=0pt,
   postbreak=\mbox{\textcolor{T-Q-B0}{$\hookrightarrow$}\space},
 }
-% Plain variant for fenced blocks with no/unknown language: same frame and
-% spacing, but no syntax highlighting (keeps metadata blocks and plain
-% snippets readable without LaTeX-keyword coloring).
-% Escape inside is enabled so long Source: URLs can be wrapped in \url{}
-% and remain a single clickable hyperlink even when visually broken.
+% Plain variant for fenced blocks with no/unknown language: same spacing,
+% but no syntax highlighting (keeps plain snippets readable without
+% LaTeX-keyword coloring).
+% Escape inside is enabled so long URLs can be wrapped in \url{} and remain
+% a single clickable hyperlink even when visually broken.
 \lstdefinestyle{postcodeplain}{
   basicstyle=\ttfamily\footnotesize,
-  frame=single,
   breaklines=true,
   showstringspaces=false,
   tabsize=2,
@@ -132,6 +143,21 @@
   escapeinside={(*@}{@*)},
 }
 \lstset{style=postcode}
+
+% Article metadata block. Looks like a listings frame but is typeset in text
+% mode: URLs are real hyperlinks (\url) that break anywhere via xurl, and an
+% \fbox never cracks the way a listings frame does on wrapped lines. The
+% generator emits this environment inside a ```{=tex} raw block.
+\newsavebox{\postmetadatabox}
+\newenvironment{postmetadata}{%
+  \begin{lrbox}{\postmetadatabox}%
+  \begin{minipage}{\dimexpr\postnarrowwidth-2\fboxsep-2\fboxrule\relax}%
+  \footnotesize\raggedright
+}{%
+  \end{minipage}%
+  \end{lrbox}%
+  \postblock{\fbox{\usebox{\postmetadatabox}}}%
+}
 
 % Inline code stays close to the listings look.
 \newcommand{\postcodespan}[1]{%
@@ -193,21 +219,20 @@
     % Unknown language: default to plain listings (no syntax highlighting).
     \tl_clear:N \l_post_listings_lang_tl
   }
-  % Width-restricted, centered code block. Spacing is added outside the
-  % minipage so it matches the surrounding paragraph rhythm.
-  \par
-  \addvspace{\postblockskip}
-  \noindent\hfill
-  \begin{minipage}{\postnarrowwidth}
-  \tl_if_empty:NTF \l_post_listings_lang_tl {
-    \lstinputlisting[style=postcodeplain]{#1}
-  } {
-    \lstinputlisting[style=postcode,language=\l_post_listings_lang_tl]{#1}
+  % Width-restricted, centered code block in an \fbox (see the style
+  % comment above). \postblock measures the space above from the frame's
+  % top edge, not from the first listings line.
+  \postblock{
+    \fbox{
+      \begin{minipage}{\dimexpr\postnarrowwidth-2\fboxsep-2\fboxrule\relax}
+      \tl_if_empty:NTF \l_post_listings_lang_tl {
+        \lstinputlisting[style=postcodeplain]{#1}
+      } {
+        \lstinputlisting[style=postcode,language=\l_post_listings_lang_tl]{#1}
+      }
+      \end{minipage}
+    }
   }
-  \end{minipage}%
-  \hfill\null
-  \par
-  \addvspace{\postblockskip}
   \group_end:
 }
 \ExplSyntaxOff
@@ -234,11 +259,15 @@
 }
 \newcommand{\postprintendnotes}{%
   \ifnum\value{postendnotecounter}>0
-    % Separate endnotes from the body with a slightly wider gap, like the
-    % space between a heading and the following text, instead of a "Notes"
-    % section title.
-    \par\addvspace{1.2\baselineskip}%
+    % Separate endnotes from the body with the same gap a heading keeps from
+    % the text above it, and give them the same narrow measure as
+    % blockquotes (1em indent on each side).
+    \par\addvspace{\postblockskip}%
+    \noindent\hfill
+    \begin{minipage}{\postquotewidth}%
     \postnotes@acc
+    \end{minipage}%
+    \hfill\null\par
   \fi
 }
 \makeatother
@@ -249,35 +278,50 @@
 % larger than bottom gap so the heading visually belongs to the text below.
 \newcommand{\postheadingone}[1]{%
   \par\addvspace{1.0\baselineskip}%
-  {\relscale{1.4}#1}\par
+  \noindent{\relscale{1.4}#1}\par
   \addvspace{0.3\baselineskip}%
 }
 \newcommand{\postheadingtwo}[1]{%
   \par\addvspace{0.8\baselineskip}%
-  {\relscale{1.2}#1}\par
+  \noindent{\relscale{1.2}#1}\par
   \addvspace{0.2\baselineskip}%
 }
 \newcommand{\postheadingthree}[1]{%
   \par\addvspace{0.6\baselineskip}%
-  {\relscale{1.1}#1}\par
+  \noindent{\relscale{1.1}#1}\par
   \addvspace{0.15\baselineskip}%
 }
 
 % Fitbox defaults: scale images to fit the narrow block width, and shrink
 % them further if they would not fit vertically.
 \fitboxset{
-  maxwidth=\postnarrowwidth,
+  maxwidth=\linewidth,
   maxheight=0.75\textheight,
   belowboxspace=0pt,
-  minwidth=0.2\postnarrowwidth,
+  minwidth=0.2\linewidth,
   minheight=0.2\linewidth,
 }
 
-% Shared vertical skip around block-level elements (images, captions, code
-% blocks, blockquotes, image groups, lists). Using one length keeps the
-% vertical rhythm consistent.
-\newlength{\postblockskip}
-\setlength{\postblockskip}{0.4\baselineskip}
+% Shared vertical skip around block-level elements (images, code blocks,
+% blockquotes, the metadata frame, endnotes). One text line height; defined
+% as a macro so it always reflects the \baselineskip at the point of use
+% (the responsive package only fixes the font size at \begin{document}).
+\newcommand{\postblockskip}{\baselineskip}
+
+% Uniform block placement: exactly \postblockskip of space above and below,
+% measured from the element's outer box edge -- the frame edge for code
+% blocks and the metadata frame -- not from the first/last baseline inside
+% it. \raisebox{-\height} parks the box's top on the current line and
+% \nointerlineskip keeps TeX's baseline glue from adding extra space.
+\newcommand{\postblock}[1]{%
+  \par\addvspace{\postblockskip}\nointerlineskip
+  \noindent\hfill\raisebox{-\height}{#1}\hfill\null
+  \par\addvspace{\postblockskip}\nointerlineskip
+}
+
+% Gap between an image and its own caption: tighter than the inter-block
+% rhythm so image and caption still read as one unit.
+\newcommand{\postcaptiongap}{0.4\baselineskip}
 
 % Per-image height cap. Inside a group we shrink images so the group never
 % becomes taller than one column.
@@ -291,14 +335,14 @@
 \newsavebox{\postcaptionbox}
 
 % Print a caption block only when #1 is non-empty.
-% The caption text is left-aligned and constrained to the same narrow width
-% as the image/code/quote blocks. The top gap matches the text-to-image gap;
-% the bottom gap is handled by the surrounding image environment.
+% The caption text is left-aligned and spans the same width as the image
+% above it (\linewidth inside the image minipage). The top gap stays tighter
+% than the inter-block rhythm so image and caption read as one unit.
 \newcommand{\postcaption}[1]{%
   \if\relax\detokenize{#1}\relax
   \else
-    \vspace{\postblockskip}%
-    \begin{minipage}{\postnarrowwidth}%
+    \vspace{\postcaptiongap}%
+    \begin{minipage}{\linewidth}%
       \raggedright
       \small
       #1%
@@ -323,22 +367,24 @@
 }
 
 % Markdown renderers ---------------------------------------------------------
-% Blockquote: width-restricted, centered, left-aligned text, no extra indent.
+% Blockquote: narrower than code blocks (1em indent each side), upright
+% (not italic), placed with the shared block rhythm. The content is boxed
+% with lrbox so \postblock can measure from the box edges.
+\newsavebox{\postquotebox}
 \newcommand{\postblockquotebegin}{%
-  \par\addvspace{\postblockskip}%
-  \noindent\hfill
-  \begin{minipage}{\postnarrowwidth}%
-  \raggedright\itshape
+  \begin{lrbox}{\postquotebox}%
+  \begin{minipage}{\postquotewidth}%
+  \raggedright
 }
 \newcommand{\postblockquoteend}{%
   \end{minipage}%
-  \hfill\null\par
-  \addvspace{\postblockskip}%
+  \end{lrbox}%
+  \postblock{\usebox{\postquotebox}}%
 }
 
-% Lists: same narrow indentation as other blocks, spacing matches the shared
-% block rhythm.
-\setlist[itemize,enumerate]{leftmargin=2em,topsep=\postblockskip,itemsep=0pt,parsep=0pt}
+% Lists: narrow indentation; surrounding space comes from the normal
+% interline glue so lists keep the same one-line rhythm as other blocks.
+\setlist[itemize,enumerate]{leftmargin=2em,topsep=0pt,partopsep=0pt,itemsep=0pt,parsep=0pt}
 
 % Image renderer receives: #1=alt(caption), #2=escaped src, #3=raw src.
 %
@@ -376,44 +422,42 @@
 \markdownSetup{
   renderers = {
     image = {
-      \par
-      \addvspace{\postblockskip}
-      % Keep the image and its caption on the same page/column, constrained
-      % to the same narrow width as code blocks and blockquotes.
-      \noindent\hfill
-      \begin{minipage}{\postnarrowwidth}
-      \centering
-      \ifpostgroupmode
-        \setlength{\postimageheight}{0.4\textheight}%
-      \else
-        \setlength{\postimageheight}{0.75\textheight}%
-      \fi
-      \if\relax\detokenize{#1}\relax
-        \setlength{\postcaptionheight}{0pt}%
-      \else
-        \sbox{\postcaptionbox}{%
-          \begin{minipage}{\postnarrowwidth}%
-            \raggedright
-            \small
-            #1%
-          \end{minipage}%
+      % Keep the image and its caption on the same page/column, indented
+      % \postindent (4 half-width spaces) on each side. Inside the minipage
+      % everything uses \linewidth: measuring against \postnarrowwidth again
+      % here would subtract the indent twice and shrink images/captions.
+      \postblock{%
+        \begin{minipage}{\postnarrowwidth}
+        \centering
+        \ifpostgroupmode
+          \setlength{\postimageheight}{0.4\textheight}%
+        \else
+          \setlength{\postimageheight}{0.75\textheight}%
+        \fi
+        \if\relax\detokenize{#1}\relax
+          \setlength{\postcaptionheight}{0pt}%
+        \else
+          \sbox{\postcaptionbox}{%
+            \begin{minipage}{\linewidth}%
+              \raggedright
+              \small
+              #1%
+            \end{minipage}%
+          }%
+          \setlength{\postcaptionheight}{\dimexpr\ht\postcaptionbox
+            +\dp\postcaptionbox+\postcaptiongap\relax}%
+        \fi
+        \fitbox[
+          maxwidth=\linewidth,
+          maxheight=\postimageheight,
+          belowboxspace=\postcaptionheight,
+        ]{%
+          \includegraphics{\postimagedir#3}%
         }%
-        \setlength{\postcaptionheight}{\dimexpr\ht\postcaptionbox
-          +\dp\postcaptionbox+\postblockskip\relax}%
-      \fi
-      \fitbox[
-        maxwidth=\postnarrowwidth,
-        maxheight=\postimageheight,
-        belowboxspace=\postcaptionheight,
-      ]{%
-        \includegraphics{\postimagedir#3}%
+        \par
+        \postcaption{#1}%
+        \end{minipage}%
       }%
-      \par
-      \postcaption{#1}%
-      \end{minipage}%
-      \hfill\null
-      \par
-      \addvspace{\postblockskip}
       \leavevmode
     },
     link = {\posthref{#1}{#3}},
