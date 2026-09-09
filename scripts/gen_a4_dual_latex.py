@@ -29,7 +29,7 @@ from pathlib import Path
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
-from _common import convert_to_jpg, find_imagemagick_cli
+from _common import convert_to_jpg, find_imagemagick_cli, safe_staging_dir
 from gen_a4_latex import process_markdown
 
 _MARKDOWN_OPTS = (
@@ -202,7 +202,9 @@ def main():
 
     content_dir = md_en.parent
     project_root = Path(__file__).resolve().parent.parent
-    latex_dir = content_dir / "_output" / "latex" / f"{md_en.stem}-dual"
+    latex_dir = safe_staging_dir(
+        content_dir / "_output" / "latex", f"{md_en.stem}-dual"
+    )
     latex_dir.mkdir(parents=True, exist_ok=True)
 
     # 1. Run each side through the standard per-post markdown pipeline.

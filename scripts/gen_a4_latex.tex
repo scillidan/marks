@@ -30,6 +30,9 @@
 \usepackage[underscores=true, fencedCode=true, notes=true, texMathDollars=false, rawAttribute=true]{markdown}
 \usepackage{enumitem}
 \usepackage{hyperref}
+% Print-like output: links stay plain text (no colored boxes) but remain
+% clickable. Endnote cross-links rely on this too.
+\hypersetup{hidelinks}
 \usepackage{microtype}
 % Tracking is only supported by pdfTeX 1.40+; keep protrusion for XeLaTeX.
 \microtypesetup{protrusion=true}
@@ -148,11 +151,14 @@
 % mode: URLs are real hyperlinks (\url) that break anywhere via xurl, and an
 % \fbox never cracks the way a listings frame does on wrapped lines. The
 % generator emits this environment inside a ```{=tex} raw block.
+% Wrapped continuation lines get a 2em hanging indent (\everypar because
+% \hangindent resets after each paragraph).
 \newsavebox{\postmetadatabox}
 \newenvironment{postmetadata}{%
   \begin{lrbox}{\postmetadatabox}%
   \begin{minipage}{\dimexpr\postnarrowwidth-2\fboxsep-2\fboxrule\relax}%
   \footnotesize\raggedright
+  \everypar{\hangindent=2em\hangafter=1}%
 }{%
   \end{minipage}%
   \end{lrbox}%
@@ -242,27 +248,33 @@
 % markdown-rendered note content (links, %, #, ...) through an aux file whose
 % line breaks / catcode changes break URLs. \long is required because note
 % bodies may span multiple paragraphs (\par).
+%
+% Markers and entries are cross-linked: the in-text superscript [N] jumps to
+% the endnote, the endnote's [N] jumps back to the in-text position. Named
+% destinations are resolved by the PDF viewer, so a single run suffices.
 \newcounter{postendnotecounter}
 \makeatletter
 \def\postnotes@acc{}
 \long\def\postendnote#1{%
   \stepcounter{postendnotecounter}%
-  \textsuperscript{\thepostendnotecounter}%
   % Bake the current number into the accumulator as plain digits; otherwise
   % \thepostendnotecounter would be expanded later, when all notes share the
   % final counter value.
   \edef\@postnotenum{\thepostendnotecounter}%
+  \hypertarget{postnote-ref-\@postnotenum}{}%
+  \textsuperscript{\hyperlink{postnote-def-\@postnotenum}{[\@postnotenum]}}%
   \expandafter\postendnote@add\expandafter{\@postnotenum}{#1}%
 }
 \long\def\postendnote@add#1#2{%
-  \g@addto@macro\postnotes@acc{\par\noindent{\normalfont\bfseries #1.}\ #2}%
+  \g@addto@macro\postnotes@acc{\par\noindent
+    \hypertarget{postnote-def-#1}{}\hyperlink{postnote-ref-#1}{[#1]}\ #2}%
 }
 \newcommand{\postprintendnotes}{%
   \ifnum\value{postendnotecounter}>0
     % Separate endnotes from the body with the same gap a heading keeps from
     % the text above it, and give them the same narrow measure as
     % blockquotes (1em indent on each side).
-    \par\addvspace{\postblockskip}%
+    \par\addvspace{\baselineskip}%
     \noindent\hfill
     \begin{minipage}{\postquotewidth}%
     \postnotes@acc
@@ -302,26 +314,29 @@
   minheight=0.2\linewidth,
 }
 
-% Shared vertical skip around block-level elements (images, code blocks,
-% blockquotes, the metadata frame, endnotes). One text line height; defined
-% as a macro so it always reflects the \baselineskip at the point of use
-% (the responsive package only fixes the font size at \begin{document}).
-\newcommand{\postblockskip}{\baselineskip}
+% Shared vertical gap around block-level elements (images, code blocks,
+% blockquotes, the metadata frame, lists). The gap equals one *visible
+% interline gap* (行距): the baseline pitch minus the vertical space the
+% glyphs themselves occupy -- i.e. exactly the whitespace between two
+% consecutive text lines. Measured at \begin{document} from a probe string
+% with a cap-height letter and a descender, after the responsive package
+% has fixed the font size (\baselineskip is only final there).
+\newlength{\postblockgap}
+\AtBeginDocument{%
+  \setbox0=\hbox{Ag}%
+  \setlength{\postblockgap}{\dimexpr\baselineskip-\ht0-\dp0\relax}%
+}
 
-% Uniform block placement: exactly \postblockskip of space above and below,
+% Uniform block placement: exactly \postblockgap of space above and below,
 % measured from the element's outer box edge -- the frame edge for code
 % blocks and the metadata frame -- not from the first/last baseline inside
 % it. \raisebox{-\height} parks the box's top on the current line and
 % \nointerlineskip keeps TeX's baseline glue from adding extra space.
 \newcommand{\postblock}[1]{%
-  \par\addvspace{\postblockskip}\nointerlineskip
+  \par\addvspace{\postblockgap}\nointerlineskip
   \noindent\hfill\raisebox{-\height}{#1}\hfill\null
-  \par\addvspace{\postblockskip}\nointerlineskip
+  \par\addvspace{\postblockgap}\nointerlineskip
 }
-
-% Gap between an image and its own caption: tighter than the inter-block
-% rhythm so image and caption still read as one unit.
-\newcommand{\postcaptiongap}{0.4\baselineskip}
 
 % Per-image height cap. Inside a group we shrink images so the group never
 % becomes taller than one column.
@@ -336,13 +351,15 @@
 
 % Print a caption block only when #1 is non-empty.
 % The caption text is left-aligned and spans the same width as the image
-% above it (\linewidth inside the image minipage). The top gap stays tighter
-% than the inter-block rhythm so image and caption read as one unit.
+% above it (\linewidth inside the image minipage). The gap between image
+% and caption is exactly one interline gap: \nointerlineskip kills TeX's
+% baseline glue (which would add ~\baselineskip on top of \postblockgap),
+% and the [t] minipage puts the caption's first-line top as the box top.
 \newcommand{\postcaption}[1]{%
   \if\relax\detokenize{#1}\relax
   \else
-    \vspace{\postcaptiongap}%
-    \begin{minipage}{\linewidth}%
+    \nointerlineskip\vspace{\postblockgap}%
+    \begin{minipage}[t]{\linewidth}%
       \raggedright
       \small
       #1%
@@ -355,7 +372,7 @@
 % images always move together across a column/page boundary.
 \newenvironment{postimagegroup}{%
   \par
-  \addvspace{\postblockskip}%
+  \addvspace{\postblockgap}%
   \noindent\begin{minipage}{\linewidth}%
   \postgroupmodetrue
   \centering
@@ -363,7 +380,7 @@
   \postgroupmodefalse
   \end{minipage}%
   \par
-  \addvspace{\postblockskip}%
+  \addvspace{\postblockgap}%
 }
 
 % Markdown renderers ---------------------------------------------------------
@@ -421,6 +438,15 @@
 
 \markdownSetup{
   renderers = {
+    % markdown.sty is loaded before enumitem, so its theme never sees the
+    % enumitem branch: tight lists would fall back to paralist's compactitem
+    % (markdown.sty loads paralist), which ignores the \setlist above and
+    % adds its own \pltopsep glue. Route tight lists through the same
+    % enumitem environments as loose ones.
+    ulBeginTight = {\begin{itemize}},
+    ulEndTight = {\end{itemize}},
+    olBeginTight = {\begin{enumerate}},
+    olEndTight = {\end{enumerate}},
     image = {
       % Keep the image and its caption on the same page/column, indented
       % \postindent (4 half-width spaces) on each side. Inside the minipage
@@ -445,7 +471,7 @@
             \end{minipage}%
           }%
           \setlength{\postcaptionheight}{\dimexpr\ht\postcaptionbox
-            +\dp\postcaptionbox+\postcaptiongap\relax}%
+            +\dp\postcaptionbox+\postblockgap\relax}%
         \fi
         \fitbox[
           maxwidth=\linewidth,
@@ -458,7 +484,6 @@
         \postcaption{#1}%
         \end{minipage}%
       }%
-      \leavevmode
     },
     link = {\posthref{#1}{#3}},
     emphasis = {{\itshape #1}},

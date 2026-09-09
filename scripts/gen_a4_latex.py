@@ -15,7 +15,7 @@ from pathlib import Path
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
-from _common import convert_to_jpg, find_imagemagick_cli
+from _common import convert_to_jpg, find_imagemagick_cli, safe_staging_dir
 
 MEDIA_EXTS = {".gif", ".mp4", ".mov", ".webm"}
 AVIF_EXTS = {".avif"}
@@ -104,11 +104,11 @@ def extract_metadata(md_content):
                     key = m.group(1).strip().lower().replace(" ", "")
                     meta[key] = m.group(2).strip()
             raw = ["```{=tex}", "\\begin{postmetadata}"]
-            for idx, line in enumerate(meta_lines):
+            for line in meta_lines:
                 rendered = render_metadata_line(line) or "\\mbox{}"
-                if idx < len(meta_lines) - 1:
-                    rendered += "\\\\"
-                raw.append(rendered)
+                # Each entry is its own paragraph so the environment's
+                # hanging indent applies to wrapped (URL) lines.
+                raw.append(rendered + "\\par")
             raw += ["\\end{postmetadata}", "```"]
             md_content = "\n".join(raw + lines[end + 1 :])
     return meta, md_content
@@ -651,7 +651,7 @@ def main():
 
     content_dir = md_path.parent
     project_root = Path(__file__).resolve().parent.parent
-    latex_dir = content_dir / "_output" / "latex" / md_path.stem
+    latex_dir = safe_staging_dir(content_dir / "_output" / "latex", md_path.stem)
     latex_dir.mkdir(parents=True, exist_ok=True)
     pdfs_dir = content_dir / "_output" / "pdfs"
     pdfs_dir.mkdir(parents=True, exist_ok=True)

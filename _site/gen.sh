@@ -115,11 +115,13 @@ BUILD_RULES=(
 
 # Paths to exclude from both PDF builds and the generated manifest.
 # Each entry is a path prefix relative to the repo root (e.g., "chat/ctan/").
+# post/README.md documents the pipeline itself; its example image reference
+# (assets/xxx.png inside a ```md fence) would fail the image check.
 # Set via .env or environment variable:
 #   GEN_EXCLUDE="chat/ctan/;post/laws-of-software-engineering/"
 # Entries may be separated by spaces and/or semicolons:
 #   GEN_EXCLUDE="chat/ctan/;post/laws-of-software-engineering/"
-EXCLUDE_PATHS=()
+EXCLUDE_PATHS=("post/README.md")
 
 # Merge any extra exclusions from .env / environment.
 if [[ -n "${GEN_EXCLUDE:-}" ]]; then
