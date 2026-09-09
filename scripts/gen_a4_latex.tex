@@ -159,6 +159,11 @@
   \begin{minipage}{\dimexpr\postnarrowwidth-2\fboxsep-2\fboxrule\relax}%
   \footnotesize\raggedright
   \everypar{\hangindent=2em\hangafter=1}%
+  % Match the inner top inset of the code blocks (fbox + listings): listings
+  % struts its first line, which puts it ~2.5pt lower than an unstrutted text
+  % line. Without this the metadata text hugs the top border while code text
+  % does not. Calibrated 2026-09 against Sarasa Mono SC footnotesize.
+  \vspace{2.5pt}%
 }{%
   \end{minipage}%
   \end{lrbox}%
