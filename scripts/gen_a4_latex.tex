@@ -291,22 +291,34 @@
 
 % Typography: headings are regular weight, left-aligned, and distinguished
 % by size and vertical spacing only. Sizes scale relative to the responsive
-% base font so they remain balanced across layouts. Top gap is slightly
-% larger than bottom gap so the heading visually belongs to the text below.
+% base font so they remain balanced across layouts. The top gap is one line
+% of the heading's OWN leading (switch to the scaled font first, then
+% \baselineskip reflects the heading size), so a bigger heading gets a
+% proportionally bigger break above it; the bottom gap stays a small
+% fraction so the heading reads as belonging to the text below.
 \newcommand{\postheadingone}[1]{%
-  \par\addvspace{1.0\baselineskip}%
-  \noindent{\relscale{1.4}#1}\par
+  \par\begingroup
+  \relscale{1.4}%
+  \addvspace{\baselineskip}%
+  \noindent#1\par
   \addvspace{0.3\baselineskip}%
+  \endgroup
 }
 \newcommand{\postheadingtwo}[1]{%
-  \par\addvspace{0.8\baselineskip}%
-  \noindent{\relscale{1.2}#1}\par
-  \addvspace{0.2\baselineskip}%
+  \par\begingroup
+  \relscale{1.2}%
+  \addvspace{\baselineskip}%
+  \noindent#1\par
+  \addvspace{0.25\baselineskip}%
+  \endgroup
 }
 \newcommand{\postheadingthree}[1]{%
-  \par\addvspace{0.6\baselineskip}%
-  \noindent{\relscale{1.1}#1}\par
-  \addvspace{0.15\baselineskip}%
+  \par\begingroup
+  \relscale{1.1}%
+  \addvspace{\baselineskip}%
+  \noindent#1\par
+  \addvspace{0.2\baselineskip}%
+  \endgroup
 }
 
 % Fitbox defaults: scale images to fit the narrow block width, and shrink
