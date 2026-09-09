@@ -31,7 +31,8 @@
 \usepackage{enumitem}
 \usepackage{hyperref}
 \usepackage{microtype}
-\microtypesetup{protrusion=true,tracking=true}
+% Tracking is only supported by pdfTeX 1.40+; keep protrusion for XeLaTeX.
+\microtypesetup{protrusion=true}
 \usepackage{ragged2e}
 
 % The body font is monospace, whose inter-word glue has almost no natural
