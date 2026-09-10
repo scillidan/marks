@@ -12,15 +12,16 @@ just image-convert portrait light "imagemagick_dither_riemersma" "assets/Edward 
 just image-convert portrait light "imagemagick_dither_floydsteinberg" "assets/Edward John Poynter_Pea Blossoms, 1890.jpg" "magick $1 -dither FloydSteinberg -colors 16 $2"
 just image-convert landscape light "imagemagick_colors8" "assets/514_Blade Runner 2049_2017.png" "magick $1 -colors 8 -despeckle $2"
 just image-convert landscape light "imagemagick_colors16" "assets/514_Blade Runner 2049_2017.png" "magick $1 -colors 16 -despeckle $2"
-just image-convert landscape light "imagemagick_noise_level" "assets/20200518_12_34_59.jpg" "magick $1 +level 20%,80% -sigmoidal-contrast 6,50% -attenuate 0.8  +noise Gaussian $2"
+just image-convert landscape light "imagemagick_noise_level" "assets/20200518_12_34_59.jpg" "magick $1 +level 20%,80% -sigmoidal-contrast 6,50% -attenuate 0.8 +noise Gaussian $2"
 just image-convert landscape light "imagemagick_noise_overlay" "assets/20200518_12_34_59.jpg" "magick $1 ( +clone -fill gray50 -colorize 100 -attenuate 1.2 +noise Gaussian -blur 0x0.3 -colorspace Gray ) -compose overlay -composite $2"
 just image-convert landscape light "imagemagick_scanlines_vignette" "assets/20211224_21_25_04.jpg" "magick $1 -colorspace Gray -sigmoidal-contrast 10,45% -modulate 75,0,80 -fill #4a4a3a -tint 60% ( +clone -fill gray50 -colorize 100 +noise Random -blur 0x0.8 -colorspace Gray ) -compose Overlay -composite ( +clone -alpha set -channel A -evaluate set 0 +channel ( -size 8x8 xc:none -fill ""rgba(0,0,0,0.2)"" -draw ""rectangle 0,0 7,3"" -write mpr:scan +delete ) -tile mpr:scan -draw ""rectangle 0,0 %[fx:w-1],%[fx:h-1]"" ) -compose Over -composite ( -size ""%[w]x%[h]"" radial-gradient:""rgba(255,255,255,0.9)-rgba(0,0,0,0.6)"" ) -compose Multiply -composite -level 5%,92% -unsharp 0x1.5+0.8+0 $2"
 magick -size 2x4 xc:none -fill rgba(0,0,0,0.35) -draw "line 0,0 2,0" -draw "line 0,2 2,2" assets/scanlines.png && just image-convert portrait light "imagemagick_scanlines" "assets/Edward John Poynter_Pea Blossoms, 1890.jpg" "magick $1 -write mpr:BASE +delete mpr:BASE -alpha transparent -tile assets/scanlines.png -draw ""rectangle 0,0 99999,99999"" mpr:BASE +swap -composite $2"
 magick -size 1x256 gradient:blue-yellow assets/lut.png && just image-convert portrait light "imagemagick_clut" "assets/20200518_12_34_59.jpg" "magick $1 ""assets/lut.png"" -clut $2"
 # https://brontosaurusrex.github.io/2019/08/12/Halftone,-Imagemagick
-just image-convert portrait light "imagemagick_halftone_fx" "assets/Edward John Poynter_Pea Blossoms, 1890.jpg" "magick $1 -level 0x70% -set option:distort:viewport '%wx%h+0+0' -colorspace CMYK -separate null: ( -size 2x2 xc: ( +clone -negate ) +append ( +clone -negate ) -append ) -virtual-pixel tile -filter gaussian ( +clone -distort SRT 60 ) +swap ( +clone -distort SRT 30 ) +swap ( +clone -distort SRT 45 ) +swap ( +clone -distort SRT 0 )  +swap +delete -compose Overlay -layers composite -set colorspace CMYK -combine -colorspace Gray $2"
+just image-convert portrait light "imagemagick_halftone_fx" "assets/Edward John Poynter_Pea Blossoms, 1890.jpg" "magick $1 -level 0x70% -set option:distort:viewport '%wx%h+0+0' -colorspace CMYK -separate null: ( -size 2x2 xc: ( +clone -negate ) +append ( +clone -negate ) -append ) -virtual-pixel tile -filter gaussian ( +clone -distort SRT 60 ) +swap ( +clone -distort SRT 30 ) +swap ( +clone -distort SRT 45 ) +swap ( +clone -distort SRT 0 ) +swap +delete -compose Overlay -layers composite -set colorspace CMYK -combine -colorspace Gray $2"
 # https://github.com/antiboredom/p5.riso/tree/master/examples/Halftone
 just image-convert landscape light "imagemagick_halftone_misregistration-distort" "assets/20200518_12_34_59.jpg" "magick $1 -colorspace gray -fx ""angle=(45 * 3.1415926/180); spacing=8; pos=(i*cos(angle) + j*sin(angle)); line=((sin(pos*2 * 3.1415926/spacing)+1)/2); u < line ? 1 : 0"" -alpha copy -fill #0000FF -colorize 100 -background #FFFF00 -flatten $2"
+just image-convert landscape light "imagemagick_modulate" "assets/20200518_12_34_59.jpg" "magick $1 -modulate 100,45,108 $2"
 ```
 
 ```sh
@@ -41,4 +42,10 @@ just image-convert landscape light "gmic_quantize" "assets/20200518_12_34_59.jpg
 
 ```sh
 # posterust "assets/image.jpg -n 11 -c #ae8653,#110a07,#f3dabd
+just image-convert portrait light "didder_bayer_01" "assets/Edward John Poynter_Pea Blossoms, 1890.jpg" "didder --palette ""black white"" -i $1 -o $2.png bayer 16x16"
+just image-convert portrait light "didder_bayer_02" "assets/20200518_12_34_59.jpg" "didder -p ""black white"" -r ""black #efd8bc"" -i $1 -o $2.png --upscale 2 bayer 4x4"
+just image-convert portrait light "didder_odm_clustered-dot" "assets/Edward John Poynter_Pea Blossoms, 1890.jpg" "didder -p ""black white"" -i $1 -o $2.png odm ClusteredDot8x8"
+just image-convert portrait light "didder_edm" "assets/Edward John Poynter_Pea Blossoms, 1890.jpg" "didder -p ""black white"" -i $1 -o $2.png edm FloydSteinberg"
+kmeans_colors -i "image-collect\assets\待ちぼうけ.jpg" -p -k 3 --no-file
+just image-convert landscape light "kmeans-colors_replace" "assets/20200518_12_34_59.jpg" "kmeans_colors find -i $1 -o $2 -c 140c08,ac8656,efd8bc --replace"
 ```

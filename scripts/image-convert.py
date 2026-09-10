@@ -5,6 +5,7 @@
 # ///
 import argparse
 import os
+import re
 import shlex
 import shutil
 import subprocess
@@ -42,9 +43,12 @@ def resolve_image(image_arg):
     sys.exit(f"✗ Image not found: {candidate}")
 
 
-def compute_output_path(input_path):
+def compute_output_path(input_path, ext=None):
     ASSETS_DIR.mkdir(parents=True, exist_ok=True)
-    ext = input_path.suffix or ".jpg"
+    if not ext:
+        ext = input_path.suffix or ".jpg"
+    elif not ext.startswith("."):
+        ext = "." + ext
     stem = input_path.stem
     candidate = ASSETS_DIR / f"{stem}{ext}"
     if not candidate.exists():
@@ -97,14 +101,21 @@ def resize_to_width(input_path, output_path, width_px):
 
 
 def run_commands(commands, input_path):
-    output_path = compute_output_path(input_path)
+    input_ext = input_path.suffix or ".jpg"
+    out_ext = input_ext
+    match = re.search(r"\$2\.([A-Za-z0-9]+)", commands)
+    if match:
+        out_ext = "." + match.group(1).lower()
+    output_path = compute_output_path(input_path, out_ext)
 
     def quote(p):
         return '"' + p + '"' if os.name == "nt" else shlex.quote(p)
 
-    shell_cmd = commands.replace("$1", quote(str(input_path))).replace(
-        "$2", quote(str(output_path))
+    shell_cmd = commands.replace("$1", quote(str(input_path)))
+    shell_cmd = re.sub(
+        r"\$2\.[A-Za-z0-9]+", lambda _: quote(str(output_path)), shell_cmd
     )
+    shell_cmd = shell_cmd.replace("$2", quote(str(output_path)))
     print(f"Running: {shell_cmd}")
     r = subprocess.run(
         shell_cmd,
@@ -126,7 +137,9 @@ def run_commands(commands, input_path):
 def main():
     parser = argparse.ArgumentParser(
         description="Render scripts/image-convert.typ as a PDF. "
-        "commands placeholders: $1 = input image, $2 = output image."
+        "commands placeholders: $1 = input image, $2 = output image. "
+        "Write $2.png (or $2.gif, $2.jpg, ...) to force the output format; "
+        "bare $2 inherits the input's extension."
     )
     parser.add_argument("mode", nargs="?", choices=["portrait", "landscape"])
     parser.add_argument("theme", nargs="?", choices=["dark", "light"])
