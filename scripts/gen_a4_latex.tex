@@ -83,8 +83,20 @@
 % pick up CJK spacing rules.
 \xeCJKDeclareCharClass{Default}{"2018, "2019, "201C, "201D}
 
-% Disable the automatic CJK/Latin glue entirely.
-\xeCJKsetup{CJKecglue={}}
+% Disable the visible CJK/Latin gap but keep a zero-width, breakable glue so a
+% line can still break between CJK and Latin (e.g. "...人的/A.O.史密斯"). The
+% default CJKecglue is a full space; an empty glue removed the gap but also the
+% break opportunity, forcing breaks at CJK-CJK boundaries only.
+\xeCJKsetup{CJKecglue={\hskip 0pt plus 0.08em}}
+
+% Long digit runs with thousands separators (e.g. "2,400,000") are a single
+% unbreakable Latin token and can overflow the column. Give the ASCII comma its
+% own interchar class and plant a near-forbidden break after "comma before
+% digit/letter" so TeX only splits there to avoid an overfull line. Ordinary
+% short numbers are untouched.
+\newXeTeXintercharclass \postdigitcomma
+\XeTeXcharclass `\, \postdigitcomma
+\XeTeXinterchartoks \postdigitcomma 0 = {\penalty9990\relax}
 
 % CJK punctuation uses xeCJK's default style (full-width, inline, with the
 % built-in kinsoku rules). A custom "postpunct" style with hanging/kerning
@@ -351,8 +363,10 @@
 % Typography: H1-H3 are bold; H4-H6 (which markdown would otherwise turn
 % into run-in \paragraph/\subparagraph heads that collide with the body
 % text) are rendered as the same kind of left-aligned block headings at the
-% base size, regular weight. Every heading is distinguished by size and
-% vertical spacing only. Sizes scale relative to the responsive base font so
+% base size, regular weight. Headings are \raggedright so a short title that
+% wraps is not stretched across the line (which read as wide inter-character
+% gaps); it breaks naturally instead. Every heading is distinguished by size
+% and vertical spacing only. Sizes scale relative to the responsive base font so
 % they remain balanced across layouts. The top gap is one line
 % of the heading's OWN leading (switch to the scaled font first, then
 % \baselineskip reflects the heading size), so a bigger heading gets a
@@ -362,6 +376,7 @@
   \par\begingroup
   \relscale{1.4}%
   \bfseries
+  \raggedright
   \addvspace{\baselineskip}%
   \noindent#1\par
   \addvspace{0.3\baselineskip}%
@@ -371,6 +386,7 @@
   \par\begingroup
   \relscale{1.2}%
   \bfseries
+  \raggedright
   \addvspace{\baselineskip}%
   \noindent#1\par
   \addvspace{0.25\baselineskip}%
@@ -380,6 +396,7 @@
   \par\begingroup
   \relscale{1.1}%
   \bfseries
+  \raggedright
   \addvspace{\baselineskip}%
   \noindent#1\par
   \addvspace{0.2\baselineskip}%
@@ -388,6 +405,7 @@
 % H4-H6: same display-heading rhythm at the base size, regular weight.
 \newcommand{\postheadinglow}[1]{%
   \par\begingroup
+  \raggedright
   \addvspace{\baselineskip}%
   \noindent#1\par
   \addvspace{0.15\baselineskip}%
