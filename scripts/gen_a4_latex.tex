@@ -180,35 +180,52 @@
 \ExplSyntaxOn
 \int_new:N \l_postbreakpenalty_int
 \int_set:Nn \l_postbreakpenalty_int { 9990 }
+\tl_new:N \l_postbreakables_tl
+\tl_new:N \l_post_search_tl
+\tl_new:N \l_post_repl_tl
 % Break opportunities are planted only after characters that read as natural
-% token boundaries for paths/URLs. The keys are single character tokens;
-% % # ~ are deliberately omitted (comment / special chars would break the
-% macro definition). TeX only takes these near-forbidden penalties to avoid
-% an otherwise-overfull line, so ordinary short tokens are never split.
-% Plain (colon-less) names so the macros stay callable outside expl3 syntax.
-\cs_new_protected:Npn \postbreakchar #1 {
-  \str_case:nnF { #1 } {
-    {/} { #1 \penalty \l_postbreakpenalty_int }
-    {.} { #1 \penalty \l_postbreakpenalty_int }
-    {-} { #1 \penalty \l_postbreakpenalty_int }
-    {_} { #1 \penalty \l_postbreakpenalty_int }
-    {:} { #1 \penalty \l_postbreakpenalty_int }
-    {?} { #1 \penalty \l_postbreakpenalty_int }
-    {&} { #1 \penalty \l_postbreakpenalty_int }
-    {=} { #1 \penalty \l_postbreakpenalty_int }
-    {+} { #1 \penalty \l_postbreakpenalty_int }
-  } { #1 }
+% token boundaries for paths/URLs. % # ~ are deliberately omitted (comment /
+% special chars). TeX only takes these near-forbidden penalties to avoid an
+% otherwise-overfull line, so ordinary short tokens are never split.
+%
+% The token list is transformed in place with \tl_replace_all rather than
+% re-emitted token by token. A token mapper (\tl_map_inline) breaks whenever
+% the content contains a macro that takes an argument -- e.g. a nested
+% \markdownRendererEmphasis inside strong emphasis: the macro is emitted
+% unexpanded, then swallows the next mapped item, raising "Argument of
+% \__tl_map_1:w has an extra }". Replacing punctuation in place keeps every
+% macro adjacent to its argument.
+%
+% \c_underscore_str / \c_ampersand_str are passed through \tl_set:Nx so the
+% search tokens come out catcode 12, matching the markdown body (see
+% \postmarkdowninput); a plain "_" or "&" here would have catcode 8/4 and
+% never match the body.
+\cs_new_protected:Npn \postbreakreplaceone #1 {
+  \tl_set:Nx \l_post_search_tl { #1 }
+  \tl_set_eq:NN \l_post_repl_tl \l_post_search_tl
+  \tl_put_right:Nn \l_post_repl_tl { \penalty \l_postbreakpenalty_int }
+  \exp_args:NNVV \tl_replace_all:Nnn \l_postbreakables_tl \l_post_search_tl \l_post_repl_tl
 }
-% Re-emit every token of #1, planting the break opportunity after the
-% punctuation above. Control sequences (e.g. markdown's backslash renderer)
-% pass through unchanged so they still expand to their glyph.
+\cs_new_protected:Npn \postbreakreplace {
+  \postbreakreplaceone { / }
+  \postbreakreplaceone { . }
+  \postbreakreplaceone { - }
+  \postbreakreplaceone { \c_underscore_str }
+  \postbreakreplaceone { : }
+  \postbreakreplaceone { ? }
+  \postbreakreplaceone { \c_ampersand_str }
+  \postbreakreplaceone { = }
+  \postbreakreplaceone { + }
+}
 \cs_new_protected:Npn \postbreakables #1 {
-  \tl_map_inline:Nn { #1 } { \postbreakchar { ##1 } }
+  \tl_set:Nn \l_postbreakables_tl { #1 }
+  \postbreakreplace
+  \tl_use:N \l_postbreakables_tl
 }
 \ExplSyntaxOff
-% A literal backslash from markdown arrives as a control sequence, so the
-% char mapper cannot see it; give it the same "break only if forced" treat-
-% ment by overriding the backslash renderer (see \markdownSetup below).
+% A literal backslash from markdown arrives as a control sequence, not a
+% character token; give it the same "break only if forced" treatment by
+% overriding the backslash renderer (see \markdownSetup below).
 \newcommand{\postcodespan}[1]{%
   \textcolor{black}{\texttt{\postbreakables{#1}}}%
 }
