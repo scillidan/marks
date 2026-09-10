@@ -17,6 +17,14 @@
 \usepackage{xurl}
 \usepackage{relsize}
 
+% URL line breaking: xurl by default allows a break after every character,
+% which splits URLs mid-word (e.g. right after "https:") and reads badly.
+% Restrict preferred breaks to natural URL separators; letters, digits and ":"
+% still break, but only as a last resort (\UrlBigBreaks) so a long URL never
+% overflows the metadata frame.
+\def\UrlBreaks{\do\/\do\.\do\-\do\_\do\&\do\=\do\?\do\%\do\#\do\+\do\@\do\!}
+\def\UrlBigBreaks{\do\:\do\a\do\b\do\c\do\d\do\e\do\f\do\g\do\h\do\i\do\j\do\k\do\l\do\m\do\n\do\o\do\p\do\q\do\r\do\s\do\t\do\u\do\v\do\w\do\x\do\y\do\z\do\A\do\B\do\C\do\D\do\E\do\F\do\G\do\H\do\I\do\J\do\K\do\L\do\M\do\N\do\O\do\P\do\Q\do\R\do\S\do\T\do\U\do\V\do\W\do\X\do\Y\do\Z\do0\do1\do2\do3\do4\do5\do6\do7\do8\do9}
+
 % Tol Bright colors from latex-demo/code-demo.tex, defined directly so the
 % colorblind package (not in TeX Live 2023 base) is not required.
 \definecolor{T-Q-B0}{RGB}{187,187,187}
@@ -78,14 +86,10 @@
 % Disable the automatic CJK/Latin glue entirely.
 \xeCJKsetup{CJKecglue={}}
 
-% Improve paragraph justification for CJK text: allow punctuation to hang
-% slightly into the margins and permit small inter-character stretching so
-% line lengths are less ragged.
-\xeCJKDeclarePunctStyle{postpunct}{
-  enabled-hanging    = true,
-  optimize-kerning   = true
-}
-\xeCJKsetup{PunctStyle=postpunct}
+% CJK punctuation uses xeCJK's default style (full-width, inline, with the
+% built-in kinsoku rules). A custom "postpunct" style with hanging/kerning
+% (enabled-hanging, optimize-kerning) was removed: it added micro-adjustments
+% that made line wrapping hard to predict without a clear visual win.
 
 % Shared narrow block width for images, blockquotes, code blocks, etc.
 % Indented by 4 half-width monospace spaces (= 2em = two CJK full-width
@@ -480,7 +484,6 @@
 \newcommand{\postblockquotebegin}{%
   \begin{lrbox}{\postquotebox}%
   \begin{minipage}{\postquotewidth}%
-  \raggedright
 }
 \newcommand{\postblockquoteend}{%
   \end{minipage}%

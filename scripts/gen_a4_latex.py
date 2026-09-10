@@ -519,7 +519,7 @@ def process_markdown(md_path, output_dir):
         sep = m.group(4)
         caption = m.group(5)
         if full in media_note and caption and not caption.lstrip().startswith("!["):
-            caption = f"[Original Format: {media_note[full]}]{caption}"
+            caption = f"{caption} [Original Format: {media_note[full]}]"
         return f"{m.group(1)}{jpg}{m.group(3)}{sep}{caption}"
 
     md_content = media_img_re.sub(rewrite_media, md_content)
