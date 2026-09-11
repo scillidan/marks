@@ -25,7 +25,7 @@ from pathlib import Path
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
-SUBDIRS = ["orion-a", "lyra-a", "lyra-b"]
+SUBDIRS = ["orion-a", "lyra-a", "altair-a"]
 SKIP = {"annex.md"}
 
 _WEIGHT_RE = re.compile(r"^weight:\s*(\d+)\s*$", re.MULTILINE)

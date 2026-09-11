@@ -3,7 +3,7 @@
 # requires-python = ">=3.12"
 # dependencies = []
 # ///
-"""Sync BYYA-site lyra-a/annex.md into individual byya-lyra-annex .md files.
+"""Sync BYYA-site altair-a/annex.md into individual byya-lyra-annex .md files.
 
 The generated .md files are intermediate build inputs: they are not committed
 and are regenerated on each CI run from the upstream BYYA-site source.
@@ -37,7 +37,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--source",
-        help="Path to the BYYA-site content.zh/docs/lyra-a/annex.md file",
+        help="Path to the BYYA-site content.zh/docs/altair-a/annex.md file",
     )
     parser.add_argument(
         "--target",
