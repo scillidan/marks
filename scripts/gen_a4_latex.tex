@@ -58,7 +58,15 @@
 % Paragraph first-line indent: two full-width CJK characters (= 4 half-width
 % spaces) on the monospace grid. The responsive package forces \parindent to
 % 1em/1.5em in its own \AtBeginDocument hook, so this must run after it.
-\AtBeginDocument{\setlength{\parindent}{2em}}
+% 
+% Body text is set ragged-right: the monospace font has almost no inter-word
+% stretch, so fully-justified lines either leave big gaps or force aggressive
+% hyphenation (e.g. breaking "Lovelock" as "Love-lock"). A small raggedness
+% keeps the right edge mostly tidy while letting lines break naturally.
+\AtBeginDocument{%
+  \setlength{\parindent}{2em}%
+  \RaggedRight
+}
 
 % Fonts: use Sarasa Mono SC everywhere. xeCJK is still loaded so CJK line
 % breaking, punctuation spacing, and character-class routing continue to work,

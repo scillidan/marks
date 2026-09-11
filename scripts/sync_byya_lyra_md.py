@@ -25,8 +25,8 @@ from pathlib import Path
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
-SUBDIRS = ["lyra-a", "lyra-b", "orion-a"]
-SKIP = {"_index.md", "annex.md"}
+SUBDIRS = ["orion-a", "lyra-a", "lyra-b"]
+SKIP = {"annex.md"}
 
 _WEIGHT_RE = re.compile(r"^weight:\s*(\d+)\s*$", re.MULTILINE)
 _FM_RE = re.compile(r"^---\s*\n(.*?)\n---", re.DOTALL)
@@ -64,8 +64,9 @@ def sync_subdir(source_root: Path, subdir: str, dest_root: Path) -> int:
         return 0
 
     entries = []
+    index_src = src_dir / "_index.md"
     for name in os.listdir(src_dir):
-        if not name.endswith(".md") or name in SKIP:
+        if not name.endswith(".md") or name in SKIP or name == "_index.md":
             continue
         entries.append((read_weight(src_dir / name), name))
     entries.sort(key=lambda t: t[0])
@@ -74,6 +75,14 @@ def sync_subdir(source_root: Path, subdir: str, dest_root: Path) -> int:
     dest_dir.mkdir(parents=True, exist_ok=True)
 
     copied = 0
+    # Preserve the section index so downstream tools can read its weight to
+    # order subdirectories (e.g. in the site manifest).
+    if index_src.is_file():
+        (dest_dir / "_index.md").write_text(
+            io.open(index_src, encoding="utf-8").read(), encoding="utf-8"
+        )
+        copied += 1
+
     for i, (_, name) in enumerate(entries, 1):
         dest = dest_dir / f"{i:03d}_{name}"
         text = io.open(src_dir / name, encoding="utf-8").read()

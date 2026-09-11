@@ -38,7 +38,7 @@ def generate_typ(md_path, size, font, output_dir):
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("subdir", choices=["lyra-a", "lyra-b", "orion-a"])
+    parser.add_argument("subdir", choices=["orion-a", "lyra-a", "altair-a"])
     parser.add_argument("--size", default="8pt")
     parser.add_argument("--font", default="MonaspiceNe NFM, Sarasa Mono SC")
     args = parser.parse_args()

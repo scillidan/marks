@@ -403,7 +403,7 @@ if [[ "$BUILD" -eq 1 ]]; then
 		fi
 	fi
 
-	# byya-lyra: build each subdirectory (lyra-a, lyra-b, orion-a) via
+	# byya-lyra: build each subdirectory (orion-a, lyra-a, altair-a) via
 	# `just lyra <subdir>`, which regenerates all .md files in that subdir.
 	if should_process_dir "byya-lyra" && [[ -d "byya-lyra" ]]; then
 		echo "[byya-lyra] Building .md files..."
@@ -550,8 +550,21 @@ SUBGROUP_ORDER = {
 }
 
 
+def read_byya_lyra_index_weight(subdir_name):
+    """Return the `weight` from byya-lyra/<subdir>/_index.md (inf if absent)."""
+    index_path = repo_root / "byya-lyra" / subdir_name / "_index.md"
+    if not index_path.exists():
+        return float("inf")
+    return read_weight(index_path)
+
+
 def sorted_subgroup_names(node):
     names = list(node.subgroups.keys())
+    # byya-lyra subdirectories are ordered by the `weight` frontmatter in each
+    # subdirectory's _index.md (synced by scripts/sync_byya_lyra_md.py). Smaller
+    # weights appear first; ties fall back to alphabetical order.
+    if node.dir == "byya-lyra":
+        return sorted(names, key=lambda name: (read_byya_lyra_index_weight(name), name))
     order = SUBGROUP_ORDER.get(node.dir)
     if order:
         ordered = [name for name in order if name in node.subgroups]
