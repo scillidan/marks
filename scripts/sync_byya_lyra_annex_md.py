@@ -54,7 +54,7 @@ def main() -> int:
             / "BYYA-site"
             / "content.zh"
             / "docs"
-            / "lyra-a"
+            / "altair-a"
             / "annex.md"
         )
         if default.exists():

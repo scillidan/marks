@@ -124,7 +124,7 @@ jobs:
 
       - name: Sync byya-lyra-annex markdown
         run: |
-          uv run scripts/sync_byya_lyra_annex_md.py --source _deps/BYYA-site/content.zh/docs/lyra-a/annex.md
+          uv run scripts/sync_byya_lyra_annex_md.py --source _deps/BYYA-site/content.zh/docs/altair-a/annex.md
 
       - name: Pre-warm Typst packages
         run: |
