@@ -555,7 +555,12 @@ def read_byya_lyra_index_weight(subdir_name):
     index_path = repo_root / "byya-lyra" / subdir_name / "_index.md"
     if not index_path.exists():
         return float("inf")
-    return read_weight(index_path)
+    text = index_path.read_text(encoding="utf-8")
+    m = re.search(r"^---\s*\n(.*?)\n---", text, re.DOTALL)
+    if not m:
+        return float("inf")
+    wm = re.search(r"^weight:\s*(\d+)\s*$", m.group(1), re.MULTILINE)
+    return int(wm.group(1)) if wm else float("inf")
 
 
 def sorted_subgroup_names(node):
