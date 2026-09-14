@@ -54,7 +54,7 @@ def main() -> int:
     pdfs_dir = output_dir / "pdfs"
     pdfs_dir.mkdir(parents=True, exist_ok=True)
 
-    md_files = sorted(content_dir.glob("*.md"))
+    md_files = sorted(p for p in content_dir.glob("*.md") if p.name != "_index.md")
     if not md_files:
         sys.exit(f"Error: no .md files in {content_dir}")
 
