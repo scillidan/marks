@@ -14,6 +14,14 @@ a6 path size="" font="":
 a4 path:
     uv run scripts/gen_a4_latex.py "{{path}}"
 
+# == copy (A5 pages 2-up on landscape A4, reading order) — engine: latex
+copy path:
+    uv run scripts/gen_copy.py "{{path}}"
+
+# == copy booklet (single saddle-stitch signature; print duplex flip-short-edge, stack, fold, staple spine)
+copy-print path:
+    uv run scripts/gen_copy.py "{{path}}" --print
+
 # == post bilingual pair (A4, synchronized two-column paracol)
 # First file: source (e.g. post/foo.md), second file: translation (e.g. post/foo.zh-cn.md)
 a4dual en zh:

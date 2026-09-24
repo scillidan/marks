@@ -320,12 +320,34 @@ def separate_footnote_definitions(md_content):
     )
 
 
-def normalize_whitespace(md_content):
+def normalize_whitespace(md_content, hard_breaks=False):
     """Clean up stray whitespace.
 
     * Remove trailing spaces that markdown interprets as hard line breaks.
     * Collapse runs of multiple spaces to a single space outside code fences.
+
+    With ``hard_breaks=True`` (copy/ pipeline), lines ending in 2+ spaces
+    keep exactly two trailing spaces: the author uses standard markdown
+    hard line breaks for 换行, while blank lines remain paragraph breaks.
+    A hard break at the very end of a paragraph (next line blank or EOF)
+    is redundant -- the blank line already ends the paragraph -- and would
+    only add a stray empty line, so it is stripped there.
     """
+
+    def keep_breaks(part):
+        lines = part.split("\n")
+        out = []
+        for idx, line in enumerate(lines):
+            m = re.search(r" {2,}$", line)
+            nxt = lines[idx + 1] if idx + 1 < len(lines) else ""
+            if m and nxt.strip():
+                core, trail = line[: m.start()], "  "
+            else:
+                core, trail = re.sub(r"[ \t]+$", "", line), ""
+            core = re.sub(r"([^\s])  +", r"\1 ", core)
+            out.append(core + trail)
+        return "\n".join(out)
+
     # Preserve fenced code blocks while normalizing the rest.
     fence_re = re.compile(r"^(```+)[^\n]*\n.*?\n\1[ \t]*$", re.S | re.M)
     parts = []
@@ -339,8 +361,11 @@ def normalize_whitespace(md_content):
     out = []
     for i, part in enumerate(parts):
         if i % 2 == 0:
-            part = re.sub(r"[ \t]+$", "", part, flags=re.M)
-            part = re.sub(r"([^\s])  +", r"\1 ", part)
+            if hard_breaks:
+                part = keep_breaks(part)
+            else:
+                part = re.sub(r"[ \t]+$", "", part, flags=re.M)
+                part = re.sub(r"([^\s])  +", r"\1 ", part)
         out.append(part)
     return "".join(out)
 
@@ -393,7 +418,7 @@ def process_figures(md_content):
     return "\n\n".join(out)
 
 
-def process_markdown(md_path, output_dir):
+def process_markdown(md_path, output_dir, hard_breaks=False):
     content_dir = md_path.parent
     md_content = md_path.read_text(encoding="utf-8")
 
@@ -544,7 +569,7 @@ def process_markdown(md_path, output_dir):
     md_content = process_figures(md_content)
     md_content = escape_underscores_in_urls(md_content)
     md_content = separate_footnote_definitions(md_content)
-    md_content = normalize_whitespace(md_content)
+    md_content = normalize_whitespace(md_content, hard_breaks=hard_breaks)
     md_content = re.sub(r"\n{3,}", "\n\n", md_content)
 
     meta_path = output_dir / "meta.tex"
