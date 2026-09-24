@@ -66,6 +66,7 @@ jobs:
             post/_output
             post_zh-cn/_output
             ctan/_output
+            ctan/font/_output
           if-no-files-found: error
 
   deploy:
