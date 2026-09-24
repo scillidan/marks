@@ -149,6 +149,54 @@ def generate_impose_wrapper(tex_stem, latex_dir, signature=None):
     return wrapper_path
 
 
+def _copy_source_base():
+    """Return the expanded COPY_SOURCE directory, or None if unset/missing."""
+    env = os.environ.get("COPY_SOURCE")
+    if not env:
+        return None
+    base = Path(os.path.expandvars(env)).expanduser().resolve()
+    if not base.exists():
+        return None
+    return base
+
+
+def resolve_copy_input(raw_path: Path) -> tuple[Path, Path]:
+    """Locate the markdown file and decide where its outputs should live.
+
+    Returns (md_path, output_base). The output base is the directory under
+    which ``_output/latex`` and ``_output/pdfs`` will be created. Local files
+    inside the repo's ``copy/`` tree keep their existing behaviour (outputs
+    live next to the source). Files resolved via ``COPY_SOURCE`` are built
+    into the repo's ``copy/_output`` tree so generated artefacts stay inside
+    the project and remain gitignored.
+    """
+    project_root = Path(__file__).resolve().parent.parent
+
+    # 1) Respect an explicit absolute/relative path if it exists.
+    candidate = resolve_path(str(raw_path))
+    if candidate.exists():
+        md_path = candidate.resolve()
+        copy_root = (project_root / "copy").resolve()
+        if str(md_path).startswith(str(copy_root) + os.sep):
+            return md_path, md_path.parent
+        return md_path, project_root / "copy"
+
+    # 2) Fall back to COPY_SOURCE for bare filenames or subpaths.
+    base = _copy_source_base()
+    if base:
+        candidate = (base / raw_path).resolve()
+        if candidate.exists():
+            md_path = candidate
+            try:
+                rel = md_path.relative_to(base)
+                output_base = project_root / "copy" / rel.parent
+            except ValueError:
+                output_base = project_root / "copy"
+            return md_path, output_base
+
+    sys.exit(f"Error: File not found: {raw_path}")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Render a copy/ markdown file to landscape A4 2-up PDF."
@@ -162,15 +210,13 @@ def main():
     )
     args = parser.parse_args()
 
-    md_path = resolve_path(args.path)
-    if not md_path.exists():
-        sys.exit(f"Error: File not found: {md_path}")
-
-    content_dir = md_path.parent
+    raw_path = Path(args.path)
+    md_path, output_base = resolve_copy_input(raw_path)
     project_root = Path(__file__).resolve().parent.parent
-    latex_dir = safe_staging_dir(content_dir / "_output" / "latex", md_path.stem)
+
+    latex_dir = safe_staging_dir(output_base / "_output" / "latex", md_path.stem)
     latex_dir.mkdir(parents=True, exist_ok=True)
-    pdfs_dir = content_dir / "_output" / "pdfs"
+    pdfs_dir = output_base / "_output" / "pdfs"
     pdfs_dir.mkdir(parents=True, exist_ok=True)
 
     process_markdown(md_path, latex_dir, hard_breaks=True)
@@ -190,7 +236,7 @@ def main():
     reader_pdf = pdfs_dir / f"{md_path.stem}.pdf"
     shutil.move(str(reader_path.with_suffix(".pdf")), str(reader_pdf))
     print(f"Created: {reader_pdf}")
-    jpg_pattern = str(content_dir / "_output" / f"{md_path.stem}_p%02d.jpg")
+    jpg_pattern = str(output_base / "_output" / f"{md_path.stem}_p%02d.jpg")
     convert_to_jpg(reader_pdf, jpg_pattern)
 
     if args.booklet:
