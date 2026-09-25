@@ -3,9 +3,10 @@
 # requires-python = ">=3.12"
 # dependencies = []
 # ///
-# copy/: A5 sequential pages -> 2-up landscape A4. --print also makes a
-# saddle-stitch booklet via pdfpages signature (duplex short-edge flip,
-# stack, fold, staple 2-3 times on the spine).
+# copy/: A5 sequential pages -> 2-up landscape A4 reader, single A5 pages,
+# or saddle-stitch booklet imposition. The reader is A5 pages 2-up on A4 in
+# reading order; the booklet uses pdfpages signature imposition (duplex
+# short-edge flip, stack, fold, staple 2-3 times on the spine).
 
 import argparse
 import math
@@ -197,18 +198,63 @@ def resolve_copy_input(raw_path: Path) -> tuple[Path, Path]:
     sys.exit(f"Error: File not found: {raw_path}")
 
 
+def _auto_signature(npages: int) -> int:
+    """Pick a sensible saddle-stitch signature size.
+
+    A signature must be a multiple of 4. Small booklets keep everything in
+    one signature; thicker ones are split into 16-page signatures so the
+    folded stack is not too bulky to staple at home.
+    """
+    if npages <= 16:
+        return max(4, math.ceil(npages / 4) * 4)
+    return 16
+
+
+def _validate_signature(raw: str, npages: int) -> int:
+    if raw == "auto":
+        return _auto_signature(npages)
+    try:
+        value = int(raw)
+    except ValueError:
+        sys.exit(f"Error: --signature must be 'auto' or a multiple of 4, got {raw!r}")
+    if value <= 0 or value % 4 != 0:
+        sys.exit(f"Error: --signature must be a positive multiple of 4, got {value}")
+    return value
+
+
 def main():
     parser = argparse.ArgumentParser(
-        description="Render a copy/ markdown file to landscape A4 2-up PDF."
+        description="Render a copy/ markdown file to A4 2-up, A5 single-page, or saddle-stitch booklet PDF."
     )
     parser.add_argument("path", help="Path to the markdown file")
     parser.add_argument(
-        "--print",
+        "--a5",
+        action="store_true",
+        dest="a5",
+        help="Produce a single-page A5 PDF (reading order).",
+    )
+    parser.add_argument(
+        "--booklet",
         action="store_true",
         dest="booklet",
-        help="Also produce the saddle-stitch booklet (imposition order).",
+        help="Produce a saddle-stitch booklet (imposition order).",
+    )
+    parser.add_argument(
+        "--signature",
+        default="auto",
+        help="Signature size for --booklet; 'auto' or a multiple of 4 (default: auto).",
+    )
+    parser.add_argument(
+        "--print",
+        action="store_true",
+        dest="booklet_legacy",
+        help=argparse.SUPPRESS,
     )
     args = parser.parse_args()
+
+    # --print is the old name for --booklet; keep it working.
+    if args.booklet_legacy:
+        args.booklet = True
 
     raw_path = Path(args.path)
     md_path, output_base = resolve_copy_input(raw_path)
@@ -231,16 +277,24 @@ def main():
 
     extract_pax(tex_stem, latex_dir)
 
-    reader_path = generate_impose_wrapper(tex_stem, latex_dir)
-    compile_tex(reader_path, "pdflatex")
-    reader_pdf = pdfs_dir / f"{md_path.stem}.pdf"
-    shutil.move(str(reader_path.with_suffix(".pdf")), str(reader_pdf))
-    print(f"Created: {reader_pdf}")
-    jpg_pattern = str(output_base / "_output" / f"{md_path.stem}_p%02d.jpg")
-    convert_to_jpg(reader_pdf, jpg_pattern)
+    # Default mode: A4 landscape 2-up reader.
+    if not args.a5 and not args.booklet:
+        reader_path = generate_impose_wrapper(tex_stem, latex_dir)
+        compile_tex(reader_path, "pdflatex")
+        reader_pdf = pdfs_dir / f"{md_path.stem}.pdf"
+        shutil.move(str(reader_path.with_suffix(".pdf")), str(reader_pdf))
+        print(f"Created: {reader_pdf}")
+        jpg_pattern = str(output_base / "_output" / f"{md_path.stem}_p%02d.jpg")
+        convert_to_jpg(reader_pdf, jpg_pattern)
+
+    if args.a5:
+        a5_src = latex_dir / f"{tex_stem}.pdf"
+        a5_pdf = pdfs_dir / f"{md_path.stem}.a5.pdf"
+        shutil.copy2(str(a5_src), str(a5_pdf))
+        print(f"Created: {a5_pdf}")
 
     if args.booklet:
-        signature = max(4, math.ceil(npages / 4) * 4)
+        signature = _validate_signature(args.signature, npages)
         booklet_path = generate_impose_wrapper(tex_stem, latex_dir, signature=signature)
         compile_tex(booklet_path, "pdflatex")
         booklet_pdf = pdfs_dir / f"{md_path.stem}.booklet.pdf"

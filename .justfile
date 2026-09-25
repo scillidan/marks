@@ -18,9 +18,14 @@ a4 path:
 copy path:
     uv run scripts/gen_copy.py "{{path}}"
 
-# == copy booklet (single saddle-stitch signature; print duplex flip-short-edge, stack, fold, staple spine)
-copy-print path:
-    uv run scripts/gen_copy.py "{{path}}" --print
+# == copy-a5 (single A5 pages, reading order; best for screens / hole-punch binding)
+copy-a5 path:
+    uv run scripts/gen_copy.py "{{path}}" --a5
+
+# == copy-booklet (saddle-stitch imposition; print duplex flip-short-edge, stack, fold, staple spine)
+# signature: number of pages per folded signature, must be a multiple of 4; "auto" picks a sensible value.
+copy-booklet path signature="auto":
+    uv run scripts/gen_copy.py "{{path}}" --booklet --signature "{{signature}}"
 
 # == post bilingual pair (A4, synchronized two-column paracol)
 # First file: source (e.g. post/foo.md), second file: translation (e.g. post/foo.zh-cn.md)
