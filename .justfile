@@ -10,15 +10,15 @@ a6 path size="" font="":
         {{ if size != "" { "--size " + size } else { "" } }} \
         {{ if font != "" { "--font \"" + font + "\"" } else { "" } }}
 
-# == post (A4, 2-column) — engine: latex
+# == post (A4, 2-column) (engine: latex)
 a4 path:
     uv run scripts/gen_a4_latex.py "{{path}}"
 
-# == copy (A5 pages 2-up on landscape A4, reading order) — engine: latex
+# == copy (A5 pages 2-up on landscape A4, reading order) (engine: latex)
 copy path:
     uv run scripts/gen_copy.py "{{path}}"
 
-# == copy-a5 (single A5 pages, reading order; best for screens / hole-punch binding)
+# == copy-a5 (single A5 pages, reading order)
 copy-a5 path:
     uv run scripts/gen_copy.py "{{path}}" --a5
 
@@ -100,7 +100,7 @@ image-convert-norun mode theme output image="" commands="":
         {{ if commands != "" { "--commands '" + commands + "'" } else { "" } }} \
         --output '{{output}}'
 
-# == ctan (CTAN cards; add ctan/<stem>.tex + matching pdfs/<stem>.pdf to compile)
+# == ctan (engine: latex)
 ctan path:
     uv run scripts/gen_ctan.py --compile "{{path}}"
 

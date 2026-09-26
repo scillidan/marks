@@ -20,19 +20,19 @@
   \setlength{\parskip}{\baselineskip}%
 }
 
-% Metadata: frameless, left-aligned, block indented by the body indent; total
-% gap to the body is two line heights (\addvspace + the next paragraph's \parskip).
+% Metadata: frameless, left-aligned, no indent. The gap between metadata
+% blocks and the body is one line height: 0.5\baselineskip from each block
+% combines with the following paragraph's \parskip to a single line.
 \renewenvironment{postmetadata}{%
-  \par\addvspace{\baselineskip}%
+  \par\addvspace{0.5\baselineskip}%
   \begingroup
   \footnotesize
   \raggedright
-  \setlength{\leftskip}{\parindent}%
   \setlength{\parindent}{0pt}%
   \setlength{\parskip}{0pt}%
 }{%
   \par\endgroup
-  \par\addvspace{\baselineskip}%
+  \addvspace{0.5\baselineskip}%
 }
 
 % Blockquote: full measure, \small, upright, normal inter-line spacing above

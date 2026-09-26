@@ -80,37 +80,56 @@ def render_metadata_line(line):
 
 
 def extract_metadata(md_content):
-    """Parse the leading ``` metadata block if present.
+    """Parse all leading ``` metadata blocks.
 
-    The metadata is extracted and returned, and the block itself is replaced
-    with a ```{=tex} raw block holding a `postmetadata` environment: a framed
-    box that typesets the lines in text mode, so URLs are real hyperlinks
+    Multiple consecutive metadata blocks are supported (for example the
+    original-language block followed by the translation block). Each block is
+    replaced with a ```{=tex} raw block holding a `postmetadata` environment.
+    The environments typeset the lines in text mode so URLs are real hyperlinks
     that wrap cleanly instead of relying on fragile listings escape markers
     (which cracked the listings frame on wrapped URL lines).
     """
     lines = md_content.splitlines()
     meta = {}
-    if lines and lines[0].strip().startswith("```"):
+    raw_blocks = []
+    pos = 0
+    n = len(lines)
+
+    # Skip leading blank lines, then consume every consecutive ``` block.
+    while pos < n and lines[pos].strip() == "":
+        pos += 1
+
+    while pos < n and lines[pos].strip().startswith("```"):
         end = None
-        for i in range(1, len(lines)):
+        for i in range(pos + 1, n):
             if lines[i].strip() == "```":
                 end = i
                 break
-        if end is not None:
-            meta_lines = lines[1:end]
-            for line in meta_lines:
-                m = re.match(r"^([A-Za-z][A-Za-z0-9_ ]*)\s*:\s*(.*)$", line)
-                if m:
-                    key = m.group(1).strip().lower().replace(" ", "")
-                    meta[key] = m.group(2).strip()
-            raw = ["```{=tex}", "\\begin{postmetadata}"]
-            for line in meta_lines:
-                rendered = render_metadata_line(line) or "\\mbox{}"
-                # Each entry is its own paragraph so the environment's
-                # hanging indent applies to wrapped (URL) lines.
-                raw.append(rendered + "\\par")
-            raw += ["\\end{postmetadata}", "```"]
-            md_content = "\n".join(raw + lines[end + 1 :])
+        if end is None:
+            break
+
+        meta_lines = lines[pos + 1 : end]
+        for line in meta_lines:
+            m = re.match(r"^([A-Za-z][A-Za-z0-9_ ]*)\s*:\s*(.*)$", line)
+            if m:
+                key = m.group(1).strip().lower().replace(" ", "")
+                meta[key] = m.group(2).strip()
+
+        block_raw = ["```{=tex}", "\\begin{postmetadata}"]
+        for line in meta_lines:
+            rendered = render_metadata_line(line) or "\\mbox{}"
+            # Each entry is its own paragraph so the environment's
+            # hanging indent applies to wrapped (URL) lines.
+            block_raw.append(rendered + "\\par")
+        block_raw += ["\\end{postmetadata}", "```"]
+        raw_blocks.extend(block_raw)
+
+        pos = end + 1
+        # Allow blank lines between consecutive metadata blocks.
+        while pos < n and lines[pos].strip() == "":
+            pos += 1
+
+    md_content = "\n".join(raw_blocks + lines[pos:])
     return meta, md_content
 
 
