@@ -23,8 +23,8 @@ copy-a5 path:
     uv run scripts/gen_copy.py "{{path}}" --a5
 
 # == copy-booklet (saddle-stitch imposition; print duplex flip-short-edge, stack, fold, staple spine)
-# signature: number of pages per folded signature, must be a multiple of 4; "auto" picks a sensible value.
-copy-booklet path signature="auto":
+# signature: number of pages per folded signature, must be a multiple of 4; default 4 keeps the first sheet full.
+copy-booklet path signature="4":
     uv run scripts/gen_copy.py "{{path}}" --booklet --signature "{{signature}}"
 
 # == post bilingual pair (A4, synchronized two-column paracol)
