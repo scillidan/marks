@@ -104,3 +104,8 @@ image-convert-norun mode theme output image="" commands="":
 ctan path:
     uv run scripts/gen_ctan.py --compile "{{path}}"
 
+# == shortcut cheatsheets (A4, generated from .cht files)
+# Usage: just shortcut [category]
+shortcut category="":
+    uv run scripts/gen_shortcut.py {{ if category != "" { "--category " + category } else { "" } }}
+
