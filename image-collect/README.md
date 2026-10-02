@@ -49,4 +49,8 @@ just polario portrait "image-collect/assets/聲の形 第02巻.jpg" "大今良�
 just polario portrait "image-collect/assets/Portrait of a Girl with Primroses.jpg" "William Herbert Allen" "" "Portrait of a Girl with Primroses" "(0%, 2%)" 100% "(100%, 100%)"
 just polario portrait "image-collect/assets/Portrait of a Girl amongst Hollyhocks.jpg" "William Herbert Allen" "" "Portrait of a Girl with Primroses" "(0%, 2%)" 100% "(100%, 100%)"
 just polario portrait "image-collect/assets/Edward John Poynter_Pea Blossoms, 1890.jpg" "Edward John Poynter" "1890" "Pea Blossoms" "(0%, 0%)" 100% "(100%, 100%)"
+just polario portrait "image-collect/assets/ほしみどおり.png" "うとい" "2021" "ほしみどおり [星见通]" "(0%, 0%)" 100% "(100%, 100%)"
+just polario landscape "image-collect/assets/出港.jpg" "WaterStar水星" "2024" "出港" "(21%, 0%)" 100% "(100%, 100%)"
+just polario landscape "image-collect/assets/133.jpg" "ideun" "2026" "133" "(0%, 0%)" 100% "(100%, 100%)"
+just polario portrait "image-collect/assets/In The Room.png" "うとい" "2021" "In The Room" "(8%, 0%)" 100% "(100%, 100%)"
 ```
