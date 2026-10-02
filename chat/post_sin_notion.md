@@ -1,6 +1,6 @@
 ```
 Model: GLM-5-Turbo
-Q: "用圣经体讲述Notion的原罪"
+Q: 用圣经体讲述Notion的原罪
 ```
 
 **《虚无之书·诺汐篇》**

@@ -1,5 +1,5 @@
 ```
-model: Kimi K2.5 Thinking, GLM-5-Turbo
+model: Kimi-K2.5, GLM-5-Turbo
 ```
 
 > 高收益情感债券（High-Yield Emotional Bond, HYEB）：  

@@ -1,6 +1,6 @@
 ```
 Agent: https://openwebui.com/m/javi/librarian:latest
-Model: gpt-5.4-mini
+Model: GPT-5.4-Mini
 ```
 
 Q: Part from [“Sir Gawain and the Green Knight“](https://rpo.library.utoronto.ca/content/sir-gawain-and-green-knight#poemline-3415):  

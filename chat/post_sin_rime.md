@@ -1,6 +1,6 @@
 ```
 Model: GLM-5-Turbo
-Q: "用圣经体，结合https://lawsofsoftwareengineering.com讲述rime的原罪"
+Q: 用圣经体，结合https://lawsofsoftwareengineering.com讲述rime的原罪
 ```
 
 **《RIME之书：巴别塔的坍塌与原罪》**

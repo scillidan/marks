@@ -1,5 +1,5 @@
 ```
-model: Kimi K2.8 Thinking
+model: Kimi-K2.8
 ```
 
 **《死隐喻：词义的形成与遗忘》**
@@ -10,7 +10,7 @@ model: Kimi K2.8 Thinking
 
 尼采在《论真理与谎言》中写道：真理乃是我们已忘记其为幻觉的幻觉，是磨去了感官生动性的隐喻。
 
-这段话中"磨去花纹的硬币"与"磨损的隐喻"相互对应，正是死隐喻的出处。隐喻一经创造，便被共同体反复使用，而使用从不要求回想其形象来源；被用得越久，来源越不被想起，直到无人再意识到它是隐喻。此时它不再引起任何联想，只作为一个义项存在——隐喻死了，死得无人宣布，无人察觉。尼采由此给真理下了一个另类的定义：真理不是与实在相符的陈述，而是一个社群对幻觉的集体遗忘。
+这段话中“磨去花纹的硬币”与“磨损的隐喻”相互对应，正是死隐喻的出处。隐喻一经创造，便被共同体反复使用，而使用从不要求回想其形象来源；被用得越久，来源越不被想起，直到无人再意识到它是隐喻。此时它不再引起任何联想，只作为一个义项存在——隐喻死了，死得无人宣布，无人察觉。尼采由此给真理下了一个另类的定义：真理不是与实在相符的陈述，而是一个社群对幻觉的集体遗忘。
 
 > Jedes Wort wird sofort dadurch Begriff, daß es eben nicht für das einmalige ganz und gar individualisierte Urerlebnis, dem es sein Entstehen verdankt, etwa als Erinnerung dienen soll, sondern zugleich für zahllose, mehr oder weniger ähnliche, das heißt streng genommen niemals gleiche, also auf lauter ungleiche Fälle passen muß. Jeder Begriff entsteht durch Gleichsetzen des Nichtgleichen. [Friedrich Nietzsche, "Über Wahrheit und Lüge im außermoralischen Sinne", 1873]
 

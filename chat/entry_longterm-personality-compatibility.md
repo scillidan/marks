@@ -1,5 +1,5 @@
 ```
-model: Hy3-preview
+model: Hy3-Preview
 ```
 
 > 长期人格兼容性（Long-term Personality Compatibility, LTPC）  

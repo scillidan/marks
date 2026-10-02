@@ -1,6 +1,6 @@
 ```
 Model: GLM-5-Turbo
-Q: "用圣经体讲述VS Code的原罪"
+Q: 用圣经体讲述VS Code的原罪
 ```
 
 **《创世记·VS Code篇》**

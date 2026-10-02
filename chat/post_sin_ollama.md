@@ -1,6 +1,6 @@
 ```
-Model: GLM-5-Turbo
-Q: "用圣经体讲述Ollama的原罪"
+Model: GLM-5
+Q: 用圣经体讲述Ollama的原罪
 ```
 
 **《硅基之书·俄拉玛篇》**

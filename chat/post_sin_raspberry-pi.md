@@ -1,6 +1,6 @@
 ```
 Model: GLM-5-Turbo
-Q: "用圣经体讲述Raspberry Pi的原罪"
+Q: 用圣经体讲述Raspberry Pi的原罪
 ```
 
 **《创世记·绿板之书：树莓派的原罪》**

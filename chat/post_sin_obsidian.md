@@ -1,6 +1,6 @@
 ```
 Model: GLM-5-Turbo
-Q: "用圣经体，结合https://lawsofsoftwareengineering.com讲述Obsidian的原罪"
+Q: 用圣经体，结合https://lawsofsoftwareengineering.com讲述Obsidian的原罪
 ```
 
 **《Obsidian原罪记》**

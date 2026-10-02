@@ -1,6 +1,6 @@
 ```
 Agent: https://openwebui.com/m/geometric/sigmund-freud
-Model: qwen3:14b
+Model: Qwen3-14B
 ```
 
 Q: 在弗里德里希·尼采《我妹妹与我：尼采佚失的最后告白》（陈苍多译，2003）这个译本里，有这么一段描写，“她习惯站在我的宿舍外面，隐藏在榆树所投下的阴影中，轻声吹着口哨，像一只莺鸟…”。分析作者的心理活动。

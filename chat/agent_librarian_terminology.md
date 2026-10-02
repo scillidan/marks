@@ -1,6 +1,6 @@
 ```
 Agent: https://openwebui.com/m/javi/librarian:latest
-Model: qwen3:14b
+Model: Qwen3-14B
 ```
 
 Q: 摘：威廉·惠威尔（William Whewell）在《归纳科学哲学》（1847年）中提到，德坎多尔（Decandolle）等人使用“语义学”（Glossology）而非“术语学”（Terminology），是为了避免“术语学”这一复合词中包含来自不同语言的词根（如“term”源自拉丁语，“ology”源自希腊语）所带来的“语言学污点”。惠威尔认为，尽管这种语言学上的严谨性值得尊重，但将“-ology”（以及少数其他复合词的词缀）视为不限于希腊语组合的便利性极高，因此他愿意在这些情况下忽略这种语言学上的顾虑。
