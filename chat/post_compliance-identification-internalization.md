@@ -1,9 +1,6 @@
 ```
 model: Kimi-K2.6
-Q:
-
-史蒂芬·凯尔曼（Steven Kelman）把社会影响分三层：顺从（compliance）为获得他人赞许或避免不赞许而表现、认同（identification）为维持某个自我定义的角色关系、内部化（internalization）因为行为与自己既有价值体系一致 。
-
+Q: 史蒂芬·凯尔曼（Steven Kelman）把社会影响分三层：顺从（compliance）为获得他人赞许或避免不赞许而表现、认同（identification）为维持某个自我定义的角色关系、内部化（internalization）因为行为与自己既有价值体系一致 。  
 写一篇1000字左右的（伪）专业（内核硬但不教条教材化）文章，讲“社会影响的三层”
 ```
 
