@@ -154,6 +154,71 @@ def clean_markdown(md_content):
     return md_content
 
 
+def apply_smart_quotes(md_content):
+    r"""Convert straight ASCII double quotes in text to curly quotes.
+
+    Fenced code blocks, inline code spans, and markdown links/images are
+    protected so their quotes stay verbatim. Only ``"..."`` in running text
+    becomes ``"..."``; apostrophes and single quotes are left untouched.
+    """
+    # Private-use delimiters that won't appear in normal markdown.
+    FENCE_DELIM = "\ue000FENCE"
+    INLINE_DELIM = "\ue000INLINE"
+    LINK_DELIM = "\ue000LINK"
+    END_DELIM = "\ue000"
+
+    protected = []
+
+    def protect(pattern, delim):
+        def repl(m):
+            idx = len(protected)
+            protected.append(m.group(0))
+            return f"{delim}{idx}{END_DELIM}"
+
+        nonlocal md_content
+        md_content = pattern.sub(repl, md_content)
+
+    # 1. Protect fenced code blocks (``` ... ``` or ~~~ ... ~~~).
+    fence_re = re.compile(r"^(```+|~~~+)[^\n]*\n.*?\n\1[ \t]*$", re.S | re.M)
+    protect(fence_re, FENCE_DELIM)
+
+    # 2. Protect inline code spans (handling matching backtick runs).
+    inline_re = re.compile(r"(`+)(.+?)\1", re.S)
+    protect(inline_re, INLINE_DELIM)
+
+    # 3. Protect markdown links/images so link titles/URLs stay intact.
+    link_re = re.compile(r"!?\[[^\]]*\]\([^)]*\)")
+    protect(link_re, LINK_DELIM)
+
+    # 4. Convert straight double quotes that are clearly opening/closing.
+    #    Opening: after whitespace/start or an opening punctuation mark.
+    #    Closing: before whitespace/end or a closing punctuation mark.
+    md_content = re.sub(
+        r"([\s\(\[\{—–\-]|^)\"([^\"\n]*?)\"([\s\.\,\;\:\!\?\)\]\}—–\-]|$)",
+        r"\1“\2”\3",
+        md_content,
+    )
+
+    # 5. Restore protected content in reverse order of protection.
+    md_content = re.sub(
+        re.escape(LINK_DELIM) + r"(\d+)" + re.escape(END_DELIM),
+        lambda m: protected[int(m.group(1))],
+        md_content,
+    )
+    md_content = re.sub(
+        re.escape(INLINE_DELIM) + r"(\d+)" + re.escape(END_DELIM),
+        lambda m: protected[int(m.group(1))],
+        md_content,
+    )
+    md_content = re.sub(
+        re.escape(FENCE_DELIM) + r"(\d+)" + re.escape(END_DELIM),
+        lambda m: protected[int(m.group(1))],
+        md_content,
+    )
+
+    return md_content
+
+
 def convert_with_magick(src, dest):
     cli = find_imagemagick_cli()
     if not cli:
@@ -590,6 +655,7 @@ def process_markdown(md_path, output_dir, hard_breaks=False):
     md_content = separate_footnote_definitions(md_content)
     md_content = normalize_whitespace(md_content, hard_breaks=hard_breaks)
     md_content = re.sub(r"\n{3,}", "\n\n", md_content)
+    md_content = apply_smart_quotes(md_content)
 
     meta_path = output_dir / "meta.tex"
     # Keep the first H1 in the markdown body; the wrapper no longer prints a

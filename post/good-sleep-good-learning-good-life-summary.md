@@ -5,7 +5,7 @@ Source: https://supermemo.guru/wiki/Good_sleep,_good_learning,_good_life:_Summar
 
 # Good sleep, good learning, good life: Summary
 
-This text is part of: "_[Science of sleep](https://supermemo.guru/wiki/Science_of_sleep "Science of sleep")_" by [Piotr Wozniak](https://supermemo.guru/wiki/Piotr_Wozniak "Piotr Wozniak") (2017)
+This text is part of: "[Science of sleep](https://supermemo.guru/wiki/Science_of_sleep)" by [Piotr Wozniak](https://supermemo.guru/wiki/Piotr_Wozniak) (2017)
 
 ## ABC of sleep
 
