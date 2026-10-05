@@ -5,12 +5,36 @@
 # ///
 """Generate shortcut cheatsheets.
 
-For every .cht file in SHORTCUT_SOURCE/shortcut*/:
-  1. Build a narrow per-software PDF (A4/4 width, auto height, receipt style).
-  2. Build one final landscape-A4 PDF for the category, flowing all software
-     content in 4 columns (top-to-bottom, left-to-right).
+Discovers .cht files under SHORTCUT_SOURCE and builds landscape-A4 aggregate
+PDFs, flowing all content in N columns (top-to-bottom, left-to-right). A narrow
+per-software PDF (receipt style) is also produced for every selected file.
 
-One final PDF is produced per category (shortcut, shortcut_dev, ...).
+Selection
+---------
+* No --include/--exclude: every .cht found recursively under SHORTCUT_SOURCE is
+  selected. One aggregate PDF is produced per top-level directory, named
+  ``<directory>.pdf``.
+* --include SPEC ...: the default "print all" output is replaced by a single
+  aggregate PDF built only from the matched files, named after the include
+  specs (e.g. ``--include neovim`` -> ``neovim.pdf``; multiple specs are joined
+  with ``_``).
+* --exclude SPEC ...: removes matched files from the selection (applied on top
+  of --include when both are given, otherwise on the full recursive set).
+
+SPEC is either a .cht stem / relative path (e.g. ``neovim``, ``shortcut/vim``)
+or a directory with a trailing slash (e.g. ``shortcut/``, ``shortcut_dev/``).
+
+Dialects
+--------
+``--style default`` (the default) parses the common ``Software: description | key``
+and ``Software:: plugin: description | key`` format, treats ``(<Text>)`` as a group
+name, and defaults to **5 columns**.
+
+``--style neovim`` parses the heading-grouped format: ``## <Group>`` headings
+(not URLs) define groups, the software prefix is stripped, ``(<Text>)`` is *not*
+treated as a group, and the layout defaults to **4 columns**.
+
+Use ``--columns N`` to override the default column count for either style.
 """
 
 import argparse
@@ -27,8 +51,6 @@ sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 SOFTWARE_TEMPLATE = Path("/scripts/shortcut-software-template.typ").as_posix()
 CATEGORY_TEMPLATE = Path("/scripts/shortcut-category-template.typ").as_posix()
-
-CATEGORIES = ["shortcut", "shortcut_dev", "shortcut_windows", "shortcut_arch"]
 
 # Characters that must be escaped inside Typst content brackets.
 _TYPST_SPECIAL = {
@@ -62,6 +84,43 @@ class Group:
     plugin: str | None
     group: str | None
     entries: list[Entry] = field(default_factory=list)
+
+
+@dataclass(frozen=True)
+class Style:
+    """A .cht dialect.
+
+    Keeping each behavioural difference as a field (rather than branching on a
+    filename) lets ``--style`` presets be added or granularized later without
+    touching the parser.
+    """
+
+    name: str
+    columns: int
+    heading_groups: bool  # "## <Group>" headings define groups
+    paren_group: bool  # "(<Text>)" at the start of a field is a group name
+    group_by_group_only: bool  # group rows by group alone (not plugin+group)
+    initial_group: str | None
+
+
+DEFAULT = Style(
+    name="default",
+    columns=5,
+    heading_groups=False,
+    paren_group=True,
+    group_by_group_only=False,
+    initial_group=None,
+)
+NEOVIM = Style(
+    name="neovim",
+    columns=4,
+    heading_groups=True,
+    paren_group=False,
+    group_by_group_only=True,
+    initial_group="General",
+)
+STYLES: dict[str, Style] = {"default": DEFAULT, "neovim": NEOVIM}
+STYLE_CHOICES = [*STYLES]
 
 
 def load_env(path: Path) -> dict[str, str]:
@@ -109,7 +168,7 @@ def _split_desc_key(line: str) -> tuple[str, str] | None:
     return None
 
 
-def parse_line(line: str, current_group: str | None, is_neovim: bool) -> Entry | None:
+def parse_line(line: str, current_group: str | None, style: Style) -> Entry | None:
     """Parse a single non-comment .cht line into an Entry."""
     split = _split_desc_key(line)
     if split is None:
@@ -118,6 +177,7 @@ def parse_line(line: str, current_group: str | None, is_neovim: bool) -> Entry |
     desc_part, key_part = split
     key = key_part.replace(r"\|", "|").replace(r"\\", "\\")
 
+    software = ""
     plugin: str | None = None
     group: str | None = None
     description = ""
@@ -128,7 +188,7 @@ def parse_line(line: str, current_group: str | None, is_neovim: bool) -> Entry |
         #   Software:: (<group>) Plugin: description
         #   Software:: (<group>) Plugin            (no description)
         #   Software:: (<group>)                   (group only)
-        if rest.startswith("(") and ")" in rest:
+        if style.paren_group and rest.startswith("(") and ")" in rest:
             close = rest.find(")")
             group = rest[1:close].strip()
             rest = rest[close + 1 :].strip()
@@ -145,7 +205,15 @@ def parse_line(line: str, current_group: str | None, is_neovim: bool) -> Entry |
     elif ": " in desc_part:
         software, description = desc_part.split(": ", 1)
     else:
-        return None
+        # Lines with no colon: either "Software (Group) description | key"
+        # (e.g. envx) or just "description | key" (e.g. cxt, gh-notify).
+        match = re.match(r"^(\S+)\s+\(([^)]*)\)\s+(.+)$", desc_part)
+        if match:
+            software = match.group(1)
+            group = match.group(2).strip()
+            description = match.group(3).strip()
+        else:
+            description = desc_part.strip()
 
     software = software.strip()
     plugin = plugin.strip() if plugin else None
@@ -154,7 +222,7 @@ def parse_line(line: str, current_group: str | None, is_neovim: bool) -> Entry |
     plugin = plugin.removesuffix(":") if plugin else None
     description = description.strip()
 
-    if is_neovim:
+    if style.heading_groups:
         group = current_group
     else:
         if group is None and description.startswith("(") and ")" in description:
@@ -176,41 +244,41 @@ def parse_line(line: str, current_group: str | None, is_neovim: bool) -> Entry |
     return Entry(software, plugin, group, description, key)
 
 
-def parse_cht(path: Path) -> tuple[list[Entry], bool]:
-    """Parse a .cht file, returning entries in file order and a neovim flag."""
-    is_neovim = path.stem.lower() == "neovim"
+def parse_cht(path: Path, style: Style) -> list[Entry]:
+    """Parse a .cht file, returning entries in file order."""
     entries: list[Entry] = []
-    current_group: str | None = "General" if is_neovim else None
+    current_group = style.initial_group
 
     for raw in path.read_text(encoding="utf-8").splitlines():
         line = raw.strip()
         if not line:
             continue
 
-        if is_neovim:
-            if line.startswith("## "):
+        if line.startswith("#"):
+            if style.heading_groups and line.startswith("## "):
                 body = line[3:].strip()
                 if "/" not in body and "\\" not in body:
                     current_group = body
-                continue
-        else:
-            if line.startswith("#"):
-                continue
+            continue
 
-        entry = parse_line(line, current_group, is_neovim)
+        entry = parse_line(line, current_group, style)
         if entry:
             entries.append(entry)
 
-    return entries, is_neovim
+    return entries
 
 
-def group_entries(entries: list[Entry], is_neovim: bool) -> list[Group]:
+def group_entries(entries: list[Entry], style: Style) -> list[Group]:
     """Group entries preserving first-seen order."""
     groups: list[Group] = []
     index: dict[tuple[str | None, str | None], int] = {}
 
     for entry in entries:
-        key = (None, entry.group) if is_neovim else (entry.plugin, entry.group)
+        key = (
+            (None, entry.group)
+            if style.group_by_group_only
+            else (entry.plugin, entry.group)
+        )
         if key not in index:
             groups.append(Group(plugin=entry.plugin, group=entry.group))
             index[key] = len(groups) - 1
@@ -230,13 +298,13 @@ def emit_table(rows: list[tuple[str, str]]) -> str:
     return "\n".join(lines)
 
 
-def emit_software_content(name: str, groups: list[Group], is_neovim: bool) -> str:
+def emit_software_content(name: str, groups: list[Group], style: Style) -> str:
     lines: list[str] = []
     lines.append(f"= {typst_escape(name)}")
     lines.append("#divider()")
 
     for g in groups:
-        if is_neovim:
+        if style.group_by_group_only:
             header = f"[{typst_escape(g.group)}]" if g.group else ""
         else:
             header = ""
@@ -252,7 +320,7 @@ def emit_software_content(name: str, groups: list[Group], is_neovim: bool) -> st
             lines.append("#v(.4em)")
             lines.append(header)
 
-        if is_neovim:
+        if style.group_by_group_only:
             rows = [
                 (
                     f"{e.plugin}: {e.description}" if e.plugin else e.description,
@@ -268,10 +336,10 @@ def emit_software_content(name: str, groups: list[Group], is_neovim: bool) -> st
 
 
 def generate_software_typ(
-    name: str, groups: list[Group], is_neovim: bool, typ_path: Path
+    name: str, groups: list[Group], style: Style, typ_path: Path
 ) -> Path:
     typ_path.parent.mkdir(parents=True, exist_ok=True)
-    content = emit_software_content(name, groups, is_neovim)
+    content = emit_software_content(name, groups, style)
     text = f'''#import "{SOFTWARE_TEMPLATE}": *
 #show: shortcut-software-layout
 
@@ -283,73 +351,205 @@ def generate_software_typ(
 
 def generate_category_typ(
     category: str,
-    software_groups: list[tuple[str, list[Group], bool]],
+    software_groups: list[tuple[str, list[Group], Style]],
+    columns: int,
     typ_path: Path,
 ) -> Path:
     typ_path.parent.mkdir(parents=True, exist_ok=True)
     parts: list[str] = [
         f'#import "{CATEGORY_TEMPLATE}": *',
-        "#show: shortcut-category-layout",
+        f"#show: shortcut-category-layout.with(columns: {columns})",
         "",
     ]
-    for name, groups, is_neovim in software_groups:
-        parts.append(emit_software_content(name, groups, is_neovim))
+    for name, groups, style in software_groups:
+        parts.append(emit_software_content(name, groups, style))
         parts.append("")
 
     typ_path.write_text("\n".join(parts), encoding="utf-8")
     return typ_path
 
 
-def process_category(source_dir: Path, category: str, project_root: Path) -> None:
-    cat_dir = source_dir / category
-    if not cat_dir.exists():
-        print(f"Warning: source directory not found: {cat_dir}", file=sys.stderr)
-        return
+def discover_cht(source_dir: Path) -> list[Path]:
+    """All .cht files under source_dir, recursive, sorted."""
+    return sorted(p for p in source_dir.rglob("*.cht") if p.is_file())
 
-    cht_files = sorted(p for p in cat_dir.iterdir() if p.suffix == ".cht")
-    if not cht_files:
-        print(f"Warning: no .cht files in {cat_dir}", file=sys.stderr)
-        return
 
+def spec_matches(spec: str, rel: Path) -> bool:
+    """Match a --include/--exclude SPEC against a source-relative .cht path."""
+    s = spec.replace("\\", "/").strip()
+    if not s:
+        return False
+    posix = rel.as_posix()
+    if s.endswith("/"):
+        prefix = s.rstrip("/")
+        return posix.startswith(prefix + "/")
+    if "/" in s:
+        stem = s.removesuffix(".cht")
+        return posix == f"{stem}.cht"
+    stem = s.removesuffix(".cht")
+    return rel.stem == stem
+
+
+def select_files(
+    source_dir: Path, includes: list[str], excludes: list[str]
+) -> list[Path]:
+    """Resolve the selected .cht files (include order preserved)."""
+    all_files = discover_cht(source_dir)
+    if includes:
+        selected: list[Path] = []
+        seen: set[Path] = set()
+        for spec in includes:
+            for path in all_files:
+                if path in seen:
+                    continue
+                if spec_matches(spec, path.relative_to(source_dir)):
+                    selected.append(path)
+                    seen.add(path)
+    else:
+        selected = list(all_files)
+
+    if excludes:
+        selected = [
+            path
+            for path in selected
+            if not any(
+                spec_matches(spec, path.relative_to(source_dir)) for spec in excludes
+            )
+        ]
+    return selected
+
+
+def _sanitize_name(spec: str) -> str:
+    s = spec.replace("\\", "/").strip().rstrip("/")
+    return s.replace("/", "-") or "shortcut"
+
+
+def output_groups(
+    selected: list[Path], source_dir: Path, includes: list[str]
+) -> list[tuple[str, list[Path]]]:
+    """Split the selection into (output-name, files) aggregate groups."""
+    if includes:
+        name = "_".join(_sanitize_name(spec) for spec in includes)
+        return [(name, selected)]
+
+    grouped: dict[str, list[Path]] = {}
+    for path in selected:
+        rel = path.relative_to(source_dir)
+        top = rel.parts[0] if len(rel.parts) > 1 else source_dir.name
+        grouped.setdefault(top, []).append(path)
+    return [(name, grouped[name]) for name in sorted(grouped)]
+
+
+def resolve_columns(style_arg: str, override: int | None) -> int:
+    if override is not None:
+        return override
+    return STYLES[style_arg].columns
+
+
+def confirm_overwrite(path: Path) -> bool:
+    try:
+        answer = input(f"Output exists: {path}\nOverwrite? (y/N) ").strip().lower()
+    except (EOFError, KeyboardInterrupt):
+        print()
+        return False
+    return answer.startswith("y")
+
+
+def process_group(
+    name: str,
+    files: list[Path],
+    source_dir: Path,
+    project_root: Path,
+    style_arg: str,
+    columns_override: int | None,
+    force: bool,
+) -> None:
     output_dir = project_root / "shortcut" / "_output"
-    typs_dir = output_dir / "typs" / category
-    per_software_dir = output_dir / "per-software-pdfs" / category
+    typs_dir = output_dir / "typs"
+    per_software_dir = output_dir / "_temp"
 
-    software_groups: list[tuple[str, list[Group], bool]] = []
-    for cht in cht_files:
-        entries, is_neovim = parse_cht(cht)
+    style = STYLES[style_arg]
+    software_groups: list[tuple[str, list[Group], Style]] = []
+    for cht in files:
+        entries = parse_cht(cht, style)
         if not entries:
             continue
-        groups = group_entries(entries, is_neovim)
-        software_groups.append((cht.stem, groups, is_neovim))
+        groups = group_entries(entries, style)
+        software_groups.append((cht.stem, groups, style))
 
         # Per-software narrow PDF (receipt style).
-        sw_typ = typs_dir / f"{cht.stem}.typ"
-        generate_software_typ(cht.stem, groups, is_neovim, sw_typ)
-        print(f"Created: {sw_typ}")
-        sw_pdf = per_software_dir / f"{cht.stem}.pdf"
+        rel = cht.relative_to(source_dir)
+        sw_typ = typs_dir / rel.parent / f"{cht.stem}.typ"
+        generate_software_typ(cht.stem, groups, style, sw_typ)
+        sw_pdf = per_software_dir / rel.parent / f"{cht.stem}.pdf"
         sw_pdf.parent.mkdir(parents=True, exist_ok=True)
         compile_typst(sw_typ, sw_pdf, project_root)
 
     if not software_groups:
-        print(f"Warning: no entries parsed for {category}", file=sys.stderr)
+        print(f"Warning: no entries parsed for {name}", file=sys.stderr)
         return
 
-    # Final landscape A4 4-column PDF.
-    cat_typ = typs_dir / f"{category}.typ"
-    generate_category_typ(category, software_groups, cat_typ)
+    columns = resolve_columns(style_arg, columns_override)
+    cat_typ = typs_dir / f"{name}.typ"
+    generate_category_typ(name, software_groups, columns, cat_typ)
     print(f"Created: {cat_typ}")
-    cat_pdf = output_dir / "pdfs" / f"{category}.pdf"
+    cat_pdf = output_dir / "pdfs" / f"{name}.pdf"
     cat_pdf.parent.mkdir(parents=True, exist_ok=True)
+    if cat_pdf.exists() and not force and not confirm_overwrite(cat_pdf):
+        print(f"Skipped: {cat_pdf}")
+        return
     compile_typst(cat_typ, cat_pdf, project_root)
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description="Generate shortcut cheatsheets from .cht files."
+    )
     parser.add_argument(
-        "--category", choices=CATEGORIES, help="Generate only one category"
+        "--include",
+        action="append",
+        default=[],
+        metavar="SPEC",
+        help="Only build these .cht files (stem/path) or directories ('dir/'). "
+        "Repeatable; merges into one PDF named after the specs.",
+    )
+    parser.add_argument(
+        "--exclude",
+        action="append",
+        default=[],
+        metavar="SPEC",
+        help="Remove .cht files/directories from the selection. Repeatable.",
+    )
+    parser.add_argument(
+        "--style",
+        choices=STYLE_CHOICES,
+        default="default",
+        help=".cht dialect to use: 'default' (plain, 5 cols) or 'neovim' (4 cols).",
+    )
+    parser.add_argument(
+        "--columns",
+        type=int,
+        default=None,
+        help="Column count for aggregate PDFs (default: from --style).",
+    )
+    parser.add_argument(
+        "-f",
+        "--force",
+        action="store_true",
+        help="Overwrite existing aggregate PDFs without prompting.",
+    )
+    parser.add_argument(
+        "--category",
+        action="append",
+        default=[],
+        metavar="NAME",
+        help="Deprecated alias for '--include NAME/'.",
     )
     args = parser.parse_args()
+
+    includes = list(args.include)
+    for category in args.category:
+        includes.append(f"{category}/")
 
     check_dependencies()
 
@@ -363,9 +563,20 @@ def main() -> int:
     if not source_dir.exists():
         sys.exit(f"Error: SHORTCUT_SOURCE directory not found: {source_dir}")
 
-    categories = [args.category] if args.category else CATEGORIES
-    for category in categories:
-        process_category(source_dir, category, project_root)
+    selected = select_files(source_dir, includes, args.exclude)
+    if not selected:
+        sys.exit("Error: no .cht files matched the given --include/--exclude filters")
+
+    for name, files in output_groups(selected, source_dir, includes):
+        process_group(
+            name,
+            files,
+            source_dir,
+            project_root,
+            args.style,
+            args.columns,
+            args.force,
+        )
 
     return 0
 

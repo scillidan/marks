@@ -1,7 +1,3 @@
-# == Default options
-# size: 8(pt)
-# font: MonaspiceNe NFM, Sarasa Mono SC
-
 set dotenv-load
 
 # == entry,part (A6)
@@ -23,9 +19,30 @@ copy-a5 path:
     uv run scripts/gen_copy.py "{{path}}" --a5
 
 # == copy-booklet (saddle-stitch imposition; print duplex flip-short-edge, stack, fold, staple spine)
+# Accepts .md (compiled to A5 first) or .pdf (imposed directly).
 # signature: number of pages per folded signature, must be a multiple of 4; default 4 keeps the first sheet full.
-copy-booklet path signature="4":
-    uv run scripts/gen_copy.py "{{path}}" --booklet --signature "{{signature}}"
+# Any trailing flags (e.g. --pages 1-16) are forwarded to the script.
+copy-booklet path signature="4" pages="" *flags:
+    uv run scripts/gen_copy.py "{{path}}" --booklet --signature "{{signature}}" \
+        {{ if pages != "" { "--pages \"" + pages + "\"" } else { "" } }} \
+        {{ flags }}
+
+# == copy-grid (grid imposition, e.g. 2x2 cards on A4 landscape)
+# Accepts .md or .pdf. Pages='1-8' limits the range (use "" for all pages).
+# Trailing flags are forwarded, e.g. --frame, --divider, --divider-horizontal,
+# --fit fill, --margin 5mm, --frame-color gray50, --frame-width 0.2pt.
+# Image processing (text stays vector), e.g.
+#   --brighten 250            multiply-brighten embedded images only
+#   --image-filter 'magick $1 -colorspace Gray -gamma 2.2 $2'
+#                             arbitrary per-image magick chain ($1=in $2=out)
+#   --dither 'magick $1 -ordered-dither h8x8a -type Bilevel $2'
+#                             whole-page rasterise + dither (PDF input)
+#   --grayscale, --dither-dpi 300, --suffix .v2
+copy-grid path grid="2x2" pages="" *flags:
+    uv run scripts/gen_copy.py "{{path}}" \
+        --grid "{{grid}}" \
+        {{ if pages != "" { "--pages \"" + pages + "\"" } else { "" } }} \
+        {{ flags }}
 
 # == post bilingual pair (A4, synchronized two-column paracol)
 # First file: source (e.g. post/foo.md), second file: translation (e.g. post/foo.zh-cn.md)
@@ -105,7 +122,13 @@ ctan path:
     uv run scripts/gen_ctan.py --compile "{{path}}"
 
 # == shortcut cheatsheets (A4, generated from .cht files)
-# Usage: just shortcut [category]
-shortcut category="":
-    uv run scripts/gen_shortcut.py {{ if category != "" { "--category " + category } else { "" } }}
+# Usage:
+#   just shortcut                                      # all .cht, one PDF per dir
+#   just shortcut --include neovim --style neovim      # only neovim -> neovim.pdf
+#   just shortcut --include neovim --include vim       # merged -> neovim_vim.pdf
+#   just shortcut --exclude neovim                     # everything except neovim
+#   just shortcut --include shortcut/                  # one dir recursively
+#   just shortcut --include neovim --columns 4         # override column count
+shortcut *args:
+    uv run scripts/gen_shortcut.py {{ args }}
 

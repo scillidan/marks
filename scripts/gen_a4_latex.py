@@ -15,7 +15,7 @@ from pathlib import Path
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
-from _common import convert_to_jpg, find_imagemagick_cli, safe_staging_dir
+from _common import convert_to_jpg, find_imagemagick_cli, safe_staging_dir, shell_quote
 
 MEDIA_EXTS = {".gif", ".mp4", ".mov", ".webm"}
 AVIF_EXTS = {".avif"}
@@ -135,7 +135,7 @@ def extract_metadata(md_content):
 
 def clean_markdown(md_content):
     # Remove cmarker raw-typst comments.
-    md_content = re.sub(r"<!--raw-typst.*?-->", "", md_content, flags=re.S)
+    md_content = re.sub(r"<!--raw-typst.*?-->", "", md_content, flags=re.DOTALL)
 
     # Convert broken image lines (alt text without a path) to italic text.
     def fix_broken_image(m):
@@ -146,7 +146,7 @@ def clean_markdown(md_content):
         r"^!\[([^\]]*)\]$",
         fix_broken_image,
         md_content,
-        flags=re.M,
+        flags=re.MULTILINE,
     )
 
     # Collapse runs of blank lines.
@@ -179,11 +179,11 @@ def apply_smart_quotes(md_content):
         md_content = pattern.sub(repl, md_content)
 
     # 1. Protect fenced code blocks (``` ... ``` or ~~~ ... ~~~).
-    fence_re = re.compile(r"^(```+|~~~+)[^\n]*\n.*?\n\1[ \t]*$", re.S | re.M)
+    fence_re = re.compile(r"^(```+|~~~+)[^\n]*\n.*?\n\1[ \t]*$", re.DOTALL | re.MULTILINE)
     protect(fence_re, FENCE_DELIM)
 
     # 2. Protect inline code spans (handling matching backtick runs).
-    inline_re = re.compile(r"(`+)(.+?)\1", re.S)
+    inline_re = re.compile(r"(`+)(.+?)\1", re.DOTALL)
     protect(inline_re, INLINE_DELIM)
 
     # 3. Protect markdown links/images so link titles/URLs stay intact.
@@ -301,9 +301,71 @@ def convert_with_magick(src, dest):
             return False
         print(f"  ✗ conversion failed for {src.name}: {r.stderr}")
         return False
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - conversion can fail in many ways; log and skip
         print(f"  ✗ conversion error for {src.name}: {e}")
         return False
+
+
+def apply_dither(
+    images_dir: Path, dither_cmd: str, conv_map: dict, cdn_map: dict, local_map: dict
+):
+    """Apply a dither command to every raster image in images_dir.
+
+    The command template must contain $1 (input path) and $2 (output path).
+    Each output is written as <stem>_dither.png and the maps are updated so
+    markdown references point to the dithered versions.
+    """
+    if "$1" not in dither_cmd or "$2" not in dither_cmd:
+        sys.exit(
+            "Error: --dither command template must contain $1 (input) and $2 (output)"
+        )
+
+    dithered_map: dict[str, str] = {}
+
+    for img_path in sorted(images_dir.iterdir()):
+        ext = img_path.suffix.lower()
+        if ext not in SUPPORTED_EXTS:
+            continue
+        if img_path.stem.endswith("_dither"):
+            continue
+
+        out_name = f"{img_path.stem}_dither.png"
+        out_path = images_dir / out_name
+
+        cmd = dither_cmd.replace("$1", shell_quote(str(img_path))).replace(
+            "$2", shell_quote(str(out_path))
+        )
+        print(f"  dither: {img_path.name}")
+        r = subprocess.run(
+            cmd,
+            shell=True,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            check=False,
+        )
+        if r.returncode != 0:
+            print(f"    ✗ failed: {(r.stderr or r.stdout).strip()}")
+            continue
+        if not out_path.exists():
+            print("    ✗ no output produced")
+            continue
+
+        dithered_map[img_path.name] = out_name
+        print(f"    ✓ {out_name}")
+
+    if not dithered_map:
+        return conv_map, cdn_map, local_map
+
+    def update(m: dict) -> dict:
+        return {k: dithered_map.get(v, v) for k, v in m.items()}
+
+    return (
+        update(conv_map),
+        update(cdn_map),
+        {k: dithered_map.get(v, v) for k, v in local_map.items()},
+    )
 
 
 def protect_pipe_tables(md_content):
@@ -350,7 +412,7 @@ def unwrap_md_code_blocks(md_content):
     package would otherwise typeset the inner content as a verbatim code block
     that does not wrap, causing overfull \\hbox lines that spill across columns.
     """
-    fence_re = re.compile(r"^(```+)md[ \t]*\n(.*?)\n\1[ \t]*$", re.S | re.M)
+    fence_re = re.compile(r"^(```+)md[ \t]*\n(.*?)\n\1[ \t]*$", re.DOTALL | re.MULTILINE)
     return fence_re.sub(lambda m: m.group(2), md_content)
 
 
@@ -433,7 +495,7 @@ def normalize_whitespace(md_content, hard_breaks=False):
         return "\n".join(out)
 
     # Preserve fenced code blocks while normalizing the rest.
-    fence_re = re.compile(r"^(```+)[^\n]*\n.*?\n\1[ \t]*$", re.S | re.M)
+    fence_re = re.compile(r"^(```+)[^\n]*\n.*?\n\1[ \t]*$", re.DOTALL | re.MULTILINE)
     parts = []
     last = 0
     for m in fence_re.finditer(md_content):
@@ -448,7 +510,7 @@ def normalize_whitespace(md_content, hard_breaks=False):
             if hard_breaks:
                 part = keep_breaks(part)
             else:
-                part = re.sub(r"[ \t]+$", "", part, flags=re.M)
+                part = re.sub(r"[ \t]+$", "", part, flags=re.MULTILINE)
                 part = re.sub(r"([^\s])  +", r"\1 ", part)
         out.append(part)
     return "".join(out)
@@ -502,7 +564,7 @@ def process_figures(md_content):
     return "\n\n".join(out)
 
 
-def process_markdown(md_path, output_dir, hard_breaks=False):
+def process_markdown(md_path, output_dir, hard_breaks=False, dither: str | None = None):
     content_dir = md_path.parent
     md_content = md_path.read_text(encoding="utf-8")
 
@@ -618,6 +680,11 @@ def process_markdown(md_path, output_dir, hard_breaks=False):
     else:
         print(f"✓ Images: all {found_count} found")
 
+    if dither:
+        conv_map, cdn_map, local_map = apply_dither(
+            images_dir, dither, conv_map, cdn_map, local_map
+        )
+
     media_img_re = re.compile(r"(!\[[^\]]*\]\()([^\s\)\\]+)(\))([ \t]*\n)([^\n]*)")
 
     def rewrite_media(m):
@@ -662,7 +729,7 @@ def process_markdown(md_path, output_dir, hard_breaks=False):
     # separate title block. Titles are rendered by the markdown renderer like
     # any other heading, keeping markdown-to-LaTeX handling uniform.
     if "title" not in meta:
-        m = re.search(r"^#\s+(.+)$", md_content, re.M)
+        m = re.search(r"^#\s+(.+)$", md_content, re.MULTILINE)
         if m:
             meta["title"] = m.group(1).strip()
 

@@ -1,7 +1,14 @@
+import os
+import shlex
 import shutil
 import subprocess
 import sys
 from pathlib import Path
+
+
+def shell_quote(p: str) -> str:
+    """Quote a path for use in a shell command template ($1/$2 placeholder)."""
+    return '"' + p + '"' if os.name == "nt" else shlex.quote(p)
 
 
 def safe_staging_dir(parent: Path, stem: str) -> Path:

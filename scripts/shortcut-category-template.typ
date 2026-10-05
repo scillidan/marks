@@ -7,12 +7,12 @@
   v(.1em)
 }
 
-#let shortcut-category-layout(doc, size: 6pt, font: ("Sarasa Mono SC",)) = {
+#let shortcut-category-layout(doc, size: 6pt, font: ("Sarasa Mono SC",), columns: 5) = {
   set page(
     paper: "a4",
     flipped: true,
     margin: (x: 6pt, y: 10pt),
-    columns: 5,
+    columns: columns,
     numbering: "1",
     number-align: center,
   )
