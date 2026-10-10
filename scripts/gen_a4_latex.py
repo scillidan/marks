@@ -179,7 +179,9 @@ def apply_smart_quotes(md_content):
         md_content = pattern.sub(repl, md_content)
 
     # 1. Protect fenced code blocks (``` ... ``` or ~~~ ... ~~~).
-    fence_re = re.compile(r"^(```+|~~~+)[^\n]*\n.*?\n\1[ \t]*$", re.DOTALL | re.MULTILINE)
+    fence_re = re.compile(
+        r"^(```+|~~~+)[^\n]*\n.*?\n\1[ \t]*$", re.DOTALL | re.MULTILINE
+    )
     protect(fence_re, FENCE_DELIM)
 
     # 2. Protect inline code spans (handling matching backtick runs).
@@ -412,7 +414,9 @@ def unwrap_md_code_blocks(md_content):
     package would otherwise typeset the inner content as a verbatim code block
     that does not wrap, causing overfull \\hbox lines that spill across columns.
     """
-    fence_re = re.compile(r"^(```+)md[ \t]*\n(.*?)\n\1[ \t]*$", re.DOTALL | re.MULTILINE)
+    fence_re = re.compile(
+        r"^(```+)md[ \t]*\n(.*?)\n\1[ \t]*$", re.DOTALL | re.MULTILINE
+    )
     return fence_re.sub(lambda m: m.group(2), md_content)
 
 
@@ -472,7 +476,7 @@ def normalize_whitespace(md_content, hard_breaks=False):
     * Remove trailing spaces that markdown interprets as hard line breaks.
     * Collapse runs of multiple spaces to a single space outside code fences.
 
-    With ``hard_breaks=True`` (copy/ pipeline), lines ending in 2+ spaces
+    With ``hard_breaks=True`` (mds pipeline), lines ending in 2+ spaces
     keep exactly two trailing spaces: the author uses standard markdown
     hard line breaks for 换行, while blank lines remain paragraph breaks.
     A hard break at the very end of a paragraph (next line blank or EOF)

@@ -10,40 +10,6 @@ a6 path size="" font="":
 a4 path:
     uv run scripts/gen_a4_latex.py "{{path}}"
 
-# == copy (A5 pages 2-up on landscape A4, reading order) (engine: latex)
-copy path:
-    uv run scripts/gen_copy.py "{{path}}"
-
-# == copy-a5 (single A5 pages, reading order)
-copy-a5 path:
-    uv run scripts/gen_copy.py "{{path}}" --a5
-
-# == copy-booklet (saddle-stitch imposition; print duplex flip-short-edge, stack, fold, staple spine)
-# Accepts .md (compiled to A5 first) or .pdf (imposed directly).
-# signature: number of pages per folded signature, must be a multiple of 4; default 4 keeps the first sheet full.
-# Any trailing flags (e.g. --pages 1-16) are forwarded to the script.
-copy-booklet path signature="4" pages="" *flags:
-    uv run scripts/gen_copy.py "{{path}}" --booklet --signature "{{signature}}" \
-        {{ if pages != "" { "--pages \"" + pages + "\"" } else { "" } }} \
-        {{ flags }}
-
-# == copy-grid (grid imposition, e.g. 2x2 cards on A4 landscape)
-# Accepts .md or .pdf. Pages='1-8' limits the range (use "" for all pages).
-# Trailing flags are forwarded, e.g. --frame, --divider, --divider-horizontal,
-# --fit fill, --margin 5mm, --frame-color gray50, --frame-width 0.2pt.
-# Image processing (text stays vector), e.g.
-#   --brighten 250            multiply-brighten embedded images only
-#   --image-filter 'magick $1 -colorspace Gray -gamma 2.2 $2'
-#                             arbitrary per-image magick chain ($1=in $2=out)
-#   --dither 'magick $1 -ordered-dither h8x8a -type Bilevel $2'
-#                             whole-page rasterise + dither (PDF input)
-#   --grayscale, --dither-dpi 300, --suffix .v2
-copy-grid path grid="2x2" pages="" *flags:
-    uv run scripts/gen_copy.py "{{path}}" \
-        --grid "{{grid}}" \
-        {{ if pages != "" { "--pages \"" + pages + "\"" } else { "" } }} \
-        {{ flags }}
-
 # == post bilingual pair (A4, synchronized two-column paracol)
 # First file: source (e.g. post/foo.md), second file: translation (e.g. post/foo.zh-cn.md)
 a4dual en zh:
