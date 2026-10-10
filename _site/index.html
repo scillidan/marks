@@ -89,12 +89,6 @@
     const SIDEBAR_COLLAPSED_KEY = 'marks.sidebarCollapsed';
     const SIDEBAR_SCROLL_KEY = 'marks.sidebarScroll';
     const DETAILS_STATE_KEY = 'marks.detailsState';
-    // Last zoom chosen in the PDF viewer; reused for every newly opened PDF.
-    const ZOOM_KEY = 'marks.zoom';
-
-    function savedZoom() {
-      return localStorage.getItem(ZOOM_KEY) || 'page-actual';
-    }
 
     function clampSidebarWidth(w) {
       const max = Math.min(window.innerWidth * 0.4, 40 * window.innerWidth / 100);
@@ -332,21 +326,12 @@
     // The custom element is defined by a deferred module script, so wait for
     // it to upgrade before calling its injectViewerStyles method.
     customElements.whenDefined('pdfjs-viewer-element').then(async () => {
-      // Keep every newly-opened PDF at the user's last zoom choice (persisted
-      // in localStorage; default Actual Size). pdfjs-viewer-element only
+      // Keep every newly-opened PDF at Actual Size. pdfjs-viewer-element only
       // applies the zoom attribute hash at initial build; later `src` changes
       // call PDFViewerApplication.open() which falls back to the
       // `defaultZoomValue` viewer option (empty -> Automatic Zoom).
-      const { viewerOptions } = await viewer.setViewerOptions({ defaultZoomValue: savedZoom(), sidebarViewOnLoad: 0 });
-      viewerOptions?.set('defaultZoomValue', savedZoom());
-      // Persist the zoom whenever the user changes it (toolbar, keyboard):
-      // 'scalechanging' carries the numeric scale and, for named presets
-      // (page-width, page-actual, ...), the preset value itself.
-      const { viewerApp } = await viewer.initPromise;
-      viewerApp.eventBus.on('scalechanging', ({ scale, presetValue }) => {
-        const z = presetValue || `${Math.round(scale * 100)}%`;
-        localStorage.setItem(ZOOM_KEY, z);
-      });
+      const { viewerOptions } = await viewer.setViewerOptions({ defaultZoomValue: 'page-actual', sidebarViewOnLoad: 0 });
+      viewerOptions?.set('defaultZoomValue', 'page-actual');
       viewer.injectViewerStyles(`
       :root{--main-color:#1c1c1c !important;--toolbar-icon-bg-color:#2b2b2b !important;--toolbar-icon-hover-bg-color:#1c1c1c !important;--body-bg-color:#f1f3f5 !important;--toolbar-bg-color:#ffffff !important;--toolbar-border-color:#d0d7de !important;--toolbar-border-bottom:0 !important;--toolbar-box-shadow:0 1px 0 rgb(31 35 40 / 8%) !important;--toolbarSidebar-box-shadow:inset -1px 0 0 rgb(31 35 40 / 12%), 0 1px 0 rgb(31 35 40 / 6%) !important;--toolbarSidebar-border-bottom:1px solid #d0d7de !important;--separator-color:#c7cdd4 !important;--field-color:#1f2328 !important;--field-bg-color:#ffffff !important;--field-border-color:#c6ccd2 !important;--button-hover-color:rgb(74 144 217 / 14%) !important;--toggled-btn-color:#2b2b2b !important;--toggled-btn-bg-color:rgb(74 144 217 / 20%) !important;--toggled-hover-active-btn-color:rgb(74 144 217 / 28%) !important;--toggled-hover-btn-outline:1px solid rgb(74 144 217 / 40%) !important;--doorhanger-bg-color:#ffffff !important;--doorhanger-border-color:rgb(31 35 40 / 18%) !important;--doorhanger-hover-bg-color:rgb(74 144 217 / 12%) !important;--doorhanger-hover-color:#1c1c1c !important;--doorhanger-separator-color:#d0d7de !important;--dropdown-btn-bg-color:#f6f8fa !important;--dropdown-btn-border:1px solid #c6ccd2 !important;--focus-ring-color:#4a90d9 !important;--outline-color:#4a90d9 !important;--outline-around-color:#f4f2ef !important;--dialog-button-border:1px solid #c6ccd2 !important;--dialog-button-bg-color:#f6f8fa !important;--dialog-button-hover-bg-color:rgb(74 144 217 / 18%) !important;--progressBar-color:#4a90d9 !important;--progressBar-bg-color:#e7edf4 !important;--progressBar-blend-color:#7db0e4 !important;--thickness-bg:#ffffff !important;--find-not-found-bg-color:#f6ddd8 !important;}
       #viewsManager{--sidebar-bg-color:rgb(241 243 245 / .96) !important;--header-bg:rgb(255 255 255 / .96) !important;--text-color:#1f2328 !important;--button-fg:#2f343b !important;--button-bg:rgb(31 35 40 / .08) !important;--button-hover-bg:rgb(74 144 217 / .16) !important;--button-hover-fg:#1c1c1c !important;--button-active-bg:rgb(74 144 217 / .24) !important;--button-active-fg:#1c1c1c !important;--button-focus-outline-color:#4a90d9 !important;--button-focus-border-color:#2b2b2b !important;--status-actions-bg:rgb(107 107 107 / .08) !important;--status-undo-bg:rgb(74 144 217 / .14) !important;--status-waiting-bg:rgb(74 144 217 / .14) !important;--status-warning-bg:#fff1e6 !important;--indicator-color:#4a90d9 !important;--indicator-warning-color:#cc6f28 !important;--header-shadow:0 1px 4px rgb(31 35 40 / 10%) !important;--image-border-color:#d0d7de !important;--image-hover-border-color:#4a90d9 !important;--image-current-border-color:#4a90d9 !important;--image-current-focused-outline-color:#4a90d9 !important;--image-page-number-bg:#f6f8fa !important;--image-page-number-fg:#2f343b !important;--image-current-page-number-bg:#4a90d9 !important;--image-current-page-number-fg:#ffffff !important;--image-shadow:0 1px 2px rgb(43 43 43 / .08), 0 0 0 1px var(--image-border-color) !important;}
