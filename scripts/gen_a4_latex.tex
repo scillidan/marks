@@ -71,13 +71,12 @@
 % Fonts: use Sarasa Mono SC everywhere. xeCJK is still loaded so CJK line
 % breaking, punctuation spacing, and character-class routing continue to work,
 % but the Latin and CJK fonts are identical so there is no visual switching.
-% Bold is mapped to the SemiBold (600) face: the real Bold (700) is derived
-% from Source Han Sans Bold and reads heavy at print sizes.
-\setmainfont[BoldFont={Sarasa Mono SC SemiBold}]{Sarasa Mono SC}
-\setmonofont[BoldFont={Sarasa Mono SC SemiBold}]{Sarasa Mono SC}
-\setCJKmainfont[BoldFont={Sarasa Mono SC SemiBold}]{Sarasa Mono SC}
-\setCJKsansfont[BoldFont={Sarasa Mono SC SemiBold}]{Sarasa Mono SC}
-\setCJKmonofont[BoldFont={Sarasa Mono SC SemiBold}]{Sarasa Mono SC}
+% Bold resolves to the real Sarasa Mono SC Bold (700) face automatically.
+\setmainfont{Sarasa Mono SC}
+\setmonofont{Sarasa Mono SC}
+\setCJKmainfont{Sarasa Mono SC}
+\setCJKsansfont{Sarasa Mono SC}
+\setCJKmonofont{Sarasa Mono SC}
 
 % Route non-Latin ranges (Cyrillic, arrows, spaces/dashes) through the same
 % CJK line-breaking rules as CJK characters.
