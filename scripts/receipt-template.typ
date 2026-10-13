@@ -28,15 +28,8 @@
   content
 }
 
-#let receipt-layout(doc, size: 8pt, font: ("Sarasa Mono SC",), rotate: false, width: none) = {
-  let page-width = if rotate {
-    if width == none { 105mm } else { width }
-  } else { 74mm }
-  set page(
-    width: page-width,
-    height: if rotate { 74mm } else { auto },
-    margin: if rotate { (x: 8pt, y: 4pt) } else { (x: 4pt, y: 8pt) },
-  )
+// Shared body styling for both layouts (single A7 and aggregate A4).
+#let receipt-style(doc, size: 8pt, font: ("Sarasa Mono SC",)) = {
   set text(font: font, size: size)
   set par(spacing: .6em, justify: true)
   show terms.item: it => {
@@ -48,5 +41,32 @@
     ]
   }
   show: init-glossary.with(yaml("receipt-measure.yaml"), term-links: true, format-term: short-long-term)
+  doc
+}
+
+#let receipt-layout(doc, size: 8pt, font: ("Sarasa Mono SC",), rotate: false, width: none) = {
+  let page-width = if rotate {
+    if width == none { 105mm } else { width }
+  } else { 74mm }
+  set page(
+    width: page-width,
+    height: if rotate { 74mm } else { auto },
+    margin: if rotate { (x: 8pt, y: 4pt) } else { (x: 4pt, y: 8pt) },
+  )
+  show: receipt-style.with(size: size, font: font)
+  doc
+}
+
+// Aggregate layout: landscape A4 flowing into N columns. The default column
+// count of 4 matches the single-mode A7 width (74mm), so merged receipts keep
+// their native size.
+#let receipt-a4-layout(doc, size: 8pt, font: ("Sarasa Mono SC",), columns: 4) = {
+  set page(
+    paper: "a4",
+    flipped: true,
+    margin: (x: 8pt, y: 10pt),
+    columns: columns,
+  )
+  show: receipt-style.with(size: size, font: font)
   doc
 }

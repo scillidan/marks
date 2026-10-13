@@ -1,55 +1,45 @@
 set dotenv-load
 
-# == entry,part (A6)
 a6 path size="" font="":
     uv run scripts/gen_a6.py "{{path}}" \
         {{ if size != "" { "--size " + size } else { "" } }} \
         {{ if font != "" { "--font \"" + font + "\"" } else { "" } }}
 
-# == post (A4, 2-column) (engine: latex)
+## 2-columns
 a4 path:
     uv run scripts/gen_a4_latex.py "{{path}}"
-
-# == post bilingual pair (A4, synchronized two-column paracol)
-# First file: source (e.g. post/foo.md), second file: translation (e.g. post/foo.zh-cn.md)
 a4dual en zh:
     uv run scripts/gen_a4_dual_latex.py "{{en}}" "{{zh}}"
+# just a4dual post/file.en.md post/file.zh-cn.md
 
-# == BYYA-nineveh (from .md)
 nineveh-md subdir source="" force="":
     uv run scripts/gen_byya_nineveh_md.py "{{subdir}}" \
         {{ if source != "" { "--source \"" + source + "\"" } else { "" } }} \
         {{ if force != "" { "--force" } else { "" } }}
-
-# == BYYA-nineveh (from .typ)
 nineveh-typ path:
     uv run scripts/gen_byya_nineveh_typ.py "{{path}}"
-
-# == BYYA-nineveh-annex (A6 dynamic height)
+## a6 dynamic height
 nineveh-annex path size="" font="":
     uv run scripts/gen_byya_nineveh_annex.py "{{path}}" \
         {{ if size != "" { "--size " + size } else { "" } }} \
         {{ if font != "" { "--font \"" + font + "\"" } else { "" } }}
-
-# == BYYA-lyra (A6, from .md)
+## a6, from .md
 lyra subdir size="" font="":
     uv run scripts/gen_byya_lyra.py "{{subdir}}" \
         {{ if size != "" { "--size " + size } else { "" } }} \
         {{ if font != "" { "--font \"" + font + "\"" } else { "" } }}
-
-# == BYYA-lyra-annex (A6 dynamic height)
+## a6, dynamic height
 lyra-annex path size="" font="":
     uv run scripts/gen_byya_lyra_annex.py "{{path}}" \
         {{ if size != "" { "--size " + size } else { "" } }} \
         {{ if font != "" { "--font \"" + font + "\"" } else { "" } }}
 
-# == receipt (A7)
-receipt path size="" font="":
-    uv run scripts/gen_a7_receipt.py "{{path}}" \
-        {{ if size != "" { "--size " + size } else { "" } }} \
-        {{ if font != "" { "--font \"" + font + "\"" } else { "" } }}
-
-# == receipt (A7, rotated 90 degrees, height locked to 74mm)
+## a7
+receipt *args:
+    uv run scripts/gen_a7_receipt.py {{ args }}
+# just receipt receipt/file.typ [--size 9pt] [--font "X"]
+# just receipt --include receipt/file1.typ receipt/file2.typ ...
+## a7, rotated 90 degrees, height locked to 74mm
 receipt-rotate path size="" font="" width="":
     uv run scripts/gen_a7_receipt.py "{{path}}" \
         {{ if size != "" { "--size " + size } else { "" } }} \
@@ -57,44 +47,22 @@ receipt-rotate path size="" font="" width="":
         {{ if width != "" { "--width " + width } else { "" } }} \
         --rotate
 
-# == image-collect (polario frame)
 polario mode image text-first text-second text-third start resize size:
     uv run scripts/gen_polario.py {{mode}} "{{image}}" "{{text-first}}" "{{text-second}}" "{{text-third}}" "{{start}}" "{{resize}}" "{{size}}"
 
-# == image-convert (image + command processing, outputs to image-convert/_output/)
-# Positional args: mode (portrait/landscape), theme (dark/light), output
-# (required, bare filename only), image (required), commands (empty = no
-# command, image is used as-is).
-# output is used as the shared base name: jpg -> image-convert/_output/,
-# typ -> image-convert/_output/typs/, pdf -> image-convert/_output/pdfs/.
-# Single quotes keep $1/$2 placeholders from being expanded by the shell.
-# Windows cmd quoting: use "" (not \") for a literal quote inside commands,
-# and keep && / & inside quotes — cmd does not use backslash escapes.
 image-convert mode theme output image="" commands="":
     uv run scripts/image-convert.py '{{mode}}' '{{theme}}' \
         {{ if image != "" { "--image '" + image + "'" } else { "" } }} \
         {{ if commands != "" { "--commands '" + commands + "'" } else { "" } }} \
         --output '{{output}}'
-
-# == image-convert (no-run: use a pre-prepared image, show commands text only)
 image-convert-norun mode theme output image="" commands="":
     uv run scripts/image-convert.py '{{mode}}' '{{theme}}' --no-run \
         {{ if image != "" { "--image '" + image + "'" } else { "" } }} \
         {{ if commands != "" { "--commands '" + commands + "'" } else { "" } }} \
         --output '{{output}}'
 
-# == ctan (engine: latex)
 ctan path:
     uv run scripts/gen_ctan.py --compile "{{path}}"
 
-# == shortcut cheatsheets (A4, generated from .cht files)
-# Usage:
-#   just shortcut                                      # all .cht, one PDF per dir
-#   just shortcut --include neovim --style neovim      # only neovim -> neovim.pdf
-#   just shortcut --include neovim --include vim       # merged -> neovim_vim.pdf
-#   just shortcut --exclude neovim                     # everything except neovim
-#   just shortcut --include shortcut/                  # one dir recursively
-#   just shortcut --include neovim --columns 4         # override column count
 shortcut *args:
     uv run scripts/gen_shortcut.py {{ args }}
-

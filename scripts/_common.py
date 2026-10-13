@@ -65,6 +65,10 @@ def check_dependencies():
 
 
 def resolve_path(p):
+    # On Windows, user-typed relative paths may use backslashes, which the
+    # justfile/argparse chain can also mangle; normalize before resolving.
+    if os.name == "nt":
+        p = p.replace("\\", "/")
     path = Path(p)
     return path if path.is_absolute() else Path.cwd() / path
 
