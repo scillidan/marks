@@ -49,8 +49,7 @@ from _common import check_dependencies, compile_typst, resolve_path
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
-SOFTWARE_TEMPLATE = Path("/scripts/shortcut-software-template.typ").as_posix()
-CATEGORY_TEMPLATE = Path("/scripts/shortcut-category-template.typ").as_posix()
+SHORTCUT_TEMPLATE = Path("/scripts/shortcut-template.typ").as_posix()
 
 # Characters that must be escaped inside Typst content brackets.
 _TYPST_SPECIAL = {
@@ -340,8 +339,8 @@ def generate_software_typ(
 ) -> Path:
     typ_path.parent.mkdir(parents=True, exist_ok=True)
     content = emit_software_content(name, groups, style)
-    text = f'''#import "{SOFTWARE_TEMPLATE}": *
-#show: shortcut-software-layout
+    text = f'''#import "{SHORTCUT_TEMPLATE}": *
+#show: shortcut-layout
 
 {content}
 '''
@@ -357,8 +356,8 @@ def generate_category_typ(
 ) -> Path:
     typ_path.parent.mkdir(parents=True, exist_ok=True)
     parts: list[str] = [
-        f'#import "{CATEGORY_TEMPLATE}": *',
-        f"#show: shortcut-category-layout.with(columns: {columns})",
+        f'#import "{SHORTCUT_TEMPLATE}": *',
+        f"#show: shortcut-a4-layout.with(columns: {columns})",
         "",
     ]
     for name, groups, style in software_groups:
