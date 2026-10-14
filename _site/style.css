@@ -29,6 +29,9 @@ html, body {
 .layout.resizing .sidebar {
   transition: none;
 }
+.layout.resizing .viewer {
+  pointer-events: none;
+}
 #sidebar-resizer {
   position: absolute;
   top: 0;

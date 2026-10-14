@@ -11,7 +11,7 @@
   <link rel="icon" type="image/png" sizes="96x96" href="asset/favicon-96x96.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="asset/apple-touch-icon.png" />
   <link rel="manifest" href="asset/site.webmanifest" />
-  <link rel="stylesheet" href="style.css?v=2">
+  <link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
   <div class="layout">
@@ -130,9 +130,10 @@
       toggleBtn.setAttribute('aria-expanded', 'false');
     }
 
-    resizer.addEventListener('mousedown', (e) => {
+    resizer.addEventListener('pointerdown', (e) => {
       e.preventDefault();
       layout.classList.add('resizing');
+      resizer.setPointerCapture(e.pointerId);
       const startX = e.clientX;
       const startW = sidebarEl.getBoundingClientRect().width;
 
@@ -140,13 +141,18 @@
         setSidebarWidth(startW + (ev.clientX - startX));
       }
       function onUp() {
-        document.removeEventListener('mousemove', onMove);
-        document.removeEventListener('mouseup', onUp);
+        document.removeEventListener('pointermove', onMove);
+        document.removeEventListener('pointerup', onUp);
+        document.removeEventListener('pointercancel', onUp);
+        if (resizer.hasPointerCapture(e.pointerId)) {
+          resizer.releasePointerCapture(e.pointerId);
+        }
         layout.classList.remove('resizing');
         saveSidebarWidth();
       }
-      document.addEventListener('mousemove', onMove);
-      document.addEventListener('mouseup', onUp);
+      document.addEventListener('pointermove', onMove);
+      document.addEventListener('pointerup', onUp);
+      document.addEventListener('pointercancel', onUp);
     });
 
     toggleBtn.addEventListener('click', () => {
