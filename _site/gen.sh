@@ -383,7 +383,7 @@ if [[ "$BUILD" -eq 1 ]]; then
 					TOTAL_SKIPPED=$((TOTAL_SKIPPED + 1))
 					continue
 				fi
-				cmd="just nineveh-typ \"$file\""
+				cmd="just nineveh \"$file\""
 				log_file="$LOG_DIR/$(sanitize_log_name "$file").log"
 				status=0
 				run_just "$cmd" "$log_file" || status=$?
@@ -458,8 +458,8 @@ if [[ "$DRY_RUN" -eq 1 ]]; then
 else
 	echo "Assembling _site ..."
 
-	# Manifest assembly uses pypinyin for Post (ZH-CN) title sorting; run it
-	# under uv so the dependency is available (uv is required by the build).
+	# Manifest assembly uses pypinyin for Post (ZH-CN) and Receipt title sorting;
+	# run it under uv so the dependency is available (uv is required by the build).
 	uv run --with pypinyin python <<'PYEOF'
 import json
 import os
@@ -547,6 +547,12 @@ def count_items(node):
 SUBGROUP_ORDER = {
     "byya-nineveh": ["nineveh", "amphissa", "laguna", "jaffa"],
     "ctan": ["font"],
+    # Receipt subgroups are derived from the classification tag in each .typ
+    # file (// comment after the title), not from real directories.
+    "receipt": [
+        "recipe", "method", "menu", "guide",
+        "manual", "instruction", "cheatsheet",
+    ],
 }
 
 
@@ -630,6 +636,32 @@ def extract_byya_nineveh_title(typ_path):
     title = unescape_typst(title)
     title = strip_typst_wrappers(title)
     return title if title else None
+
+
+def extract_receipt_classification(typ_path):
+    """Return the classification tag from a receipt .typ file.
+
+    The tag is the // comment line immediately following the '= <title>'
+    heading (e.g. '// recipe'). Returns None when no such comment exists.
+    """
+    if not typ_path.exists():
+        return None
+    try:
+        lines = typ_path.read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return None
+    for i, line in enumerate(lines):
+        if line.startswith("= "):
+            for follow in lines[i + 1:]:
+                stripped = follow.strip()
+                if not stripped:
+                    continue
+                if stripped.startswith("//"):
+                    tag = stripped[2:].strip()
+                    return tag if tag else None
+                break
+            return None
+    return None
 
 
 def extract_markdown_h1(md_path):
@@ -725,6 +757,16 @@ for pdf_path in pdf_paths:
     if not dir_parts or is_excluded(dir_parts):
         continue
 
+    # Receipt PDFs are grouped into subdirectories by the classification tag
+    # in the source .typ file (the // comment right after the title), unlike
+    # byya-nineveh where subgroups mirror real directories.
+    source_dir_parts = dir_parts
+    if dir_parts[0] == "receipt":
+        _src_typ = repo_root.joinpath(*dir_parts) / f"{Path(filename).stem}.typ"
+        _tag = extract_receipt_classification(_src_typ)
+        if _tag:
+            dir_parts = (*dir_parts, _tag)
+
     # Copy PDF into _site/pdfs/<dir>/... preserving subdirectories.
     dest_dir = pdfs_dir.joinpath(*dir_parts)
     dest_dir.mkdir(parents=True, exist_ok=True)
@@ -757,7 +799,7 @@ for pdf_path in pdf_paths:
     title = Path(filename).stem
     source_guess = None
     for ext in (".md", ".typ"):
-        candidate = repo_root.joinpath(*dir_parts) / f"{title}{ext}"
+        candidate = repo_root.joinpath(*source_dir_parts) / f"{title}{ext}"
         if candidate.exists():
             source_guess = str(candidate.relative_to(repo_root))
             break
@@ -822,6 +864,14 @@ def _pinyin_key(text):
 _zh_cn = groups_by_dir.get("post_zh-cn")
 if _zh_cn:
     _zh_cn.items.sort(key=lambda item: _pinyin_key(item["title"]))
+
+# Receipt items are sorted by the pinyin of their title (ascending), both
+# within each classification subgroup and within any top-level items.
+_receipt = groups_by_dir.get("receipt")
+if _receipt:
+    _receipt.items.sort(key=lambda item: _pinyin_key(item["title"]))
+    for _sub in _receipt.subgroups.values():
+        _sub.items.sort(key=lambda item: _pinyin_key(item["title"]))
 
 # byya-lyra-annex items follow the original annex.md order when an order file
 # is present (written by sync_byya_lyra_annex_md.py). Fall back to filename sort.

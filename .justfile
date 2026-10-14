@@ -12,12 +12,9 @@ a4dual en zh:
     uv run scripts/gen_a4_dual_latex.py "{{en}}" "{{zh}}"
 # just a4dual post/file.en.md post/file.zh-cn.md
 
-nineveh-md subdir source="" force="":
-    uv run scripts/gen_byya_nineveh_md.py "{{subdir}}" \
-        {{ if source != "" { "--source \"" + source + "\"" } else { "" } }} \
-        {{ if force != "" { "--force" } else { "" } }}
-nineveh-typ path:
-    uv run scripts/gen_byya_nineveh_typ.py "{{path}}"
+# .typ file -> typ script; directory -> md script (--source/--force forwarded)
+nineveh path *flags:
+    {{ if path =~ '[.]typ$' { "uv run scripts/gen_byya_nineveh_typ.py" } else { "uv run scripts/gen_byya_nineveh_md.py" } }} "{{path}}" {{ flags }}
 ## a6 dynamic height
 nineveh-annex path size="" font="":
     uv run scripts/gen_byya_nineveh_annex.py "{{path}}" \
@@ -38,28 +35,17 @@ lyra-annex path size="" font="":
 receipt *args:
     uv run scripts/gen_a7_receipt.py {{ args }}
 # just receipt receipt/file.typ [--size 9pt] [--font "X"]
-# just receipt --include receipt/file1.typ receipt/file2.typ ...
-## a7, rotated 90 degrees, height locked to 74mm
-receipt-rotate path size="" font="" width="":
-    uv run scripts/gen_a7_receipt.py "{{path}}" \
-        {{ if size != "" { "--size " + size } else { "" } }} \
-        {{ if font != "" { "--font \"" + font + "\"" } else { "" } }} \
-        {{ if width != "" { "--width " + width } else { "" } }} \
-        --rotate
+# just receipt --include receipt/file1.typ receipt/file2.typ ... [--a5]
+## rotated variant: just receipt <file> --rotate [--size ..] [--font ".."] [--width ..]
 
 polario mode image text-first text-second text-third start resize size:
     uv run scripts/gen_polario.py {{mode}} "{{image}}" "{{text-first}}" "{{text-second}}" "{{text-third}}" "{{start}}" "{{resize}}" "{{size}}"
 
-image-convert mode theme output image="" commands="":
+image-convert mode theme output image="" commands="" *flags:
     uv run scripts/image-convert.py '{{mode}}' '{{theme}}' \
         {{ if image != "" { "--image '" + image + "'" } else { "" } }} \
         {{ if commands != "" { "--commands '" + commands + "'" } else { "" } }} \
-        --output '{{output}}'
-image-convert-norun mode theme output image="" commands="":
-    uv run scripts/image-convert.py '{{mode}}' '{{theme}}' --no-run \
-        {{ if image != "" { "--image '" + image + "'" } else { "" } }} \
-        {{ if commands != "" { "--commands '" + commands + "'" } else { "" } }} \
-        --output '{{output}}'
+        --output '{{output}}' {{ flags }}
 
 ctan path:
     uv run scripts/gen_ctan.py --compile "{{path}}"

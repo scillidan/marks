@@ -70,3 +70,16 @@
   show: receipt-style.with(size: size, font: font)
   doc
 }
+
+// Aggregate layout: portrait A5 flowing into 2 columns. A5 width (148mm) fits
+// exactly two A7-width (74mm) columns, so merged receipts keep their native
+// size, just arranged vertically.
+#let receipt-a5-layout(doc, size: 8pt, font: ("Sarasa Mono SC",), columns: 2) = {
+  set page(
+    paper: "a5",
+    margin: (x: 8pt, y: 10pt),
+    columns: columns,
+  )
+  show: receipt-style.with(size: size, font: font)
+  doc
+}

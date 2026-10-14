@@ -43,16 +43,18 @@ def generate_typ(content_path, size, font, rotate, width, output_dir):
     return generated
 
 
-def generate_merge_typ(content_paths, size, font, output_dir):
-    """Merge several .typ receipts into one landscape-A4 document
-    (4 columns at the native A7 width), flowing top-to-bottom,
-    left-to-right, packed with no gap between receipts."""
+def generate_merge_typ(content_paths, size, font, output_dir, a5=False):
+    """Merge several .typ receipts into one aggregate document, flowing
+    top-to-bottom, left-to-right, packed with no gap between receipts.
+    Default: landscape A4 (4 columns at the native A7 width); a5=True uses
+    portrait A5 with 2 columns instead."""
     typs_dir = output_dir / "typs"
     typs_dir.mkdir(exist_ok=True)
 
+    layout = "receipt-a5-layout" if a5 else "receipt-a4-layout"
     parts = [
         f'#import "{TEMPLATE}": *',
-        f"#show: receipt-a4-layout.with(size: {add_pt(size)}, font: {font_tuple(font)})",
+        f"#show: {layout}.with(size: {add_pt(size)}, font: {font_tuple(font)})",
         "",
     ]
     for path in content_paths:
@@ -74,7 +76,7 @@ def merge_name(content_paths):
     return name
 
 
-def run_merge(paths, size, font):
+def run_merge(paths, size, font, a5=False):
     content_paths = [resolve_path(p) for p in paths]
     for path in content_paths:
         if not path.exists():
@@ -94,7 +96,7 @@ def run_merge(paths, size, font):
     pdfs_dir = output_dir / "pdfs"
     pdfs_dir.mkdir(parents=True, exist_ok=True)
 
-    typ_path = generate_merge_typ(content_paths, size, font, output_dir)
+    typ_path = generate_merge_typ(content_paths, size, font, output_dir, a5=a5)
     pdf_path = pdfs_dir / f"{typ_path.stem}.pdf"
     compile_typst(typ_path, pdf_path, project_root)
     return 0
@@ -110,6 +112,11 @@ def main() -> int:
         metavar="PATH",
         help="Merge these .typ receipts into one landscape-A4 PDF (4 columns).",
     )
+    parser.add_argument(
+        "--a5",
+        action="store_true",
+        help="With --include: emit portrait-A5 PDF (2 columns) instead of A4.",
+    )
     parser.add_argument("--size", default="8pt")
     parser.add_argument("--font", default="Sarasa Mono SC")
     parser.add_argument("--rotate", action="store_true")
@@ -119,7 +126,7 @@ def main() -> int:
     check_dependencies()
 
     if args.include:
-        return run_merge(args.include, args.size, args.font)
+        return run_merge(args.include, args.size, args.font, a5=args.a5)
 
     if not args.paths:
         sys.exit("Error: missing path (or use --include to merge several .typ files)")

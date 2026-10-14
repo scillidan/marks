@@ -29,9 +29,13 @@
   )[
     #text(size: size * 1.4, weight: "bold", it.body)
   ]
+  // Keep the line pitch inside a wrapping cell equal to the pitch between
+  // table rows, so a wrapped entry sits as close to its own first line as
+  // to the neighbouring rows. (Empirically 0.5em made wrapped lines visibly
+  // looser than the row spacing; 0.2em matches it at size 6pt.)
   show table.cell: it => context {
     let indent = measure(text("  ")).width
-    par(hanging-indent: indent, leading: 0.5em, it.body)
+    par(hanging-indent: indent, leading: 0.2em, it.body)
   }
   doc
 }
