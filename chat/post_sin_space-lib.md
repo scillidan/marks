@@ -1,6 +1,6 @@
 ```
 Model: GLM-5-Turbo
-Q: 在哲学、排版、语法、内容法庭上，用陪审团人物和https://lawsofsoftwareengineering.com，反驳“作为LIB的给中英文文本中间加物理空格”
+Q: 在哲学、排版、语法、内容法庭上，用陪审团人物和https://lawsofsoftwareengineering.com，反驳“作为LIB的给中英文文本中间加物理空格”。
 ```
 
 案号：2024-软体-刑初字第001号  

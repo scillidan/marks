@@ -1,6 +1,6 @@
 ```
 Model: GLM-5-Turbo
-Q: 结合LLM和人类语言，阐述Token, Perplexity, Emergent Abilities, Attention, Vector, Alignment
+Q: 结合LLM和人类语言，阐述Token, Perplexity, Emergent Abilities, Attention, Vector, Alignment。
 ```
 
 大语言模型（LLM）与人类语言的交汇，本质上是一场“用数学重构巴别塔”的壮举。机器没有灵魂，但它通过极其精巧的数学结构与人类语言的结构产生了共鸣。  

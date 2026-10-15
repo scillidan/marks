@@ -1,5 +1,5 @@
 ```
-model: Hy4-Preview, Kimi-K2.8
+Model: Hy4-Preview, Kimi-K2.8
 ```
 
 **《requests、Beautiful Soup和Scrapy》**

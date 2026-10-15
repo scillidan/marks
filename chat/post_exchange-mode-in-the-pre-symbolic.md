@@ -1,6 +1,6 @@
 ```
-model: Kimi-K2.6
-Q: 写一篇1000字左右的（伪）专业（内核硬但不教条教材化）文章，讲/涉及/影射“前符号阶段的交换模式（Exchange mode in the pre-symbolic）”
+Model: Kimi-K2.6
+Q: 写一篇1000字左右的（伪）专业（内核硬但不教条教材化）文章，讲/涉及/影射“前符号阶段的交换模式（Exchange mode in the pre-symbolic）”。
 ```
 
 **《前符号阶段的交换模式：一种无货币的流通》**

@@ -1,6 +1,6 @@
 ```
-model: Kimi-K2.6
-Q: 从人的生理/心理模型角度，写一篇内核硬但不教条/教材化的文章，阐述Learned（习得性）、Repetition（强迫性）、Primary（原发性）、Secondary（继发性）
+Model: Kimi-K2.6
+Q: 从人的生理/心理模型角度，写一篇内核硬但不教条/教材化的文章，阐述Learned（习得性）、Repetition（强迫性）、Primary（原发性）、Secondary（继发性）。
 ```
 
 **《一个行为的四种来历》**

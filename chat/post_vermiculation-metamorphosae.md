@@ -1,5 +1,5 @@
 ```
-model: Kimi-K2.5
+Model: Kimi-K2.5
 Q:
 
 > At first glance, the question "Would you still love me if I were a bug?" sounds absurd. It’s also kind of a joke usually shared between couples on TikTok, a question that gets laughed at. But if you pay enough attention, underneath the silliness of that question lies something deeper: a philosophical question about love. No, not romantic love in telenovela style, but love in its most honest form, unconditional love.  

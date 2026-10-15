@@ -1,6 +1,6 @@
 ```
 Model: Kimi-K2.8
-Q: 用圣经体讲述Adobe的原罪
+Q: 用圣经体讲述Adobe的原罪。
 ```
 
 **《Adobe原罪记》**
