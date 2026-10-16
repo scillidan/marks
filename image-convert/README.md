@@ -48,4 +48,6 @@ just image-convert portrait light "didder_odm_clustered-dot" "assets/Edward John
 just image-convert portrait light "didder_edm" "assets/Edward John Poynter_Pea Blossoms, 1890.jpg" "didder -p ""black white"" -i $1 -o $2.png edm FloydSteinberg"
 kmeans_colors -i "image-collect\assets\待ちぼうけ.jpg" -p -k 3 --no-file
 just image-convert landscape light "kmeans-colors_replace" "assets/20200518_12_34_59.jpg" "kmeans_colors find -i $1 -o $2 -c 140c08,ac8656,efd8bc --replace"
+rusted_ascii_filter "assets/20200518_12_34_59.jpg" -w 600 -c 50
+just image-convert landscape light "rusted_ascii_filter" "assets/20200518_12_34_59_ascii.png" "rusted_ascii_filter $1 -c 600 -c 50" --no-run
 ```

@@ -15,7 +15,8 @@ a4dual en zh:
 ## a6 / a6, dynamic height
 nineveh path *flags:
     {{ if path =~ '[.]typ$' { "uv run scripts/gen_byya_nineveh_typ.py" } else { "uv run scripts/gen_byya_nineveh_md.py" } }} "{{path}}" {{ flags }}
-# just nineveh --md/--typ --source/--force ...
+# just nineveh <subdir> [--source <dir>] [--force] [--no-compile]  (.md, via BYYA_SITE_DOCS)
+# just nineveh path/to/file.typ  (.typ)
 nineveh-annex path size="" font="":
     uv run scripts/gen_byya_nineveh_annex.py "{{path}}" \
         {{ if size != "" { "--size " + size } else { "" } }} \
@@ -34,7 +35,7 @@ receipt *args:
     uv run scripts/gen_a7_receipt.py {{ args }}
 # just receipt receipt/file.typ [--size 9pt] [--font ".."]
 # just receipt receipt/file.typ --rotate [--width ..]
-# just receipt [--a5] --include receipt/file1.typ receipt/file2.typ ...
+# just receipt --include receipt/file1.typ receipt/file2.typ ... [--a5]
 
 polario mode image text-first text-second text-third start resize size:
     uv run scripts/gen_polario.py {{mode}} "{{image}}" "{{text-first}}" "{{text-second}}" "{{text-third}}" "{{start}}" "{{resize}}" "{{size}}"
@@ -44,7 +45,7 @@ image-convert mode theme output image="" commands="" *flags:
         {{ if image != "" { "--image '" + image + "'" } else { "" } }} \
         {{ if commands != "" { "--commands '" + commands + "'" } else { "" } }} \
         --output '{{output}}' {{ flags }}
-# just image-convert --norun ...
+# just image-convert portrait light "name" "assets/img.jpg" "magick $1 ... $2" [--no-run]
 
 ctan path:
     uv run scripts/gen_ctan.py --compile "{{path}}"
