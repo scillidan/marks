@@ -1,6 +1,6 @@
 ```
 Date: 2025.08.23
-Author: Sarah Whitmore
+Creator: Sarah Whitmore
 Source: https://thenaturenetwork.co.uk/the-secret-life-of-moles-what-theyre-really-up-to-underground/
 ```
 

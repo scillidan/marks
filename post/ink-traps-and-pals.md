@@ -1,6 +1,6 @@
 ```
 Date: 2021.04.03
-Author: Toshi Omagari
+Creator: Toshi Omagari
 Source: https://tosche.net/blog/ink-traps-and-pals
 ```
 

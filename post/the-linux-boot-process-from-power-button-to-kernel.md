@@ -1,6 +1,6 @@
 ```
 Date: 2025.10.25
-Author: 0xkato
+Creator: 0xkato
 Translator: GPT-4o mini
 Source: https://www.0xkato.xyz/linux-boot/
 ```

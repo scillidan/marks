@@ -1,6 +1,6 @@
 ```
 Date: 2017.04.14
-Author: Abducted Platypus
+Creator: Abducted Platypus
 Source: http://abductedplatypus.com/tools/2017/04/14/dither-brushes.html
 ```
 

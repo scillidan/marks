@@ -1,6 +1,6 @@
 ```
 Date: 2025.06.30
-Author: Erica Klarreich
+Creator: Erica Klarreich
 Source: https://cacm.acm.org/news/an-algorithm-for-a-better-bookshelf/
 ```
 

@@ -1,6 +1,6 @@
 ```
 Date: 2018.04.10
-Author: Erin Van Rheenen
+Creator: Erin Van Rheenen
 Photos: David Webster Smith
 Source: https://hakaimagazine.com/videos-visuals/the-secret-language-of-ships/
 ```

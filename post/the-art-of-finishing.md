@@ -1,6 +1,6 @@
 ```
 Date: 2024.09.02
-Author: Tomas Stropus
+Creator: Tomas Stropus
 Source: https://www.bytedrum.com/posts/art-of-finishing/
 ```
 

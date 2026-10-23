@@ -1,6 +1,6 @@
 ```
 Data: 2021.02.05
-Author: Emily Cronkleton
+Creator: Emily Cronkleton
 Source: https://www.healthline.com/health/stretching-before-bed
 ```
 

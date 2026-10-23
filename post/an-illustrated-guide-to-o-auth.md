@@ -1,6 +1,6 @@
 ```
 Date: 2025.08.25
-Author: Aditya Bhargava
+Creator: Aditya Bhargava
 Source: https://www.ducktyped.org/p/an-illustrated-guide-to-oauth
 ```
 

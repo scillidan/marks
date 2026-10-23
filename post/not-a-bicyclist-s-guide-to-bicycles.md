@@ -1,6 +1,6 @@
 ```
 Date: 2024.11.14
-Author: Nathan Contino
+Creator: Nathan Contino
 Source: https://www.lambdalatitudinarians.org/techblog/2024/11/14/not-a-bicyclists-guide-to-bicycles/
 ```
 

@@ -1,6 +1,6 @@
 ```
 Date: 2020.12.22
-Author: Anya Danilova
+Creator: Anya Danilova
 Typography Consultant: Alexey Murashko
 English translation: Dina Mingalieva
 Source: https://type.today/en/journal/spaces

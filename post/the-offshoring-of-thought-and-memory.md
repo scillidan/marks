@@ -1,6 +1,6 @@
 ```
 Date: 2023.05.05
-Author: James
+Creator: James
 Source: https://www.multiverses.xyz/facts/the-offshoring-of-thought-and-memory/
 ```
 

@@ -1,6 +1,6 @@
 ```
 Date: 2018.01.14
-Author: mwcraig11
+Creator: mwcraig11
 Source: https://marywcraig.com/2018/01/14/franz-kafka-the-workers-friend/
 ```
 

@@ -1,6 +1,6 @@
 ```
 Date: 2024.05
-Author: Tommi Hovi
+Creator: Tommi Hovi
 Source: https://tommihovi.com/2024/05/demystifying-cookies-and-tokens/
 ```
 

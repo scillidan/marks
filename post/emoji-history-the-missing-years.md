@@ -1,6 +1,6 @@
 ```
 Date: 2024.06.04
-Author: Matt Sephton
+Creator: Matt Sephton
 Source: https://blog.gingerbeardman.com/2024/05/10/emoji-history-the-missing-years/
 ```
 

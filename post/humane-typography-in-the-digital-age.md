@@ -1,6 +1,6 @@
 ```
 Date: 2016.01.25
-Author: Matej Latin
+Creator: Matej Latin
 Source: https://matejlatin.github.io/Gutenberg/example2/
 ```
 

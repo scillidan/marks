@@ -1,6 +1,6 @@
 ```
 Date: 2024.10.15
-Author: Mehdi Harmi
+Creator: Mehdi Harmi
 Source: https://news.cnrs.fr/articles/why-birds-do-not-fall-while-sleeping
 ```
 

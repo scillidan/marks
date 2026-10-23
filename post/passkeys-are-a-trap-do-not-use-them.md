@@ -1,6 +1,6 @@
 ```
 Date: 2026.10.11
-Author: The Hack
+Creator: The Hack
 Source: https://nonfunctional.substack.com/p/passkeys-are-a-trap-do-not-use-them
 ```
 

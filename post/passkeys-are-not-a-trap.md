@@ -1,6 +1,6 @@
 ```
 Date: 2026.10.14
-Author: Scott Helme
+Creator: Scott Helme
 Source: https://scotthelme.co.uk/passkeys-are-not-a-trap/
 ```
 

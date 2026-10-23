@@ -1,6 +1,6 @@
 ```
 Date: 2024.10.28
-Author: Molly Herring
+Creator: Molly Herring
 Source: https://www.quantamagazine.org/meet-the-eukaryote-the-first-cell-to-get-organized-20241028/
 ```
 

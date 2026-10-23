@@ -1,6 +1,6 @@
 ```
 Date: 2021.03.25
-Author: Zaria Gorvett
+Creator: Zaria Gorvett
 Source: https://www.bbc.com/future/article/20210325-the-strange-medieval-fruit-the-world-forgot
 ```
 

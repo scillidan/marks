@@ -1,6 +1,6 @@
 ```
 Date: 2010.09.17
-Author: Derek
+Creator: Derek
 Source: https://makegames.tumblr.com/post/1136623767/finishing-a-game
 ```
 

@@ -1,5 +1,5 @@
 ```
-Author: Jack R. Gibb
+Creator: Jack R. Gibb
 Source: https://reagle.org/joseph/2010/conflict/media/gibb-defensive-communication.html
 ```
 

@@ -1,6 +1,6 @@
 ```
 Date: 2018.05.29
-Author: Chris Jennings
+Creator: Chris Jennings
 Source: https://www.publisha.org/pages/footnotes/
 ```
 

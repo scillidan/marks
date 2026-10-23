@@ -1,6 +1,6 @@
 ```
 Date: 2024.11
-Author: Mark Schapiro
+Creator: Mark Schapiro
 Photographs: Simona Ghizzoni
 Source: https://www.smithsonianmag.com/arts-culture/meet-italian-fruit-detective-who-investigates-centuries-old-paintings-clues-produce-180985227/
 ```

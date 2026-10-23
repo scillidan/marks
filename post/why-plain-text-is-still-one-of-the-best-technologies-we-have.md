@@ -1,6 +1,6 @@
 ```
 Date: 2026.10.4
-Author: nickb
+Creator: nickb
 Source: https://deadparrotbbs.com/why-plain-text-is-still-one-of-the-best-technologies-we-have/
 ```
 

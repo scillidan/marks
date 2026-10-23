@@ -1,6 +1,6 @@
 ```
 Date: 2015.08.16
-Author: 回风
+Creator: 回风
 ```
 
 # Deploy Hexo sites to VPS

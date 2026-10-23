@@ -1,6 +1,6 @@
 ```
 Date: 2024.10.12
-Author: Taylor Troesh
+Creator: Taylor Troesh
 Source: https://taylor.town/history-of-microwave-ovens
 ```
 

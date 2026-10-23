@@ -1,6 +1,6 @@
 ```
 Date: 2024.09.10
-Author: Region of Peel Archives
+Creator: Region of Peel Archives
 Source: https://peelarchivesblog.com/2024/09/10/how-do-archivists-package-things-the-battle-of-the-boxes/
 ```
 

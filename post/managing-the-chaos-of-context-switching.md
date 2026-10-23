@@ -1,6 +1,6 @@
 ```
 Date: 2023.09.04
-Author: Addy Osmani
+Creator: Addy Osmani
 Source: https://leaddev.com/process/managing-chaos-context-switching
 ```
 

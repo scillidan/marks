@@ -1,6 +1,6 @@
 ```
 Date: 2025.08.07
-Author: Joshua Barnes
+Creator: Joshua Barnes
 Source: https://sydneyreviewofbooks.com/reviews/just-a-little-longer
 ```
 
