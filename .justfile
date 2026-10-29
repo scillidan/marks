@@ -49,6 +49,3 @@ image-convert mode theme output image="" commands="" *flags:
 
 ctan path:
     uv run scripts/gen_ctan.py --compile "{{path}}"
-
-shortcut *args:
-    uv run scripts/gen_shortcut.py {{ args }}
