@@ -1,6 +1,7 @@
 _temp/
 .env
 __pycache__/
+.opencode/
 *.pyc
 *.luabridge.*
 *.markdown.in
