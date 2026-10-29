@@ -30,12 +30,13 @@
     #text(size: size * 1.4, weight: "bold", it.body)
   ]
   // Keep the line pitch inside a wrapping cell equal to the pitch between
-  // table rows, so a wrapped entry sits as close to its own first line as
-  // to the neighbouring rows. (Empirically 0.5em made wrapped lines visibly
-  // looser than the row spacing; 0.2em matches it at size 6pt.)
+  // table rows. 0.2em let descenders (j/g/p/q/y) touch the next line's
+  // ascenders; 0.275em is the largest value that still keeps the 245-entry
+  // Neovim preview on one A4 page. row-gutter in gen_shortcut.py uses the
+  // same 0.275em.
   show table.cell: it => context {
     let indent = measure(text("  ")).width
-    par(hanging-indent: indent, leading: 0.2em, it.body)
+    par(hanging-indent: indent, leading: 0.275em, it.body)
   }
   doc
 }

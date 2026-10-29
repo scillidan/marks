@@ -287,8 +287,10 @@ def group_entries(entries: list[Entry], style: Style) -> list[Group]:
 
 
 def emit_table(rows: list[tuple[str, str]]) -> str:
+    # Match the cell leading (0.275em at 6pt). 0.3em row-gutter pushes the
+    # 245-entry Neovim preview onto a second A4 page.
     lines = [
-        "#table(stroke: none, inset: 2pt, row-gutter: 1.5pt, column-gutter: 4pt, align: left, columns: 2,"
+        "#table(stroke: none, inset: 2pt, row-gutter: 0.275em, column-gutter: 4pt, align: left, columns: 2,"
     ]
     for i, (desc, key) in enumerate(rows):
         comma = "," if i < len(rows) - 1 else ""
