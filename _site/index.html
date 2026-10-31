@@ -11,7 +11,7 @@
   <link rel="icon" type="image/png" sizes="96x96" href="asset/favicon-96x96.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="asset/apple-touch-icon.png" />
   <link rel="manifest" href="asset/site.webmanifest" />
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
   <div class="layout">
@@ -52,12 +52,50 @@
     let manifest = { groups: [] };
     let flatItems = [];
 
+    // Per-directory format switch state: dir -> 'a4' | 'a5-2up'.
+    const VERSION_STATE_KEY = 'marks.versionState';
+    const FALLBACK_VERSIONS = ['a4', 'a5-2up'];
+
+    function readVersionState() {
+      try {
+        return JSON.parse(localStorage.getItem(VERSION_STATE_KEY) || '{}');
+      } catch {
+        return {};
+      }
+    }
+
+    function writeVersionState(state) {
+      localStorage.setItem(VERSION_STATE_KEY, JSON.stringify(state));
+    }
+
+    function versionsOf(m) {
+      return (m && m.versions && m.versions.length)
+        ? m.versions
+        : FALLBACK_VERSIONS;
+    }
+
+    function versionFor(dir) {
+      const state = readVersionState();
+      const versions = versionsOf(manifest);
+      return versions.includes(state[dir]) ? state[dir] : versions[0];
+    }
+
+    // Path of an item under the given directory's selected version; falls
+    // back to a4, then to whatever version exists. Unversioned groups keep
+    // their single `path`.
+    function itemPath(dir, item) {
+      if (!item) return null;
+      if (!item.paths) return item.path;
+      const v = versionFor(dir);
+      return item.paths[v] || item.paths.a4 || Object.values(item.paths)[0] || null;
+    }
+
     function flattenItems(groups) {
       const items = [];
       for (const group of groups || []) {
         if (group.items) {
           for (const item of group.items) {
-            items.push(item);
+            items.push({ dir: group.dir, item });
           }
         }
         if (group.subgroups) {
@@ -69,7 +107,7 @@
 
     function currentItemIndex() {
       const path = decodeURIComponent(location.hash.slice(1));
-      return flatItems.findIndex(i => i.path === path);
+      return flatItems.findIndex(({ dir, item }) => itemPath(dir, item) === path);
     }
 
     function updateNavButtons() {
@@ -82,7 +120,7 @@
       const idx = currentItemIndex();
       const targetIdx = idx < 0 ? (delta > 0 ? 0 : -1) : idx + delta;
       const target = flatItems[targetIdx];
-      if (target) loadPdf(target.path, target.title);
+      if (target) loadPdf(itemPath(target.dir, target.item), target.item.title);
     }
 
     const SIDEBAR_W_KEY = 'marks.sidebarWidth';
@@ -176,8 +214,11 @@
     function findItemByPath(groups, path) {
       for (const group of groups) {
         if (group.items) {
-          const item = group.items.find(i => i.path === path);
-          if (item) return item;
+          const item = group.items.find(i =>
+            itemPath(group.dir, i) === path ||
+            (i.paths && Object.values(i.paths).includes(path))
+          );
+          if (item) return { dir: group.dir, item, requested: path };
         }
         if (group.subgroups) {
           const found = findItemByPath(group.subgroups, path);
@@ -206,19 +247,78 @@
       updateNavButtons();
     }
 
-    function renderItem(item) {
+    function refreshItemLink(dir, a, item) {
+      const p = itemPath(dir, item);
+      if (p) {
+        a.href = '#' + encodeURIComponent(p);
+        a.dataset.path = p;
+        a.classList.remove('missing');
+      } else {
+        a.removeAttribute('href');
+        a.dataset.path = '';
+        a.classList.add('missing');
+      }
+    }
+
+    function renderItem(dir, item) {
       const li = document.createElement('li');
       const a = document.createElement('a');
-      a.href = '#' + encodeURIComponent(item.path);
       a.textContent = item.title;
       a.title = item.title + (item.source ? ` (${item.source})` : '');
-      a.dataset.path = item.path;
+      a.dataset.base = item.base || '';
+      refreshItemLink(dir, a, item);
       a.addEventListener('click', e => {
         e.preventDefault();
-        loadPdf(item.path, item.title);
+        const p = itemPath(dir, item);
+        if (p) loadPdf(p, item.title);
       });
       li.appendChild(a);
       return li;
+    }
+
+    function renderVersionSwitch(group) {
+      const wrap = document.createElement('span');
+      wrap.className = 'ver-switch';
+      const current = versionFor(group.dir);
+      for (const v of versionsOf(manifest)) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'ver-btn' + (v === current ? ' active' : '');
+        btn.textContent = `[${v}]`;
+        btn.title = `Switch ${group.name} to ${v}`;
+        btn.dataset.version = v;
+        btn.addEventListener('click', e => {
+          e.preventDefault();
+          e.stopPropagation();
+          const state = readVersionState();
+          state[group.dir] = v;
+          writeVersionState(state);
+          wrap.querySelectorAll('.ver-btn').forEach(b => b.classList.toggle('active', b.dataset.version === v));
+          // Refresh only this group's own item list; subgroup lists keep
+          // their state because the switch belongs to this directory.
+          const details = wrap.closest('details');
+          const ownList = details.querySelector(':scope > .item-list');
+          if (ownList) {
+            ownList.querySelectorAll('a').forEach(a => {
+              const entry = group.items.find(item => (item.base || '') === a.dataset.base);
+              if (entry) refreshItemLink(group.dir, a, entry);
+            });
+          }
+          const groupLink = details.querySelector(':scope > summary .group-link');
+          const first = group.items.find(item => itemPath(group.dir, item));
+          if (groupLink && first) refreshItemLink(group.dir, groupLink, first);
+          // If the displayed PDF belongs to this group, switch it in place.
+          const currentPath = decodeURIComponent(location.hash.slice(1));
+          const cur = group.items.find(item => item.paths && Object.values(item.paths).includes(currentPath));
+          if (cur) {
+            const p = itemPath(group.dir, cur);
+            if (p) loadPdf(p, cur.title);
+          }
+          updateNavButtons();
+        });
+        wrap.appendChild(btn);
+      }
+      return wrap;
     }
 
     function renderGroup(group, container, depth = 0) {
@@ -233,14 +333,14 @@
       if (hasItems) {
         const first = group.items[0];
         const link = document.createElement('a');
-        link.href = '#' + encodeURIComponent(first.path);
         link.textContent = displayName;
         link.title = displayName;
         link.className = 'group-link';
-        link.dataset.path = first.path;
+        refreshItemLink(group.dir, link, first);
         link.addEventListener('click', e => {
           e.preventDefault();
-          loadPdf(first.path, first.title);
+          const p = itemPath(group.dir, first);
+          if (p) loadPdf(p, first.title);
         });
         summary.appendChild(link);
       } else {
@@ -248,6 +348,11 @@
         span.textContent = displayName;
         span.className = 'group-name';
         summary.appendChild(span);
+      }
+      // Version switch on the right of the directory name, only for groups
+      // whose entries carry more than one format (post*).
+      if (hasItems && group.items.some(i => i.paths)) {
+        summary.appendChild(renderVersionSwitch(group));
       }
       details.appendChild(summary);
 
@@ -270,7 +375,7 @@
         const ul = document.createElement('ul');
         ul.className = 'item-list';
         for (const item of group.items) {
-          ul.appendChild(renderItem(item));
+          ul.appendChild(renderItem(group.dir, item));
         }
         details.appendChild(ul);
       }
@@ -310,14 +415,28 @@
         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
         manifest = await res.json();
         flatItems = flattenItems(manifest.groups);
-        renderToc();
 
+        // If the URL points at a specific format, select that format before
+        // rendering so the group's switch shows the right active button.
         const hash = decodeURIComponent(location.hash.slice(1));
+        let initial = null;
         if (hash) {
-          const item = findItemByPath(manifest.groups, hash);
-          if (item) {
-            loadPdf(item.path, item.title);
+          initial = findItemByPath(manifest.groups, hash);
+          if (initial && initial.item.paths) {
+            const matchVersion = Object.keys(initial.item.paths).find(
+              v => initial.item.paths[v] === initial.requested
+            );
+            if (matchVersion) {
+              const state = readVersionState();
+              state[initial.dir] = matchVersion;
+              writeVersionState(state);
+            }
           }
+        }
+
+        renderToc();
+        if (initial) {
+          loadPdf(itemPath(initial.dir, initial.item), initial.item.title);
         }
         updateNavButtons();
       } catch (err) {

@@ -5,9 +5,9 @@ a6 path size="" font="":
         {{ if size != "" { "--size " + size } else { "" } }} \
         {{ if font != "" { "--font \"" + font + "\"" } else { "" } }}
 
-## 2-columns
-a4 path:
-    uv run scripts/gen_a4_latex.py "{{path}}"
+## 2-columns (add --a5-2up for the A5 pages imposed 2-up on landscape A4)
+a4 path *flags:
+    uv run scripts/gen_a4_latex.py "{{path}}" {{ flags }}
 a4dual en zh:
     uv run scripts/gen_a4_dual_latex.py "{{en}}" "{{zh}}"
 # just a4dual post/file.en.md post/file.zh-cn.md

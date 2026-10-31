@@ -752,22 +752,36 @@ def process_markdown(md_path, output_dir, hard_breaks=False, dither: str | None 
     return body_path, meta_path, images_dir
 
 
-def generate_wrapper(md_path, latex_dir, project_root):
-    """Write the per-article LaTeX wrapper that pulls in the shared template."""
+def generate_wrapper(md_path, latex_dir, project_root, layout="a4"):
+    """Write the per-article LaTeX wrapper that pulls in the shared template.
+
+    ``layout="a5"`` is the single-column A5 page set used by the 2-up reader;
+    the article content (body.md, meta.tex, images/) is shared with the A4
+    build in the same staging directory.
+    """
     stem = md_path.stem
     rel_root = os.path.relpath(project_root, latex_dir).replace("\\", "/")
+    if layout == "a5":
+        documentclass = r"\documentclass{article}"
+        geometry = r"\usepackage[a5paper, margin=1.2cm]{geometry}"
+        twocolumn_def = ""
+        wrapper_name = f"{stem}-a5.tex"
+    else:
+        documentclass = r"\documentclass[twocolumn]{article}"
+        geometry = r"\usepackage[a4paper, margin=1.2cm]{geometry}"
+        twocolumn_def = "\\def\\posttwocolumn{1}\n"
+        wrapper_name = f"{stem}.tex"
     wrapper = rf"""% !TeX program = xelatex
 % Auto-generated LaTeX wrapper for {md_path.name} -- do not edit.
 % Regenerate with: python scripts/gen_a4_latex.py {md_path.as_posix()}
 % The wrapper is compiled from inside this directory (see generator).
 
-\documentclass[twocolumn]{{article}}
-\usepackage[a4paper, margin=1.2cm]{{geometry}}
+{documentclass}
+{geometry}
 
 \def\poststem{{{stem}}}
-\def\postlayout{{a4}}
-\def\posttwocolumn{{1}}
-
+\def\postlayout{{{layout}}}
+{twocolumn_def}
 \input{{{rel_root}/scripts/gen_a4_latex}}
 
 \def\postimagedir{{images/}}
@@ -782,14 +796,14 @@ def generate_wrapper(md_path, latex_dir, project_root):
 
 \end{{document}}
 """
-    wrapper_path = latex_dir / f"{stem}.tex"
+    wrapper_path = latex_dir / wrapper_name
     wrapper_path.write_text(wrapper, encoding="utf-8")
     print(f"Created: {wrapper_path}")
     return wrapper_path
 
 
-def compile_xelatex(wrapper_path, pdf_dir, project_root, jpg_pattern):
-    """Compile from the staging dir, then move the PDF and convert to JPGs.
+def run_xelatex(wrapper_path):
+    """Compile a wrapper in its own directory and return the produced PDF.
 
     xelatex is run with cwd = the wrapper's directory: the markdown package's
     Lua bridge is written next to the PDF there and executed relative to it,
@@ -812,18 +826,64 @@ def compile_xelatex(wrapper_path, pdf_dir, project_root, jpg_pattern):
     )
     if r.returncode != 0:
         sys.exit(f"✗ xelatex compile error:\n{(r.stderr or r.stdout)[-4000:]}")
-    staged_pdf = wrapper_path.with_suffix(".pdf")
+    return wrapper_path.with_suffix(".pdf")
+
+
+def compile_xelatex(wrapper_path, pdf_dir, project_root, jpg_pattern):
+    """Compile from the staging dir, then move the PDF and convert to JPGs."""
+    staged_pdf = run_xelatex(wrapper_path)
     pdf_path = pdf_dir / f"{wrapper_path.stem}.pdf"
     shutil.move(str(staged_pdf), str(pdf_path))
     print(f"Created: {pdf_path}")
     convert_to_jpg(pdf_path, jpg_pattern)
 
 
+def impose_2up(source_pdf, latex_dir):
+    """Impose A5 pages 2-up on landscape A4 (the copys/novel reader layout)."""
+    # pdfpages + pdflatex cannot reliably read non-ASCII file names, and the
+    # post_zh-cn stems contain them; the staging dir is private, so stage the
+    # source under a safe local name.
+    shutil.copy2(str(source_pdf), str(latex_dir / "impose-source.pdf"))
+    wrapper_path = latex_dir / "impose-2up.tex"
+    wrapper_path.write_text(
+        r"""% !TeX program = pdflatex
+% Auto-generated 2-up imposition wrapper -- do not edit.
+\documentclass{article}
+\usepackage[a4paper, landscape, margin=0pt]{geometry}
+\usepackage{pdfpages}
+\begin{document}
+\includepdf[pages=-, nup=2x1]{impose-source.pdf}
+\end{document}
+""",
+        encoding="utf-8",
+    )
+    r = subprocess.run(
+        ["pdflatex", "-interaction=nonstopmode", "-halt-on-error", wrapper_path.name],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        check=False,
+        cwd=str(latex_dir),
+    )
+    if r.returncode != 0:
+        sys.exit(f"✗ 2-up imposition error:\n{(r.stderr or r.stdout)[-4000:]}")
+    return wrapper_path.with_suffix(".pdf")
+
+
 def main():
     parser = argparse.ArgumentParser(
-        description="Render a post/ markdown file to A4 double-column LaTeX PDF."
+        description=(
+            "Render a post/ markdown file to an A4 double-column PDF, optionally "
+            "with A5 pages imposed 2-up on landscape A4."
+        )
     )
     parser.add_argument("path", help="Path to the markdown file")
+    parser.add_argument(
+        "--a5-2up",
+        action="store_true",
+        help="Also render single-column A5 pages and impose them 2-up on landscape A4.",
+    )
     args = parser.parse_args()
 
     md_path = resolve_path(args.path)
@@ -841,6 +901,19 @@ def main():
     wrapper_path = generate_wrapper(md_path, latex_dir, project_root)
     jpg_pattern = str(content_dir / "_output" / f"{md_path.stem}_p%02d.jpg")
     compile_xelatex(wrapper_path, pdfs_dir, project_root, jpg_pattern)
+
+    if args.a5_2up:
+        a5_wrapper = generate_wrapper(md_path, latex_dir, project_root, layout="a5")
+        a5_pdf = run_xelatex(a5_wrapper)
+        print(f"Created: {a5_pdf}")
+        imposed_pdf = impose_2up(a5_pdf, latex_dir)
+        out_pdf = pdfs_dir / f"{md_path.stem}.a5-2up.pdf"
+        shutil.move(str(imposed_pdf), str(out_pdf))
+        print(f"Created: {out_pdf}")
+        convert_to_jpg(
+            out_pdf,
+            str(content_dir / "_output" / f"{md_path.stem}_a5-2up_p%02d.jpg"),
+        )
     return 0
 
 

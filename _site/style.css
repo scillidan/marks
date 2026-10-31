@@ -262,6 +262,37 @@ summary:hover {
 .group-name {
   color: #666;
 }
+/* Format switch buttons ([a4] [a5-2up]) on the right of a directory name. */
+.ver-switch {
+  float: right;
+  display: flex;
+  gap: 2px;
+}
+.ver-btn {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 11px;
+  line-height: 1.4;
+  padding: 0 3px;
+  border: none;
+  background: none;
+  color: #8a94a0;
+  cursor: pointer;
+  border-radius: 3px;
+}
+.ver-btn:hover {
+  color: #1e40af;
+  background: #eef;
+}
+.ver-btn.active {
+  color: #1e40af;
+  font-weight: 700;
+}
+/* Items that do not exist in the selected format. */
+.item-list a.missing {
+  color: #b6bdc6;
+  pointer-events: none;
+  font-style: italic;
+}
 pdfjs-viewer-element {
   flex: 1;
   min-height: 0;

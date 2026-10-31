@@ -102,8 +102,8 @@ fi
 # _output/typs/, which the main BUILD_RULES find loop prunes via -name _output).
 BUILD_RULES=(
 	"typst-demo:1:*-demo.typ:mkdir -p \$(dirname {path})/_output/pdfs && typst compile --root . {path} \$(dirname {path})/_output/pdfs/\$(basename {path} .typ).pdf:assets,typst-demo/codly-template.typ,typst-demo/nineveh-template.typ,typst-demo/polario-frame-template.typ,typst-demo/receipt-template.typ,typst-demo/tooltip-template.typ"
-	"post:99:*.md:just a4 {path}:scripts/gen_a4_latex.py,scripts/gen_a4_latex.tex"
-	"post_zh-cn:99:*.md:just a4 {path}:scripts/gen_a4_latex.py,scripts/gen_a4_latex.tex"
+	"post:99:*.md:just a4 {path} --a5-2up:scripts/gen_a4_latex.py,scripts/gen_a4_latex.tex"
+	"post_zh-cn:99:*.md:just a4 {path} --a5-2up:scripts/gen_a4_latex.py,scripts/gen_a4_latex.tex"
 	"chat:1:*.md:just a6 {path}:scripts/gen_a6.py"
 	"entry:1:*.md:just a6 {path}:scripts/gen_a6.py"
 	"part:1:*.md:just a6 {path}:scripts/gen_a6.py"
@@ -492,6 +492,8 @@ if _byya_titles.exists():
 
 manifest = {
     "generated_at": datetime.now(timezone.utc).isoformat(),
+    # Version names offered by the per-directory switch (post* only for now).
+    "versions": ["a4", "a5-2up"],
     "groups": []
 }
 
@@ -753,16 +755,31 @@ for pdf_path in pdf_paths:
         dir_parts = parts[:-2]
 
     filename = parts[-1]
+    stem = Path(filename).stem
 
     if not dir_parts or is_excluded(dir_parts):
         continue
+
+    # Post PDFs carry a format version in the file name: the plain <stem>.pdf
+    # is the A4 article, <stem>.a5-2up.pdf the A5 pages imposed 2-up on
+    # landscape A4. Other directories are unversioned.
+    version = None
+    base = stem
+    if dir_parts[0] in ("post", "post_zh-cn"):
+        if stem.endswith(".a5-2up"):
+            version = "a5-2up"
+            base = stem[: -len(".a5-2up")]
+        elif stem.endswith(".a5"):
+            continue  # single A5 pages are an intermediate, not a site version
+        else:
+            version = "a4"
 
     # Receipt PDFs are grouped into subdirectories by the classification tag
     # in the source .typ file (the // comment right after the title), unlike
     # byya-nineveh where subgroups mirror real directories.
     source_dir_parts = dir_parts
     if dir_parts[0] == "receipt":
-        _src_typ = repo_root.joinpath(*dir_parts) / f"{Path(filename).stem}.typ"
+        _src_typ = repo_root.joinpath(*dir_parts) / f"{stem}.typ"
         _tag = extract_receipt_classification(_src_typ)
         if _tag:
             dir_parts = (*dir_parts, _tag)
@@ -796,7 +813,7 @@ for pdf_path in pdf_paths:
             )
         node = node.subgroups[part]
 
-    title = Path(filename).stem
+    title = base if version else stem
     source_guess = None
     for ext in (".md", ".typ"):
         candidate = repo_root.joinpath(*source_dir_parts) / f"{title}{ext}"
@@ -843,11 +860,24 @@ for pdf_path in pdf_paths:
         if extracted_title:
             title = extracted_title
 
-    node.items.append({
-        "title": title,
-        "path": manifest_path_str,
-        "source": Path(source_guess).as_posix() if source_guess else None,
-    })
+    source = Path(source_guess).as_posix() if source_guess else None
+    if version:
+        item = next((i for i in node.items if i.get("base") == base), None)
+        if item is None:
+            item = {
+                "title": title,
+                "base": base,
+                "paths": {},
+                "source": source,
+            }
+            node.items.append(item)
+        item["paths"][version] = manifest_path_str
+    else:
+        node.items.append({
+            "title": title,
+            "path": manifest_path_str,
+            "source": source,
+        })
 
 # Post (ZH-CN) items are sorted by the pinyin of their title (ascending).
 # Chinese titles are converted to pinyin with the pypinyin library; the mixed
