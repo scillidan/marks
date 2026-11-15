@@ -33,7 +33,11 @@ jobs:
 
       # LaTeX-specific toolchain: ImageMagick is used to rasterise GIF/WebP/SVG
       # sources for xelatex; ffmpeg extracts first frames from video files.
-      - run: sudo apt-get update && sudo apt-get install -y ghostscript imagemagick libmagickcore-6.q16-6-extra librsvg2-bin ffmpeg texlive-xetex texlive-latex-extra texlive-lang-chinese
+      # markdown v3 (TeX Live 2025) pulls in lt3luabridge.tex, which Debian
+      # ships in texlive-luatex, not texlive-latex-extra. The old
+      # libmagickcore-6.q16-6-extra is gone on 26.04 (ImageMagick 7); its extra
+      # codecs are irrelevant here and webp/heic live in the base package.
+      - run: sudo apt-get update && sudo apt-get install -y ghostscript imagemagick librsvg2-bin ffmpeg texlive-xetex texlive-latex-extra texlive-luatex texlive-lang-chinese
 
       - uses: ./.github/actions/install-fonts
         with:
@@ -91,7 +95,7 @@ jobs:
             .justfile
 
       # Non-LaTeX toolchain: no texlive here; qpdf is kept for image-convert.
-      - run: sudo apt-get update && sudo apt-get install -y ghostscript imagemagick libmagickcore-6.q16-6-extra librsvg2-bin ffmpeg qpdf
+      - run: sudo apt-get update && sudo apt-get install -y ghostscript imagemagick librsvg2-bin ffmpeg qpdf
 
       - uses: ./.github/actions/install-fonts
         with:
